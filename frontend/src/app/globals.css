@@ -1,0 +1,94 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-color: #eef2f6;
+  --text-main: #2d3748;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  overflow-x: hidden;
+}
+
+/* Custom Neumorphic Soft UI Utilities */
+.soft-card {
+  background: #eef2f6;
+  box-shadow: 8px 8px 18px #d1d9e6, -8px -8px 18px #ffffff;
+  border-radius: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.soft-card-sm {
+  background: #eef2f6;
+  box-shadow: 4px 4px 10px #d1d9e6, -4px -4px 10px #ffffff;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.soft-card-inset {
+  background: #eef2f6;
+  box-shadow: inset 4px 4px 8px #d1d9e6, inset -4px -4px 8px #ffffff;
+  border-radius: 1.25rem;
+}
+
+.soft-button {
+  background: #eef2f6;
+  box-shadow: 5px 5px 12px #d1d9e6, -5px -5px 12px #ffffff;
+  transition: all 0.2s ease-in-out;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.soft-button:hover {
+  box-shadow: 2px 2px 6px #d1d9e6, -2px -2px 6px #ffffff;
+  transform: translateY(-1px);
+}
+
+.soft-button:active {
+  box-shadow: inset 3px 3px 6px #d1d9e6, inset -3px -3px 6px #ffffff;
+  transform: translateY(0);
+}
+
+.soft-button-primary {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: #ffffff;
+  box-shadow: 4px 4px 12px rgba(37, 99, 235, 0.35), -2px -2px 8px #ffffff;
+  transition: all 0.2s ease-in-out;
+}
+
+.soft-button-primary:hover {
+  box-shadow: 6px 6px 16px rgba(37, 99, 235, 0.45), -3px -3px 10px #ffffff;
+  transform: translateY(-1px);
+}
+
+.soft-input {
+  background: #eef2f6;
+  box-shadow: inset 3px 3px 6px #cbd5e1, inset -3px -3px 6px #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  outline: none;
+}
+
+.soft-input:focus {
+  border-color: #3b82f6;
+  box-shadow: inset 4px 4px 8px #cbd5e1, inset -4px -4px 8px #ffffff, 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #eef2f6;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}

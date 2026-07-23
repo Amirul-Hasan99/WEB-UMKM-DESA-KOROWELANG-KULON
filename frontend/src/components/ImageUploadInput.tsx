@@ -1,0 +1,138 @@
+'use client';
+
+import React, { useRef, useState } from 'react';
+import { Upload, Link as LinkIcon, Image as ImageIcon, X, Check } from 'lucide-react';
+import SoftButton from './SoftButton';
+
+interface ImageUploadInputProps {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+}
+
+export const ImageUploadInput: React.FC<ImageUploadInputProps> = ({
+  label,
+  value,
+  onChange,
+  placeholder = 'https://images.unsplash.com/... atau upload file'
+}) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [activeTab, setActiveTab] = useState<'upload' | 'url'>('upload');
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Ukuran file maksimal adalah 5MB.');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === 'string') {
+          onChange(reader.result);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleClear = () => {
+    onChange('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex items-center justify-between">
+        <label className="text-xs font-bold uppercase tracking-wider text-gray-600 ml-1">
+          {label}
+        </label>
+        <div className="flex items-center gap-1 bg-white/60 p-1 rounded-xl text-[11px] font-bold">
+          <button
+            type="button"
+            onClick={() => setActiveTab('upload')}
+            className={`px-2.5 py-1 rounded-lg transition-all ${
+              activeTab === 'upload' ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-500 hover:text-gray-800'
+            }`}
+          >
+            Upload Device
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('url')}
+            className={`px-2.5 py-1 rounded-lg transition-all ${
+              activeTab === 'url' ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-500 hover:text-gray-800'
+            }`}
+          >
+            Pake URL
+          </button>
+        </div>
+      </div>
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFileChange}
+        className="hidden"
+      />
+
+      {activeTab === 'upload' ? (
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="flex-1 flex items-center justify-center gap-2 p-3 rounded-2xl soft-button text-xs font-bold text-gray-700 hover:text-blue-600 hover:bg-white/80 transition-all border border-dashed border-gray-400/60"
+          >
+            <Upload className="w-4 h-4 text-blue-600" />
+            <span>Pilih File Foto dari Perangkat (Device)</span>
+          </button>
+        </div>
+      ) : (
+        <div className="relative flex items-center">
+          <LinkIcon className="w-4 h-4 absolute left-3.5 text-gray-400 pointer-events-none" />
+          <input
+            type="url"
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={placeholder}
+            className="soft-input w-full pl-10 pr-4 py-3 text-xs text-gray-800 rounded-2xl font-medium"
+          />
+        </div>
+      )}
+
+      {/* Image Preview Thumbnail */}
+      {value && (
+        <div className="mt-1 flex items-center justify-between p-2.5 rounded-2xl soft-card-sm bg-white/70">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-12 h-12 rounded-xl overflow-hidden bg-gray-200 shrink-0 border border-gray-300">
+              <img src={value} alt="Preview Foto" className="w-full h-full object-cover" />
+            </div>
+            <div className="flex flex-col min-w-0">
+              <span className="text-xs font-bold text-gray-800 flex items-center gap-1">
+                <Check className="w-3.5 h-3.5 text-emerald-600" />
+                Foto Siap Digunakan
+              </span>
+              <span className="text-[10px] text-gray-500 truncate max-w-[200px] sm:max-w-xs">
+                {value.startsWith('data:') ? 'File Ter-upload dari Perangkat' : value}
+              </span>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={handleClear}
+            className="p-1.5 rounded-xl text-red-500 hover:bg-red-50 transition-colors"
+            title="Hapus Foto"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default ImageUploadInput;
