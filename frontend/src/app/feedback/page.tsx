@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { MessageSquare, Send, CheckCircle2, User, Mail, MessageCircle } from 'lucide-react';
+import { MessageSquare, Send, CheckCircle2, User, Mail, MessageCircle } from '@/components/Icons';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import SoftCard from '@/components/SoftCard';

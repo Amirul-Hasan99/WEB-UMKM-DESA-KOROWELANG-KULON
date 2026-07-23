@@ -39,20 +39,7 @@ UMKM KOROWELANG KULON/
     │   └── lib/                          # Axios Client, Interceptors, & TypeScript Types
     ├── tailwind.config.js
     └── package.json
-```
 
----
-
-## 🔑 Default Accounts (Akun Pengujian Demo)
-
-Gunakan akun berikut untuk menguji portal dashboard Admin dan Super Admin:
-
-| Role | Email | Password | Fitur & Hak Akses |
-|---|---|---|---|
-| **Super Admin** | `superadmin@korowelangkulon.desa.id` | `superadmin123` | Master Access (Kelola Staff Admin, Edit Logo/Header/Footer/Banner Website, Kelola UMKM & Produk) |
-| **Admin Staff** | `admin@korowelangkulon.desa.id` | `admin123` | Staff Access (Kelola UMKM, Kelola Produk, Edit Profil Admin, Lihat Feedback Warga) |
-
----
 
 ## ⚡ Fitur Utama Berdasarkan Aktor
 

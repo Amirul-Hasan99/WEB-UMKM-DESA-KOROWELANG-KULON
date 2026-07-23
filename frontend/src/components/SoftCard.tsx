@@ -21,7 +21,7 @@ export const SoftCard: React.FC<SoftCardProps> = ({
       className={twMerge(
         clsx(
           inset ? 'soft-card-inset p-5' : 'soft-card p-6',
-          hoverEffect && !inset && 'transition-all duration-300 hover:-translate-y-1 hover:shadow-[12px_12px_24px_#cbd5e1,-12px_-12px_24px_#ffffff]',
+          hoverEffect && !inset && 'transition-all duration-300 hover:-translate-y-1 hover:shadow-[8px_8px_20px_rgba(166,180,200,0.45),-3px_-3px_8px_rgba(255,255,255,0.7)]',
           className
         )
       )}

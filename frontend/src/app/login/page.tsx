@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Mail, Lock, LogIn, Store, ShieldCheck, UserCheck, AlertCircle } from 'lucide-react';
+import { Mail, Lock, LogIn, ShieldCheck, UserCheck, AlertCircle } from '@/components/Icons';
 import SoftCard from '@/components/SoftCard';
 import SoftInput from '@/components/SoftInput';
 import SoftButton from '@/components/SoftButton';
@@ -52,41 +52,43 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-[#eef2f6]">
-      <div className="w-full max-w-md flex flex-col gap-6">
+    <div className="h-screen w-full flex items-center justify-center p-3 sm:p-4 bg-[#eef2f6] overflow-hidden">
+      <div className="w-full max-w-sm flex flex-col gap-3 sm:gap-4 my-auto">
         
         {/* Brand Header */}
-        <div className="flex flex-col items-center text-center gap-2">
-          <Link href="/" className="w-14 h-14 rounded-2xl soft-card flex items-center justify-center p-2 mb-1 hover:scale-105 transition-transform">
-            <Store className="w-8 h-8 text-blue-600" />
+        <div className="flex flex-col items-center text-center gap-1.5">
+          <Link href="/" className="w-12 h-12 rounded-2xl soft-card flex items-center justify-center p-1.5 hover:scale-105 transition-transform overflow-hidden">
+            <img src="/api/logo" alt="Logo Kendal" className="w-full h-full object-cover rounded-xl" />
           </Link>
-          <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">
-            Portal Admin Kelurahan
-          </h1>
-          <p className="text-xs text-gray-500 font-semibold">
-            UMKM Desa Korowelang Kulon • Kabupaten Kendal
-          </p>
+          <div className="flex flex-col gap-0.5">
+            <h1 className="text-xl font-extrabold text-gray-900 tracking-tight leading-none">
+              Portal Admin Kelurahan
+            </h1>
+            <p className="text-[11px] text-gray-500 font-semibold mt-1">
+              Desa Korowelang Kulon • Kabupaten Kendal
+            </p>
+          </div>
         </div>
 
-        {/* Soft UI Neumorphic Card (Matching design aesthetic) */}
-        <SoftCard className="p-8 flex flex-col gap-6">
+        {/* Soft UI Neumorphic Card */}
+        <SoftCard className="p-5 sm:p-6 flex flex-col gap-4">
           
-          <div className="flex flex-col gap-1 border-b border-gray-200 pb-4">
-            <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-blue-600" />
-              Masuk ke Akun Anda
+          <div className="flex flex-col gap-0.5 border-b border-gray-200 pb-3">
+            <h2 className="text-base font-bold text-gray-800 flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0" />
+              Masuk Akun Staff / Admin
             </h2>
-            <p className="text-xs text-gray-500">Gunakan email & password terdaftar staff desa.</p>
+            <p className="text-[11px] text-gray-500">Masukkan kredensial login staff kelurahan.</p>
           </div>
 
           {errorMsg && (
-            <div className="p-3.5 rounded-2xl bg-red-50 text-red-600 text-xs font-bold border border-red-200 flex items-center gap-2">
+            <div className="p-2.5 rounded-xl bg-red-50 text-red-600 text-xs font-bold border border-red-200 flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{errorMsg}</span>
             </div>
           )}
 
-          <form onSubmit={handleLogin} className="flex flex-col gap-5">
+          <form onSubmit={handleLogin} className="flex flex-col gap-3.5">
             <SoftInput
               label="Email Staff / Admin"
               type="email"
@@ -110,25 +112,25 @@ export default function LoginPage() {
             <SoftButton
               type="submit"
               variant="primary"
-              size="lg"
-              className="w-full mt-1"
+              size="sm"
+              className="w-full mt-1 py-2.5"
               disabled={loading}
-              icon={<LogIn className="w-5 h-5" />}
+              icon={<LogIn className="w-4 h-4" />}
             >
               {loading ? 'Memproses Login...' : 'Masuk (Sign In)'}
             </SoftButton>
           </form>
 
           {/* Quick Demo Testing Helpers */}
-          <div className="pt-4 border-t border-gray-200 flex flex-col gap-2.5">
+          <div className="pt-3 border-t border-gray-200 flex flex-col gap-2">
             <span className="text-[10px] font-extrabold uppercase tracking-widest text-gray-400 text-center">
-              Akses Cepat Pengujian Demo
+              Akses Cepat Demo
             </span>
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => fillCredentials('superadmin')}
-                className="soft-button py-2 px-3 text-[11px] font-bold text-gray-700 hover:text-blue-600 flex items-center justify-center gap-1"
+                className="soft-button py-1.5 px-2 text-[11px] font-bold text-gray-700 hover:text-blue-600 flex items-center justify-center gap-1 rounded-xl"
               >
                 <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
                 Super Admin
@@ -136,7 +138,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => fillCredentials('admin')}
-                className="soft-button py-2 px-3 text-[11px] font-bold text-gray-700 hover:text-blue-600 flex items-center justify-center gap-1"
+                className="soft-button py-1.5 px-2 text-[11px] font-bold text-gray-700 hover:text-blue-600 flex items-center justify-center gap-1 rounded-xl"
               >
                 <UserCheck className="w-3.5 h-3.5 text-blue-600" />
                 Admin Staff
@@ -147,7 +149,7 @@ export default function LoginPage() {
         </SoftCard>
 
         <div className="text-center">
-          <Link href="/" className="text-xs font-bold text-gray-500 hover:text-blue-600 transition-colors">
+          <Link href="/" className="text-[11px] font-bold text-gray-500 hover:text-blue-600 transition-colors">
             ← Kembali ke Halaman Utama (Public)
           </Link>
         </div>

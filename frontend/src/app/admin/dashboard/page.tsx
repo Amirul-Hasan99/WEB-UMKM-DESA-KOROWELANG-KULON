@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Store, Package, MessageSquare, Plus, ArrowRight, ShieldCheck, TrendingUp, Users } from 'lucide-react';
+import { Store, Package, MessageSquare, Plus, ArrowRight, ShieldCheck, TrendingUp, Users } from '@/components/Icons';
 import AdminSidebar from '@/components/AdminSidebar';
 import SoftCard from '@/components/SoftCard';
 import SoftButton from '@/components/SoftButton';
@@ -77,14 +77,7 @@ export default function AdminDashboardPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <Link href="/admin/umkm">
               <SoftButton variant="default" className="w-full justify-between py-4" icon={<Store className="w-5 h-5 text-blue-600" />}>
-                <span>Kelola Data UMKM</span>
-                <ArrowRight className="w-4 h-4 text-gray-400" />
-              </SoftButton>
-            </Link>
-
-            <Link href="/admin/produk">
-              <SoftButton variant="default" className="w-full justify-between py-4" icon={<Package className="w-5 h-5 text-emerald-600" />}>
-                <span>Kelola Produk UMKM</span>
+                <span>Kelola Data & Produk UMKM</span>
                 <ArrowRight className="w-4 h-4 text-gray-400" />
               </SoftButton>
             </Link>

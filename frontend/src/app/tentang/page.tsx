@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Info, Award, Users, ShieldCheck, MapPin, Sparkles } from 'lucide-react';
+import { Info, MapPin, PhoneCall, Mail, ShieldCheck, Store, Award, Sparkles, Users } from '@/components/Icons';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import SoftCard from '@/components/SoftCard';

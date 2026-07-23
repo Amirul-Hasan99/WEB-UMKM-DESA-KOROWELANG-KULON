@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { ShieldCheck, UserCheck, Globe, Store, Package, ArrowRight } from 'lucide-react';
+import { ShieldCheck, UserCheck, Globe, Store, Package, ArrowRight } from '@/components/Icons';
 import AdminSidebar from '@/components/AdminSidebar';
 import SoftCard from '@/components/SoftCard';
 import SoftButton from '@/components/SoftButton';

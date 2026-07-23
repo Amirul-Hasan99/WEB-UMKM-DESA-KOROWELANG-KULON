@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Store, PhoneCall, MapPin, Star, ArrowLeft, Package, ExternalLink, ShieldCheck } from 'lucide-react';
+import { Store, MapPin, PhoneCall, Star, ArrowLeft, ShieldCheck, ShoppingBag, MessageSquare, Award, Package, ExternalLink } from '@/components/Icons';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import SoftCard from '@/components/SoftCard';

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Globe, Check, Image as ImageIcon, Layout, Info, MapPin } from 'lucide-react';
+import { Globe, Check, ImageIcon, Layout, Info, MapPin } from '@/components/Icons';
 import AdminSidebar from '@/components/AdminSidebar';
 import SoftCard from '@/components/SoftCard';
 import SoftInput from '@/components/SoftInput';

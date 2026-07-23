@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Store, Info, MessageSquare, LogIn, Menu, X, ShieldCheck, Home } from 'lucide-react';
+import { Store, Info, MessageSquare, LogIn, Menu, X, ShieldCheck, Home } from '@/components/Icons';
 import SoftButton from './SoftButton';
 import { fetchDynamicContent } from '@/lib/api';
 import { DynamicContent } from '@/lib/types';

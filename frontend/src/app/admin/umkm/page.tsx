@@ -1,21 +1,22 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Store, Plus, Edit2, Trash2, X, Check, MapPin, PhoneCall } from 'lucide-react';
+import { Store, Plus, Edit2, Trash2, X, Check, MapPin, Package, ShoppingBag, ArrowLeft } from '@/components/Icons';
 import AdminSidebar from '@/components/AdminSidebar';
 import SoftCard from '@/components/SoftCard';
 import SoftInput from '@/components/SoftInput';
 import SoftButton from '@/components/SoftButton';
 import ImageUploadInput from '@/components/ImageUploadInput';
 import { fetchUmkms } from '@/lib/api';
-import { UMKM } from '@/lib/types';
+import { UMKM, UMKMProduct } from '@/lib/types';
 
 export default function AdminUmkmPage() {
   const [umkms, setUmkms] = useState<UMKM[]>([]);
+  
+  // UMKM Modal Form states
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUmkm, setEditingUmkm] = useState<UMKM | null>(null);
 
-  // Form states
   const [name, setName] = useState('');
   const [owner, setOwner] = useState('');
   const [category, setCategory] = useState('Kuliner');
@@ -28,10 +29,23 @@ export default function AdminUmkmPage() {
   const [landingText, setLandingText] = useState('');
   const [profileImage, setProfileImage] = useState('');
 
+  // Product Management Modal states (Integrated in UMKM)
+  const [selectedUmkmForProducts, setSelectedUmkmForProducts] = useState<UMKM | null>(null);
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  const [isProductFormOpen, setIsProductFormOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<UMKMProduct | null>(null);
+
+  const [pName, setPName] = useState('');
+  const [pPrice, setPPrice] = useState('');
+  const [pUnit, setPUnit] = useState('pcs');
+  const [pDescription, setPDescription] = useState('');
+  const [pImage, setPImage] = useState('');
+
   useEffect(() => {
     fetchUmkms().then(setUmkms);
   }, []);
 
+  // --- UMKM HANDLERS ---
   const openAddModal = () => {
     setEditingUmkm(null);
     setName('');
@@ -64,10 +78,9 @@ export default function AdminUmkmPage() {
     setIsModalOpen(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmitUmkm = (e: React.FormEvent) => {
     e.preventDefault();
     if (editingUmkm) {
-      // Update existing local state
       setUmkms(prev =>
         prev.map(u =>
           u.id === editingUmkm.id
@@ -89,7 +102,6 @@ export default function AdminUmkmPage() {
         )
       );
     } else {
-      // Add new
       const newUmkm: UMKM = {
         id: umkms.length > 0 ? Math.max(...umkms.map(u => u.id)) + 1 : 1,
         name,
@@ -114,9 +126,83 @@ export default function AdminUmkmPage() {
     setIsModalOpen(false);
   };
 
-  const handleDelete = (id: number) => {
-    if (confirm('Apakah Anda yakin ingin menghapus UMKM ini?')) {
+  const handleDeleteUmkm = (id: number) => {
+    if (confirm('Apakah Anda yakin ingin menghapus UMKM ini beserta seluruh produknya?')) {
       setUmkms(prev => prev.filter(u => u.id !== id));
+    }
+  };
+
+  // --- PRODUCT HANDLERS (INTEGRATED) ---
+  const openProductModal = (umkm: UMKM) => {
+    setSelectedUmkmForProducts(umkm);
+    setIsProductFormOpen(false);
+    setIsProductModalOpen(true);
+  };
+
+  const openAddProductForm = () => {
+    setEditingProduct(null);
+    setPName('');
+    setPPrice('');
+    setPUnit('pcs');
+    setPDescription('');
+    setPImage('');
+    setIsProductFormOpen(true);
+  };
+
+  const openEditProductForm = (prod: UMKMProduct) => {
+    setEditingProduct(prod);
+    setPName(prod.name);
+    setPPrice(prod.price.toString());
+    setPUnit(prod.unit);
+    setPDescription(prod.description);
+    setPImage(prod.image);
+    setIsProductFormOpen(true);
+  };
+
+  const handleSaveProduct = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedUmkmForProducts) return;
+
+    let updatedProducts: UMKMProduct[] = [];
+    if (editingProduct) {
+      updatedProducts = (selectedUmkmForProducts.products || []).map(p =>
+        p.id === editingProduct.id
+          ? {
+              ...p,
+              name: pName,
+              price: parseFloat(pPrice) || 0,
+              unit: pUnit,
+              description: pDescription,
+              image: pImage || p.image,
+            }
+          : p
+      );
+    } else {
+      const newProd: UMKMProduct = {
+        id: Date.now(),
+        umkmId: selectedUmkmForProducts.id,
+        name: pName,
+        price: parseFloat(pPrice) || 0,
+        unit: pUnit,
+        description: pDescription,
+        image: pImage || 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=500&q=80',
+      };
+      updatedProducts = [newProd, ...(selectedUmkmForProducts.products || [])];
+    }
+
+    const updatedUmkm = { ...selectedUmkmForProducts, products: updatedProducts };
+    setSelectedUmkmForProducts(updatedUmkm);
+    setUmkms(prev => prev.map(u => (u.id === updatedUmkm.id ? updatedUmkm : u)));
+    setIsProductFormOpen(false);
+  };
+
+  const handleDeleteProduct = (productId: number) => {
+    if (!selectedUmkmForProducts) return;
+    if (confirm('Hapus produk ini dari UMKM?')) {
+      const updatedProducts = (selectedUmkmForProducts.products || []).filter(p => p.id !== productId);
+      const updatedUmkm = { ...selectedUmkmForProducts, products: updatedProducts };
+      setSelectedUmkmForProducts(updatedUmkm);
+      setUmkms(prev => prev.map(u => (u.id === updatedUmkm.id ? updatedUmkm : u)));
     }
   };
 
@@ -126,10 +212,11 @@ export default function AdminUmkmPage() {
 
       <main className="flex-1 flex flex-col gap-6 min-w-0">
         
+        {/* Page Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex flex-col gap-1">
-            <h1 className="text-2xl font-extrabold text-gray-900">Kelorta UMKM Terdaftar</h1>
-            <p className="text-xs text-gray-500">Daftarkan usaha baru dan perbarui profil UMKM Korowelang Kulon.</p>
+            <h1 className="text-2xl font-extrabold text-gray-900">Kelola Data & Produk UMKM</h1>
+            <p className="text-xs text-gray-500">Kelola pendaftaran usaha warga dan tambah/edit katalog produk langsung di masing-masing UMKM.</p>
           </div>
           <SoftButton variant="primary" onClick={openAddModal} icon={<Plus className="w-4 h-4" />}>
             Daftarkan UMKM Baru
@@ -145,23 +232,37 @@ export default function AdminUmkmPage() {
                   <img src={umkm.profileImage} alt={umkm.name} className="w-full h-full object-cover" />
                 </div>
                 <div className="flex flex-col gap-1 min-w-0 flex-1">
-                  <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wider">{umkm.category}</span>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wider">{umkm.category}</span>
+                    <span className="text-[10px] font-extrabold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
+                      {umkm.products?.length || 0} Produk
+                    </span>
+                  </div>
                   <h3 className="font-extrabold text-base text-gray-900 truncate">{umkm.name}</h3>
                   <p className="text-xs text-gray-600">Pemilik: {umkm.owner}</p>
                   <p className="text-xs text-gray-500 truncate flex items-center gap-1 mt-1">
-                    <MapPin className="w-3 h-3 text-red-500" />
+                    <MapPin className="w-3 h-3 text-red-500 shrink-0" />
                     {umkm.address}
                   </p>
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-gray-200/80 flex items-center justify-between">
-                <span className="text-xs text-gray-500 font-medium">WA: {umkm.whatsapp}</span>
+              {/* Action Buttons: Includes Direct Product Management */}
+              <div className="pt-3 border-t border-gray-200/80 flex flex-wrap items-center justify-between gap-2">
+                <SoftButton
+                  variant="primary"
+                  size="sm"
+                  onClick={() => openProductModal(umkm)}
+                  icon={<Package className="w-3.5 h-3.5" />}
+                >
+                  Kelola Produk ({umkm.products?.length || 0})
+                </SoftButton>
+
                 <div className="flex items-center gap-2">
                   <SoftButton variant="default" size="sm" onClick={() => openEditModal(umkm)} icon={<Edit2 className="w-3.5 h-3.5" />}>
-                    Edit Detail
+                    Edit UMKM
                   </SoftButton>
-                  <SoftButton variant="danger" size="sm" onClick={() => handleDelete(umkm.id)} icon={<Trash2 className="w-3.5 h-3.5" />}>
+                  <SoftButton variant="danger" size="sm" onClick={() => handleDeleteUmkm(umkm.id)} icon={<Trash2 className="w-3.5 h-3.5" />}>
                     Hapus
                   </SoftButton>
                 </div>
@@ -170,7 +271,7 @@ export default function AdminUmkmPage() {
           ))}
         </div>
 
-        {/* MODAL FORM ADD/EDIT */}
+        {/* MODAL 1: FORM ADD / EDIT DATA UMKM */}
         {isModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in">
             <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto soft-card p-6 md:p-8 bg-[#eef2f6]">
@@ -183,7 +284,7 @@ export default function AdminUmkmPage() {
                 </button>
               </div>
 
-              <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+              <form onSubmit={handleSubmitUmkm} className="flex flex-col gap-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <SoftInput label="Nama UMKM" value={name} onChange={e => setName(e.target.value)} required />
                   <SoftInput label="Nama Pemilik" value={owner} onChange={e => setOwner(e.target.value)} required />
@@ -247,8 +348,124 @@ export default function AdminUmkmPage() {
                     Simpan Data UMKM
                   </SoftButton>
                 </div>
-
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* MODAL 2: INTEGRATED KELOLA PRODUK UNTUK UMKM SPESIFIK */}
+        {isProductModalOpen && selectedUmkmForProducts && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in">
+            <div className="w-full max-w-3xl max-h-[90vh] overflow-y-auto soft-card p-6 md:p-8 bg-[#eef2f6] flex flex-col gap-6">
+              
+              {/* Header Modal Produk */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-200">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold shrink-0">
+                    <Package className="w-5 h-5" />
+                  </div>
+                  <div className="flex flex-col">
+                    <h3 className="text-lg font-bold text-gray-900">
+                      Kelola Produk: {selectedUmkmForProducts.name}
+                    </h3>
+                    <span className="text-xs text-gray-500">
+                      Pemilik: {selectedUmkmForProducts.owner} • Kategori: {selectedUmkmForProducts.category}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {!isProductFormOpen && (
+                    <SoftButton variant="primary" size="sm" onClick={openAddProductForm} icon={<Plus className="w-4 h-4" />}>
+                      Tambah Produk Baru
+                    </SoftButton>
+                  )}
+                  <button onClick={() => setIsProductModalOpen(false)} className="p-2 rounded-xl soft-button text-gray-600">
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* SECTION: FORM TAMBAH / EDIT PRODUK */}
+              {isProductFormOpen ? (
+                <form onSubmit={handleSaveProduct} className="p-5 rounded-2xl soft-card-inset flex flex-col gap-4 animate-in slide-in-from-top-2">
+                  <div className="flex items-center justify-between pb-2 border-b border-gray-300/60">
+                    <span className="text-xs font-extrabold uppercase text-blue-600 tracking-wider">
+                      {editingProduct ? 'Edit Data Produk' : 'Tambah Produk Baru'}
+                    </span>
+                    <button type="button" onClick={() => setIsProductFormOpen(false)} className="text-xs font-bold text-gray-500 hover:text-gray-800 flex items-center gap-1">
+                      <ArrowLeft className="w-3.5 h-3.5" /> Kembalikan ke Daftar Produk
+                    </button>
+                  </div>
+
+                  <SoftInput label="Nama Produk" value={pName} onChange={e => setPName(e.target.value)} required />
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <SoftInput label="Harga (Rp)" type="number" value={pPrice} onChange={e => setPPrice(e.target.value)} required />
+                    <SoftInput label="Satuan (pcs/pack/kg/ekor)" value={pUnit} onChange={e => setPUnit(e.target.value)} required />
+                  </div>
+
+                  <ImageUploadInput label="Foto Produk" value={pImage} onChange={setPImage} />
+
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-bold uppercase text-gray-500 ml-1">Deskripsi Produk</label>
+                    <textarea
+                      rows={3}
+                      className="soft-input w-full p-3 text-sm rounded-2xl"
+                      value={pDescription}
+                      onChange={e => setPDescription(e.target.value)}
+                      placeholder="Keunggulan produk, varian rasa, ketahanan..."
+                    />
+                  </div>
+
+                  <div className="flex justify-end gap-3 pt-3 border-t border-gray-300/60">
+                    <SoftButton type="button" variant="default" onClick={() => setIsProductFormOpen(false)}>
+                      Batal
+                    </SoftButton>
+                    <SoftButton type="submit" variant="primary" icon={<Check className="w-4 h-4" />}>
+                      {editingProduct ? 'Simpan Perubahan Produk' : 'Tambah Produk Ini'}
+                    </SoftButton>
+                  </div>
+                </form>
+              ) : (
+                /* SECTION: DAFTAR PRODUK DALAM CARD UMKM */
+                <div className="flex flex-col gap-4">
+                  {(selectedUmkmForProducts.products || []).length === 0 ? (
+                    <div className="p-8 text-center text-gray-500 text-xs font-semibold rounded-2xl soft-card-inset">
+                      Belum ada produk yang didaftarkan untuk UMKM ini. Klik tombol "+ Tambah Produk Baru" di atas.
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {selectedUmkmForProducts.products?.map((prod) => (
+                        <div key={prod.id} className="p-4 rounded-2xl soft-card flex flex-col justify-between gap-3">
+                          <div className="flex gap-3">
+                            <div className="w-16 h-16 rounded-xl overflow-hidden bg-gray-200 shrink-0">
+                              <img src={prod.image} alt={prod.name} className="w-full h-full object-cover" />
+                            </div>
+                            <div className="flex flex-col min-w-0 flex-1">
+                              <h4 className="font-bold text-gray-900 text-xs truncate">{prod.name}</h4>
+                              <span className="text-xs font-extrabold text-blue-600 mt-0.5">
+                                Rp {prod.price.toLocaleString('id-ID')} / {prod.unit}
+                              </span>
+                              <p className="text-[11px] text-gray-500 line-clamp-2 mt-1">{prod.description}</p>
+                            </div>
+                          </div>
+
+                          <div className="pt-2 border-t border-gray-200 flex items-center justify-end gap-2">
+                            <SoftButton variant="default" size="sm" onClick={() => openEditProductForm(prod)} icon={<Edit2 className="w-3 h-3" />}>
+                              Edit
+                            </SoftButton>
+                            <SoftButton variant="danger" size="sm" onClick={() => handleDeleteProduct(prod.id)} icon={<Trash2 className="w-3 h-3" />}>
+                              Hapus
+                            </SoftButton>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
             </div>
           </div>
         )}

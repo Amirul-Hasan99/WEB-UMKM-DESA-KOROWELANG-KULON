@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Search, Filter, Star, MapPin, Store, ShoppingBag, PhoneCall } from 'lucide-react';
+import { Store, Search, Filter, Star, MapPin, ShieldCheck, ShoppingBag, PhoneCall } from '@/components/Icons';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import SoftCard from '@/components/SoftCard';

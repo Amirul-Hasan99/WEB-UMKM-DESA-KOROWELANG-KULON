@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { UserCheck, Plus, Edit2, Trash2, X, Check, ShieldCheck, Mail, Phone } from 'lucide-react';
+import { UserCheck, Plus, Edit2, Trash2, X, Check, ShieldCheck, Mail, Phone } from '@/components/Icons';
 import AdminSidebar from '@/components/AdminSidebar';
 import SoftCard from '@/components/SoftCard';
 import SoftInput from '@/components/SoftInput';

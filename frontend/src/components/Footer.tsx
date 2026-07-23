@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { MapPin, Phone, Mail, Store, Heart } from 'lucide-react';
+import { MapPin, Phone, Mail, Store, Heart } from '@/components/Icons';
 import { fetchDynamicContent } from '@/lib/api';
 import { DynamicContent } from '@/lib/types';
 

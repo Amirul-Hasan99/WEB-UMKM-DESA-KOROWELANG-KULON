@@ -14,7 +14,7 @@ import {
   LogOut,
   ShieldCheck,
   ChevronRight
-} from 'lucide-react';
+} from '@/components/Icons';
 import SoftButton from './SoftButton';
 import { UserAdmin } from '@/lib/types';
 
@@ -44,43 +44,58 @@ export const AdminSidebar: React.FC = () => {
 
   const isSuperAdmin = user?.role === 'superadmin';
 
-  const menuItems = [
-    {
-      title: 'DASHBOARD',
-      items: [
+  const menuItems = isSuperAdmin
+    ? [
         {
-          name: 'Overview Utama',
-          href: isSuperAdmin ? '/superadmin/dashboard' : '/admin/dashboard',
-          icon: <LayoutDashboard className="w-4 h-4" />
+          title: 'DASHBOARD SUPER ADMIN',
+          items: [
+            {
+              name: 'Overview Utama',
+              href: '/superadmin/dashboard',
+              icon: <LayoutDashboard className="w-4 h-4" />
+            }
+          ]
+        },
+        {
+          title: 'MANAJEMEN KELURAHAN',
+          items: [
+            { name: 'Kelola Akun Admin Staff', href: '/superadmin/admins', icon: <UserCheck className="w-4 h-4" /> },
+            { name: 'Kelola Konten Website', href: '/superadmin/konten', icon: <Globe className="w-4 h-4" /> },
+          ]
+        },
+        {
+          title: 'AKUN & FEEDBACK',
+          items: [
+            { name: 'Profil Saya', href: '/admin/profil', icon: <User className="w-4 h-4" /> },
+            { name: 'Lihat Feedback User', href: '/admin/feedback', icon: <MessageSquare className="w-4 h-4" /> },
+          ]
         }
       ]
-    },
-    {
-      title: 'MANAJEMEN UMKM',
-      items: [
-        { name: 'Kelola Data UMKM', href: '/admin/umkm', icon: <Store className="w-4 h-4" /> },
-        { name: 'Kelola Produk UMKM', href: '/admin/produk', icon: <Package className="w-4 h-4" /> },
-      ]
-    },
-    ...(isSuperAdmin
-      ? [
-          {
-            title: 'MANAJEMEN SUPER ADMIN',
-            items: [
-              { name: 'Kelola Akun Admin Staff', href: '/superadmin/admins', icon: <UserCheck className="w-4 h-4" /> },
-              { name: 'Kelola Konten Website', href: '/superadmin/konten', icon: <Globe className="w-4 h-4" /> },
-            ]
-          }
-        ]
-      : []),
-    {
-      title: 'AKUN & FEEDBACK',
-      items: [
-        { name: 'Profil Saya', href: '/admin/profil', icon: <User className="w-4 h-4" /> },
-        { name: 'Lihat Feedback User', href: '/admin/feedback', icon: <MessageSquare className="w-4 h-4" /> },
-      ]
-    }
-  ];
+    : [
+        {
+          title: 'DASHBOARD ADMIN',
+          items: [
+            {
+              name: 'Overview Utama',
+              href: '/admin/dashboard',
+              icon: <LayoutDashboard className="w-4 h-4" />
+            }
+          ]
+        },
+        {
+          title: 'MANAJEMEN UMKM',
+          items: [
+            { name: 'Kelola Data & Produk UMKM', href: '/admin/umkm', icon: <Store className="w-4 h-4" /> },
+          ]
+        },
+        {
+          title: 'AKUN & FEEDBACK',
+          items: [
+            { name: 'Profil Saya', href: '/admin/profil', icon: <User className="w-4 h-4" /> },
+            { name: 'Lihat Feedback User', href: '/admin/feedback', icon: <MessageSquare className="w-4 h-4" /> },
+          ]
+        }
+      ];
 
   return (
     <aside className="w-full md:w-64 shrink-0 flex flex-col gap-6 p-5 soft-card">
