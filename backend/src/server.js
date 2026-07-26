@@ -60,10 +60,15 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`=================================================`);
-  console.log(`🚀 Server Backend UMKM Korowelang Kulon Berjalan!`);
-  console.log(`🌐 Port: ${PORT}`);
-  console.log(`🔗 Health Check: http://localhost:${PORT}/api`);
-  console.log(`=================================================`);
-});
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`=================================================`);
+    console.log(`🚀 Server Backend UMKM Korowelang Kulon Berjalan!`);
+    console.log(`🌐 Port: ${PORT}`);
+    console.log(`🔗 Health Check: http://localhost:${PORT}/api`);
+    console.log(`=================================================`);
+  });
+}
+
+module.exports = app;
+
