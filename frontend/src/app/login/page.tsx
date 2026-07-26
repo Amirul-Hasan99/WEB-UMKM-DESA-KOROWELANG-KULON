@@ -58,7 +58,7 @@ export default function LoginPage() {
         {/* Brand Header */}
         <div className="flex flex-col items-center text-center gap-1.5">
           <Link href="/" className="w-12 h-12 rounded-2xl soft-card flex items-center justify-center p-1.5 hover:scale-105 transition-transform overflow-hidden">
-            <img src="/api/logo" alt="Logo Kendal" className="w-full h-full object-cover rounded-xl" />
+            <img src="/logo-kendal.png" alt="Logo Kendal" className="w-full h-full object-cover rounded-xl" />
           </Link>
           <div className="flex flex-col gap-0.5">
             <h1 className="text-xl font-extrabold text-gray-900 tracking-tight leading-none">

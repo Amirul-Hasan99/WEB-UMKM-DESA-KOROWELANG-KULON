@@ -196,7 +196,7 @@ const mockData = {
     siteName: "UMKM Korowelang Kulon",
     headerTitle: "Portal Pemberdayaan UMKM Desa Korowelang Kulon",
     headerSubtitle: "Mendukung Ekonomi Kreatif & Usaha Lokal Desa Pesisir Mandiri",
-    logoUrl: "https://images.unsplash.com/photo-1560179707-f14e90ef3623?auto=format&fit=crop&w=150&q=80",
+    logoUrl: "/logo-kendal.png",
     heroTitle: "Jelajahi Produk Unggulan Karya Warga Korowelang Kulon",
     heroSubtitle: "Dari Kuliner Bandeng Presto hingga Batik Pesisir Tradisional. Dapatkan produk berkualitas langsung dari pelaku usaha desa kami.",
     heroBannerUrl: "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=80",

@@ -6,7 +6,7 @@ export const initialDynamicContent: DynamicContent = {
   siteName: "UMKM Korowelang Kulon",
   headerTitle: "Portal Pemberdayaan UMKM Desa Korowelang Kulon",
   headerSubtitle: "Mendukung Ekonomi Kreatif & Usaha Lokal Desa Pesisir Mandiri",
-  logoUrl: "/api/logo",
+  logoUrl: "/logo-kendal.png",
   heroTitle: "Jelajahi Produk Unggulan Karya Warga Korowelang Kulon",
   heroSubtitle: "Dari Kuliner Bandeng Presto hingga Batik Pesisir Tradisional. Dapatkan produk berkualitas langsung dari pelaku usaha desa kami.",
   heroBannerUrl: "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=80",
@@ -156,7 +156,7 @@ export const fetchDynamicContent = async (): Promise<DynamicContent> => {
         return {
           ...initialDynamicContent,
           ...parsed,
-          logoUrl: parsed.logoUrl && !parsed.logoUrl.includes('unsplash') ? parsed.logoUrl : '/api/logo'
+          logoUrl: parsed.logoUrl && !parsed.logoUrl.includes('unsplash') ? parsed.logoUrl : '/logo-kendal.png'
         };
       } catch (e) {}
     }
