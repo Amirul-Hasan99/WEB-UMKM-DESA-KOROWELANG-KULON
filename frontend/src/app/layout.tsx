@@ -2,9 +2,54 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'UMKM Desa Korowelang Kulon | Portal Resmi Usaha Desa',
-  description: 'Portal pemberdayaan dan katalog produk UMKM Desa Korowelang Kulon, Kecamatan Cepiring, Kabupaten Kendal.',
-  keywords: ['UMKM', 'Korowelang Kulon', 'Kendal', 'Bandeng Presto', 'Batik Pesisir', 'Emping Melinjo', 'Desa Pesisir'],
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://umkm-kutoharjo.vercel.app'),
+  title: {
+    default: 'UMKM Desa Kutoharjo | Portal Resmi Usaha Desa',
+    template: '%s | UMKM Kutoharjo',
+  },
+  description: 'Portal pemberdayaan digital dan katalog produk resmi UMKM Desa Kutoharjo, Kecamatan Kaliwungu, Kabupaten Kendal, Jawa Tengah.',
+  keywords: [
+    'UMKM Kutoharjo',
+    'Kuliner Kutoharjo',
+    'Bandeng Cabut Duri',
+    'Desa Kutoharjo',
+    'Kendal',
+    'Pemberdayaan Ekonomi Desa',
+    'Katalog UMKM Kendal'
+  ],
+  authors: [{ name: 'Pemerintah Desa Kutoharjo' }],
+  creator: 'Pemerintah Desa Kutoharjo',
+  openGraph: {
+    type: 'website',
+    locale: 'id_ID',
+    url: 'https://umkm-kutoharjo.vercel.app',
+    title: 'UMKM Desa Kutoharjo | Portal Resmi Usaha Desa',
+    description: 'Jelajahi produk lokal berkualitas, kuliner unggulan, dan usaha masyarakat Desa Kutoharjo.',
+    siteName: 'Portal UMKM Desa Kutoharjo',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'UMKM Desa Kutoharjo',
+    description: 'Portal Resmi Produk & Usaha Desa Kutoharjo, Kendal.',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+};
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'GovernmentOrganization',
+  name: 'Portal UMKM Desa Kutoharjo',
+  url: 'https://umkm-kutoharjo.vercel.app',
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: 'Kendal',
+    addressRegion: 'Jawa Tengah',
+    addressCountry: 'ID',
+  },
+  description: 'Wadah digitalisasi resmi dan portal UMKM Desa Kutoharjo, Kendal, Jawa Tengah.',
 };
 
 export default function RootLayout({
@@ -14,9 +59,16 @@ export default function RootLayout({
 }) {
   return (
     <html lang="id">
-      <body className="bg-[#eef2f6] text-gray-800 antialiased selection:bg-blue-500 selection:text-white">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
+      <body className="bg-[#eef2f6] text-gray-800 antialiased selection:bg-red-500 selection:text-white">
         {children}
       </body>
     </html>
   );
 }
+

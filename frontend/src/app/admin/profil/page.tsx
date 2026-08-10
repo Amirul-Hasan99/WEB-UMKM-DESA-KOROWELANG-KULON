@@ -85,7 +85,7 @@ export default function AdminProfilePage() {
               </div>
               <div className="flex flex-col gap-1 flex-1">
                 <span className="text-xs font-bold text-gray-400 uppercase">Role Akun</span>
-                <span className="text-sm font-extrabold text-blue-600 uppercase tracking-wider flex items-center gap-1">
+                <span className="text-sm font-extrabold text-red-600 uppercase tracking-wider flex items-center gap-1">
                   <ShieldCheck className="w-4 h-4" />
                   {user?.role === 'superadmin' ? 'Super Admin Kelurahan' : 'Admin Staff'}
                 </span>

@@ -3,34 +3,34 @@ import { UMKM, UMKMProduct, Feedback, DynamicContent, UserAdmin } from './types'
 
 // Fallback Mock Data for initial client state when backend is booting up
 export const initialDynamicContent: DynamicContent = {
-  siteName: "UMKM Korowelang Kulon",
-  headerTitle: "Portal Pemberdayaan UMKM Desa Korowelang Kulon",
-  headerSubtitle: "Mendukung Ekonomi Kreatif & Usaha Lokal Desa Pesisir Mandiri",
+  siteName: "UMKM Kutoharjo",
+  headerTitle: "Portal Pemberdayaan UMKM Desa Kutoharjo",
+  headerSubtitle: "Mendukung Ekonomi Kreatif & Usaha Lokal Desa Mandiri",
   logoUrl: "/logo-kendal.png",
-  heroTitle: "Jelajahi Produk Unggulan Karya Warga Korowelang Kulon",
-  heroSubtitle: "Dari Kuliner Bandeng Presto hingga Batik Pesisir Tradisional. Dapatkan produk berkualitas langsung dari pelaku usaha desa kami.",
+  heroTitle: "Jelajahi Produk Unggulan Karya Warga Kutoharjo",
+  heroSubtitle: "Dari Kuliner khas hingga Kerajinan Tradisional. Dapatkan produk berkualitas langsung dari pelaku usaha desa kami.",
   heroBannerUrl: "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=80",
-  aboutTitle: "Tentang Program UMKM Desa Korowelang Kulon",
-  aboutText: "Desa Korowelang Kulon merupakan desa pesisir yang kaya akan potensi produk olahan hasil laut, industri makanan ringan, hingga kerajinan seni batik pesisiran. Portal ini hadir sebagai wadah digitalisasi resmi yang dikelola oleh Pemerintah Kelurahan Korowelang Kulon untuk memasarkan dan memperkenalkan potensi lokal secara luas ke seluruh Indonesia.",
-  villageAddress: "Jl. Raya Korowelang Kulon No. 01, Kec. Cepiring, Kabupaten Kendal, Jawa Tengah",
-  contactEmail: "info@korowelangkulon.desa.id",
+  aboutTitle: "Tentang Program UMKM Desa Kutoharjo",
+  aboutText: "Desa Kutoharjo merupakan desa yang kaya akan potensi produk olahan, industri makanan ringan, hingga kerajinan seni khas desa. Portal ini hadir sebagai wadah digitalisasi resmi yang dikelola oleh Pemerintah Kelurahan Kutoharjo untuk memasarkan dan memperkenalkan potensi lokal secara luas ke seluruh Indonesia.",
+  villageAddress: "Jl. Raya Kutoharjo No. 01, Kec. Kaliwungu, Kabupaten Kendal, Jawa Tengah",
+  contactEmail: "info@kutoharjo.desa.id",
   contactPhone: "(0294) 381000 / 0812-3456-7890",
-  footerText: "© 2026 Pemerintah Desa Korowelang Kulon. Hak Cipta Dilindungi Undang-Undang."
+  footerText: "© 2026 Pemerintah Desa Kutoharjo. Hak Cipta Dilindungi Undang-Undang."
 };
 
 export const initialUmkms: UMKM[] = [
   {
     id: 1,
-    name: "Bandeng Presto Khas Korowelang",
+    name: "Bandeng Presto Khas Kutoharjo",
     owner: "H. Ahmad Subechi",
     category: "Kuliner",
-    address: "RT 02 / RW 01, Dusun Karanganyar, Desa Korowelang Kulon",
+    address: "RT 02 / RW 01, Dusun Karanganyar, Desa Kutoharjo",
     phone: "6281229988771",
     whatsapp: "6281229988771",
     gmapsUrl: "https://maps.google.com/?q=-6.912345,110.123456",
     gmapsEmbed: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15842.695724128522!2d110.145000!3d-6.890000!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNsKwNTMnMjQuMCJTIDExMMKwMDgnNDI0LjAiRQ!5e0!3m2!1sid!2sid!4v1650000000000!5m2!1sid!2sid",
-    description: "Produsen olahan bandeng presto duri lunak resep warisan keluarga Korowelang Kulon sejak 1998. Diolah higienis dengan bumbu rempah alami pilihan.",
-    landingText: "Cita rasa bandeng presto gurih, lezat, dan tanpa pengawet asli pesisir Korowelang Kulon.",
+    description: "Produsen olahan bandeng presto duri lunak resep warisan keluarga Kutoharjo sejak 1998. Diolah higienis dengan bumbu rempah alami pilihan.",
+    landingText: "Cita rasa bandeng presto gurih, lezat, dan tanpa pengawet asli Kutoharjo.",
     profileImage: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=600&q=80",
     bannerImage: "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=1200&q=80",
     rating: 4.9,
@@ -43,7 +43,7 @@ export const initialUmkms: UMKM[] = [
         name: "Bandeng Presto Kemasan Vakum (Isi 2 Ekor)",
         price: 35000,
         unit: "pack",
-        description: "Bandeng duri lunak plus sambal terasi pedas manis khas Korowelang. Tahan hingga 14 hari di suhu ruangan.",
+        description: "Bandeng duri lunak plus sambal terasi pedas manis khas Kutoharjo. Tahan hingga 14 hari di suhu ruangan.",
         image: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=500&q=80"
       },
       {
@@ -59,16 +59,16 @@ export const initialUmkms: UMKM[] = [
   },
   {
     id: 2,
-    name: "Batik Tulis Pesisir Korowelang",
+    name: "Batik Tulis Kutoharjo",
     owner: "Ibu Hj. Maryam",
     category: "Kerajinan & Fashion",
-    address: "RT 04 / RW 02, Jalan Utama Korowelang Kulon No. 45",
+    address: "RT 04 / RW 02, Jalan Utama Kutoharjo No. 45",
     phone: "6285640112233",
     whatsapp: "6285640112233",
     gmapsUrl: "https://maps.google.com/?q=-6.914444,110.125555",
     gmapsEmbed: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15842.695724128522!2d110.145000!3d-6.890000!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNsKwNTMnMjQuMCJTIDExMMKwMDgnNDI0LjAiRQ!5e0!3m2!1sid!2sid!4v1650000000000!5m2!1sid!2sid",
-    description: "Pengrajin batik motif pesisiran khas Korowelang Kulon dengan perpaduan warna cerah motif bahari dan floramorfis.",
-    landingText: "Batik tulis eksklusif karya tangan ibu-ibu pengrajin lokal Korowelang Kulon.",
+    description: "Pengrajin batik motif khas Kutoharjo dengan perpaduan warna cerah motif alami dan floramorfis.",
+    landingText: "Batik tulis eksklusif karya tangan ibu-ibu pengrajin lokal Kutoharjo.",
     profileImage: "https://images.unsplash.com/photo-1606744824163-985d376605aa?auto=format&fit=crop&w=600&q=80",
     bannerImage: "https://images.unsplash.com/photo-1528459801416-a9e53bbf4e17?auto=format&fit=crop&w=1200&q=80",
     rating: 4.8,
@@ -78,20 +78,20 @@ export const initialUmkms: UMKM[] = [
       {
         id: 3,
         umkmId: 2,
-        name: "Kain Batik Tulis Motif Pesisiran (2x1.15m)",
+        name: "Kain Batik Tulis Motif Kutoharjo (2x1.15m)",
         price: 350000,
         unit: "pcs",
-        description: "Kain katun prima halus berpewarna sintesis tahan pudar dengan cetakan motif khas pantai Korowelang.",
+        description: "Kain katun prima halus berpewarna sintesis tahan pudar dengan cetakan motif khas Kutoharjo.",
         image: "https://images.unsplash.com/photo-1606744824163-985d376605aa?auto=format&fit=crop&w=500&q=80"
       }
     ]
   },
   {
     id: 3,
-    name: "Emping Melinjo Super Korowelang",
+    name: "Emping Melinjo Super Kutoharjo",
     owner: "Pak Suparno",
     category: "Makanan Ringan",
-    address: "RT 01 / RW 03, Dusun Dukuh Kulon, Korowelang Kulon",
+    address: "RT 01 / RW 03, Dusun Dukuh Kulon, Kutoharjo",
     phone: "6281390114455",
     whatsapp: "6281390114455",
     gmapsUrl: "https://maps.google.com/?q=-6.916666,110.127777",
@@ -190,15 +190,15 @@ export const loginAdmin = async (email: string, password: string) => {
     }
     return res.data;
   } catch (e: any) {
-    // Fallback authentication for quick client demo if server is offline
-    if (email === 'superadmin@korowelangkulon.desa.id' && password === 'superadmin123') {
+    // Fallback authentication for client demo if server is offline
+    if (email === 'superadmin@kutoharjo.desa.id' && password === 'superadmin123') {
       const user = { id: 1, name: "Super Admin Kelurahan", email, role: "superadmin", phone: "081234567890" };
       const token = "mock_superadmin_jwt_token";
       localStorage.setItem('umkm_token', token);
       localStorage.setItem('umkm_user', JSON.stringify(user));
       return { success: true, token, user };
     }
-    if (email === 'admin@korowelangkulon.desa.id' && password === 'admin123') {
+    if (email === 'admin@kutoharjo.desa.id' && password === 'admin123') {
       const user = { id: 2, name: "Budi Santoso (Admin Staff)", email, role: "admin", phone: "081987654321" };
       const token = "mock_admin_jwt_token";
       localStorage.setItem('umkm_token', token);

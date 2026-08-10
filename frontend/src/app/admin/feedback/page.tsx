@@ -19,14 +19,14 @@ export default function AdminFeedbackPage() {
       id: 1,
       name: "Ahmad Wijaya",
       email: "ahmad.w@gmail.com",
-      message: "Bandeng presto khas Korowelang rasanya juara sekali! Sambalnya pas dan durinya benar-benar lunak.",
+      message: "Bandeng presto khas Kutoharjo rasanya juara sekali! Sambalnya pas dan durinya benar-benar lunak.",
       createdAt: "2024-06-10T10:00:00.000Z"
     },
     {
       id: 2,
       name: "Dini Lestari",
       email: "dini.l@yahoo.com",
-      message: "Website portal ini sangat membantu saya mencari batik tulis asli Korowelang Kulon langsung dari pengrajinnya.",
+      message: "Website portal ini sangat membantu saya mencari batik tulis asli Kutoharjo langsung dari pengrajinnya.",
       createdAt: "2024-06-12T14:30:00.000Z"
     }
   ]);
@@ -58,13 +58,13 @@ export default function AdminFeedbackPage() {
               <SoftCard key={f.id} className="p-6 flex flex-col gap-3">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-200/80 pb-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold shrink-0">
+                    <div className="w-10 h-10 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center font-bold shrink-0">
                       <User className="w-5 h-5" />
                     </div>
                     <div className="flex flex-col">
                       <span className="font-extrabold text-gray-900 text-base">{f.name}</span>
                       <span className="text-xs text-gray-500 flex items-center gap-1">
-                        <Mail className="w-3 h-3 text-blue-500" />
+                        <Mail className="w-3 h-3 text-red-500" />
                         {f.email}
                       </span>
                     </div>

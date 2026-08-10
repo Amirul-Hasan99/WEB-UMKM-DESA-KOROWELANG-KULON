@@ -55,14 +55,14 @@ body {
 }
 
 .soft-button-primary {
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
   color: #ffffff;
-  box-shadow: 4px 4px 12px rgba(37, 99, 235, 0.3), -2px -2px 6px rgba(255, 255, 255, 0.6);
+  box-shadow: 4px 4px 12px rgba(220, 38, 38, 0.3), -2px -2px 6px rgba(255, 255, 255, 0.6);
   transition: all 0.2s ease-in-out;
 }
 
 .soft-button-primary:hover {
-  box-shadow: 5px 5px 14px rgba(37, 99, 235, 0.4), -2px -2px 8px rgba(255, 255, 255, 0.7);
+  box-shadow: 5px 5px 14px rgba(220, 38, 38, 0.4), -2px -2px 8px rgba(255, 255, 255, 0.7);
   transform: translateY(-1px);
 }
 
@@ -74,8 +74,8 @@ body {
 }
 
 .soft-input:focus {
-  border-color: #3b82f6;
-  box-shadow: inset 3px 3px 6px rgba(166, 180, 200, 0.35), inset -2px -2px 5px rgba(255, 255, 255, 0.65), 0 0 0 2px rgba(59, 130, 246, 0.2);
+  border-color: #ef4444;
+  box-shadow: inset 3px 3px 6px rgba(166, 180, 200, 0.35), inset -2px -2px 5px rgba(255, 255, 255, 0.65), 0 0 0 2px rgba(239, 68, 68, 0.2);
 }
 
 /* Custom Scrollbar */

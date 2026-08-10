@@ -1,25 +1,21 @@
 const express = require('express');
 const router = express.Router();
 const { authenticateToken, requireRole } = require('../middleware/authMiddleware');
-const {
-  getAllAdmins,
-  createAdmin,
-  updateAdmin,
-  deleteAdmin,
-  updateDynamicContent
-} = require('../controllers/superadminController');
+const validate = require('../middleware/validate');
+const { adminAccountSchema, adminAccountUpdateSchema, dynamicContentSchema } = require('../validators/schemas');
 
-// Super Admin Protected Routes (Strictly superadmin only)
+const superadminController = require('../controllers/superadminController');
+
 router.use(authenticateToken);
 router.use(requireRole('superadmin'));
 
-// Manage Staff Admin Accounts
-router.get('/admins', getAllAdmins);
-router.post('/admins', createAdmin);
-router.put('/admins/:id', updateAdmin);
-router.delete('/admins/:id', deleteAdmin);
+// Admin account management
+router.get('/admins', superadminController.getAllAdmins);
+router.post('/admins', validate(adminAccountSchema), superadminController.createAdmin);
+router.put('/admins/:id', validate(adminAccountUpdateSchema), superadminController.updateAdmin);
+router.delete('/admins/:id', superadminController.deleteAdmin);
 
-// Dynamic Website Content Management
-router.put('/konten', updateDynamicContent);
+// Dynamic content
+router.put('/konten', validate(dynamicContentSchema), superadminController.updateDynamicContent);
 
 module.exports = router;

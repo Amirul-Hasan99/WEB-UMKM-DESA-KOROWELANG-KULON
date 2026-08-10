@@ -107,7 +107,7 @@ export default function AdminUmkmPage() {
         name,
         owner,
         category,
-        address: address || 'Desa Korowelang Kulon',
+        address: address || 'Desa Kutoharjo',
         phone,
         whatsapp: whatsapp || phone,
         gmapsUrl,
@@ -233,7 +233,7 @@ export default function AdminUmkmPage() {
                 </div>
                 <div className="flex flex-col gap-1 min-w-0 flex-1">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wider">{umkm.category}</span>
+                    <span className="text-[10px] font-bold text-red-600 uppercase tracking-wider">{umkm.category}</span>
                     <span className="text-[10px] font-extrabold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
                       {umkm.products?.length || 0} Produk
                     </span>
@@ -361,7 +361,7 @@ export default function AdminUmkmPage() {
               {/* Header Modal Produk */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-200">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-red-100 text-red-600 flex items-center justify-center font-bold shrink-0">
                     <Package className="w-5 h-5" />
                   </div>
                   <div className="flex flex-col">
@@ -390,7 +390,7 @@ export default function AdminUmkmPage() {
               {isProductFormOpen ? (
                 <form onSubmit={handleSaveProduct} className="p-5 rounded-2xl soft-card-inset flex flex-col gap-4 animate-in slide-in-from-top-2">
                   <div className="flex items-center justify-between pb-2 border-b border-gray-300/60">
-                    <span className="text-xs font-extrabold uppercase text-blue-600 tracking-wider">
+                    <span className="text-xs font-extrabold uppercase text-red-600 tracking-wider">
                       {editingProduct ? 'Edit Data Produk' : 'Tambah Produk Baru'}
                     </span>
                     <button type="button" onClick={() => setIsProductFormOpen(false)} className="text-xs font-bold text-gray-500 hover:text-gray-800 flex items-center gap-1">
@@ -444,7 +444,7 @@ export default function AdminUmkmPage() {
                             </div>
                             <div className="flex flex-col min-w-0 flex-1">
                               <h4 className="font-bold text-gray-900 text-xs truncate">{prod.name}</h4>
-                              <span className="text-xs font-extrabold text-blue-600 mt-0.5">
+                              <span className="text-xs font-extrabold text-red-600 mt-0.5">
                                 Rp {prod.price.toLocaleString('id-ID')} / {prod.unit}
                               </span>
                               <p className="text-[11px] text-gray-500 line-clamp-2 mt-1">{prod.description}</p>

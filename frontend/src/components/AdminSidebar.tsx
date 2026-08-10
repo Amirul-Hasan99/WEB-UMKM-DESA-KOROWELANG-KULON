@@ -102,14 +102,14 @@ export const AdminSidebar: React.FC = () => {
       
       {/* User Info Badge */}
       <div className="flex items-center gap-3 p-3 rounded-2xl soft-card-inset">
-        <div className="w-11 h-11 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-bold text-lg shadow-md shrink-0">
+        <div className="w-11 h-11 rounded-2xl bg-red-600 text-white flex items-center justify-center font-bold text-lg shadow-md shrink-0">
           {user?.name ? user.name.charAt(0) : 'A'}
         </div>
         <div className="flex flex-col min-w-0">
           <span className="font-bold text-sm text-gray-800 truncate">
             {user?.name || 'Staff Kelurahan'}
           </span>
-          <span className="text-[11px] font-bold text-blue-600 uppercase tracking-wider flex items-center gap-1">
+          <span className="text-[11px] font-bold text-red-600 uppercase tracking-wider flex items-center gap-1">
             <ShieldCheck className="w-3 h-3" />
             {isSuperAdmin ? 'Super Admin' : 'Admin Staff'}
           </span>
@@ -133,7 +133,7 @@ export const AdminSidebar: React.FC = () => {
                     className={`flex items-center justify-between px-3.5 py-2.5 text-xs font-bold rounded-2xl transition-all ${
                       isActive
                         ? 'soft-button-primary'
-                        : 'text-gray-600 hover:text-blue-600 hover:bg-white/60'
+                        : 'text-gray-600 hover:text-red-600 hover:bg-white/60'
                     }`}
                   >
                     <div className="flex items-center gap-2.5">

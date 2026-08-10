@@ -40,17 +40,6 @@ export default function LoginPage() {
     }
   };
 
-  // Preset demo account fillers
-  const fillCredentials = (type: 'superadmin' | 'admin') => {
-    if (type === 'superadmin') {
-      setEmail('superadmin@korowelangkulon.desa.id');
-      setPassword('superadmin123');
-    } else {
-      setEmail('admin@korowelangkulon.desa.id');
-      setPassword('admin123');
-    }
-  };
-
   return (
     <div className="h-screen w-full flex items-center justify-center p-3 sm:p-4 bg-[#eef2f6] overflow-hidden">
       <div className="w-full max-w-sm flex flex-col gap-3 sm:gap-4 my-auto">
@@ -65,7 +54,7 @@ export default function LoginPage() {
               Portal Admin Kelurahan
             </h1>
             <p className="text-[11px] text-gray-500 font-semibold mt-1">
-              Desa Korowelang Kulon • Kabupaten Kendal
+              Desa Kutoharjo • Kabupaten Kendal
             </p>
           </div>
         </div>
@@ -75,7 +64,7 @@ export default function LoginPage() {
           
           <div className="flex flex-col gap-0.5 border-b border-gray-200 pb-3">
             <h2 className="text-base font-bold text-gray-800 flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0" />
+              <ShieldCheck className="w-4 h-4 text-red-600 shrink-0" />
               Masuk Akun Staff / Admin
             </h2>
             <p className="text-[11px] text-gray-500">Masukkan kredensial login staff kelurahan.</p>
@@ -121,35 +110,10 @@ export default function LoginPage() {
             </SoftButton>
           </form>
 
-          {/* Quick Demo Testing Helpers */}
-          <div className="pt-3 border-t border-gray-200 flex flex-col gap-2">
-            <span className="text-[10px] font-extrabold uppercase tracking-widest text-gray-400 text-center">
-              Akses Cepat Demo
-            </span>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => fillCredentials('superadmin')}
-                className="soft-button py-1.5 px-2 text-[11px] font-bold text-gray-700 hover:text-blue-600 flex items-center justify-center gap-1 rounded-xl"
-              >
-                <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
-                Super Admin
-              </button>
-              <button
-                type="button"
-                onClick={() => fillCredentials('admin')}
-                className="soft-button py-1.5 px-2 text-[11px] font-bold text-gray-700 hover:text-blue-600 flex items-center justify-center gap-1 rounded-xl"
-              >
-                <UserCheck className="w-3.5 h-3.5 text-blue-600" />
-                Admin Staff
-              </button>
-            </div>
-          </div>
-
         </SoftCard>
 
         <div className="text-center">
-          <Link href="/" className="text-[11px] font-bold text-gray-500 hover:text-blue-600 transition-colors">
+          <Link href="/" className="text-[11px] font-bold text-gray-500 hover:text-red-600 transition-colors">
             ← Kembali ke Halaman Utama (Public)
           </Link>
         </div>

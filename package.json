@@ -1,0 +1,14 @@
+{
+  "name": "umkm-korowelang-kulon-root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test:backend": "cd backend && npm run test",
+    "test:frontend": "cd frontend && npm run test",
+    "test:e2e": "playwright test",
+    "test": "npm run test:backend && npm run test:frontend"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.45.0"
+  }
+}

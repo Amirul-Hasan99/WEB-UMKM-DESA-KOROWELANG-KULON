@@ -35,15 +35,15 @@ export default function UmkmCatalogPage() {
         
         {/* Header Title */}
         <div className="flex flex-col gap-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full soft-card-sm text-xs font-bold text-blue-600 self-start">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full soft-card-sm text-xs font-bold text-red-600 self-start">
             <Store className="w-4 h-4" />
             Katalog Usaha Desa
           </div>
           <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">
-            Daftar UMKM Korowelang Kulon
+            Daftar UMKM Kutoharjo
           </h1>
           <p className="text-sm text-gray-600 font-medium max-w-2xl">
-            Temukan berbagai usaha mikro lokal, dari hidangan laut olahan bandeng presto, kerajinan batik tulis pesisir, hingga camilan khas desa.
+            Temukan berbagai usaha mikro lokal, dari hidangan kuliner olahan, kerajinan seni khas desa, hingga camilan lezat.
           </p>
         </div>
 
@@ -67,7 +67,7 @@ export default function UmkmCatalogPage() {
                 className={`px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all ${
                   selectedCategory === cat
                     ? 'soft-button-primary'
-                    : 'soft-button text-gray-600 hover:text-blue-600'
+                    : 'soft-button text-gray-600 hover:text-red-600'
                 }`}
               >
                 {cat}
@@ -106,13 +106,13 @@ export default function UmkmCatalogPage() {
                     <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
                     <span>{umkm.rating}</span>
                   </div>
-                  <div className="absolute bottom-3 left-3 bg-blue-600 text-white text-[11px] font-bold px-3 py-1 rounded-xl uppercase tracking-wider">
+                  <div className="absolute bottom-3 left-3 bg-red-600 text-white text-[11px] font-bold px-3 py-1 rounded-xl uppercase tracking-wider">
                     {umkm.category}
                   </div>
                 </div>
 
                 <div className="flex flex-col gap-2 flex-1">
-                  <h3 className="font-extrabold text-lg text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-1">
+                  <h3 className="font-extrabold text-lg text-gray-900 group-hover:text-red-600 transition-colors line-clamp-1">
                     {umkm.name}
                   </h3>
                   <p className="text-xs font-bold text-gray-500">Pemilik: {umkm.owner}</p>

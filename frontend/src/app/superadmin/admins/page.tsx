@@ -13,25 +13,25 @@ export default function SuperAdminAdminsPage() {
     {
       id: 1,
       name: "Super Admin Kelurahan",
-      email: "superadmin@korowelangkulon.desa.id",
+      email: "superadmin@kutoharjo.desa.id",
       role: "superadmin",
       phone: "081234567890",
       avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
-      bio: "Kepala Seksi Pemberdayaan Ekonomi Masyarakat Kelurahan Korowelang Kulon."
+      bio: "Kepala Seksi Pemberdayaan Ekonomi Masyarakat Kelurahan Kutoharjo."
     },
     {
       id: 2,
       name: "Budi Santoso (Admin Staff)",
-      email: "admin@korowelangkulon.desa.id",
+      email: "admin@kutoharjo.desa.id",
       role: "admin",
       phone: "081987654321",
       avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80",
-      bio: "Staff Pendamping UMKM Kelurahan Korowelang Kulon."
+      bio: "Staff Pendamping UMKM Kelurahan Kutoharjo."
     },
     {
       id: 3,
       name: "Siti Rahma (Admin Staff)",
-      email: "siti@korowelangkulon.desa.id",
+      email: "siti@kutoharjo.desa.id",
       role: "admin",
       phone: "085712345678",
       avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80",
@@ -96,7 +96,7 @@ export default function SuperAdminAdminsPage() {
         email,
         role,
         phone,
-        bio: bio || 'Staff Kelurahan Korowelang Kulon.',
+        bio: bio || 'Staff Kelurahan Kutoharjo.',
         avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
       };
       setAdmins(prev => [...prev, newAdmin]);
@@ -131,20 +131,20 @@ export default function SuperAdminAdminsPage() {
           {admins.map((a) => (
             <SoftCard key={a.id} className="flex flex-col justify-between gap-4">
               <div className="flex items-start gap-4">
-                <div className="w-14 h-14 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-bold text-xl shrink-0 shadow-md">
+                <div className="w-14 h-14 rounded-2xl bg-red-600 text-white flex items-center justify-center font-bold text-xl shrink-0 shadow-md">
                   {a.name.charAt(0)}
                 </div>
                 <div className="flex flex-col gap-1 min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <span className="font-extrabold text-base text-gray-900 truncate">{a.name}</span>
                     <span className={`px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-wider ${
-                      a.role === 'superadmin' ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'
+                      a.role === 'superadmin' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'
                     }`}>
                       {a.role}
                     </span>
                   </div>
                   <span className="text-xs text-gray-500 flex items-center gap-1">
-                    <Mail className="w-3 h-3 text-blue-500" />
+                    <Mail className="w-3 h-3 text-red-500" />
                     {a.email}
                   </span>
                   <span className="text-xs text-gray-500 flex items-center gap-1">

@@ -24,9 +24,9 @@ export const SoftButton: React.FC<SoftButtonProps> = ({
   };
 
   const variantClasses = {
-    default: 'soft-button text-gray-700 hover:text-blue-600',
+    default: 'soft-button text-gray-700 hover:text-red-600',
     primary: 'soft-button-primary text-white',
-    secondary: 'soft-button text-blue-600 font-semibold',
+    secondary: 'soft-button text-red-600 font-semibold',
     danger: 'bg-red-500 text-white shadow-[4px_4px_10px_#fca5a5,-2px_-2px_6px_#ffffff] hover:bg-red-600 active:scale-95 transition-all',
   };
 

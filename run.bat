@@ -1,7 +1,7 @@
 @echo off
-title UMKM Korowelang Kulon - Local Development Server
+title UMKM Kutoharjo - Local Development Server
 echo ===================================================
-echo   MEMULAI SERVER LOCALHOST UMKM KOROWELANG KULON
+echo   MEMULAI SERVER LOCALHOST UMKM KUTOHARJO
 echo ===================================================
 echo.
 
