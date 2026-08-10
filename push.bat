@@ -2,7 +2,7 @@
 title Push Commit ke GitHub Repository
 echo ========================================================
 echo   AUTOMATION PUSH COMMIT TO GITHUB REPOSITORY
-echo   Repo: https://github.com/Amirul-Hasan99/WEB-UMKM-DESA-KOROWELANG-KULON
+echo   Repo: https://github.com/alfatahusman1-maman/UMKM-DESA-KUTOHARJO
 echo ========================================================
 echo.
 
@@ -20,10 +20,10 @@ if not exist ".git" (
     echo [1/5] Inisialisasi Repository Git Local...
     git init
     git branch -M main
-    git remote add origin https://github.com/Amirul-Hasan99/WEB-UMKM-DESA-KOROWELANG-KULON.git
+    git remote add origin https://github.com/alfatahusman1-maman/UMKM-DESA-KUTOHARJO.git
 ) else (
     echo [1/5] Repository Git lokal sudah terinisialisasi.
-    git remote set-url origin https://github.com/Amirul-Hasan99/WEB-UMKM-DESA-KOROWELANG-KULON.git
+    git remote set-url origin https://github.com/alfatahusman1-maman/UMKM-DESA-KUTOHARJO.git
 )
 
 echo.
@@ -33,7 +33,7 @@ git add .
 echo.
 set /p commit_msg="[3/5] Masukkan Pesan Commit (atau tekan ENTER untuk default): "
 if "%commit_msg%"=="" (
-    set commit_msg=Update Website Portal UMKM Desa Korowelang Kulon
+    set commit_msg=Update Website Portal UMKM Desa Kutoharjo
 )
 
 echo.
@@ -51,8 +51,8 @@ git push -u origin main
 echo.
 echo ========================================================
 echo   PROSES PUSH SELESAI!
-echo   Periksa repository Anda di:
-echo   https://github.com/Amirul-Hasan99/WEB-UMKM-DESA-KOROWELANG-KULON
+echo   Repository GitHub:
+echo   https://github.com/alfatahusman1-maman/UMKM-DESA-KUTOHARJO
 echo ========================================================
 echo.
 pause
