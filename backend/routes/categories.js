@@ -2,28 +2,38 @@ const express = require("express");
 const router = express.Router();
 const crypto = require("crypto");
 const { authMiddleware, requireRole } = require("../middleware/auth");
+const { Category, UMKM } = require("../db/models");
+const localDb = require("../db/local_db");
 
-module.exports = function (sql) {
+module.exports = function () {
   // GET /api/categories
   router.get("/", async (req, res) => {
     try {
-      const rows = await sql.query(
-        `SELECT 
-          c.id, c.name, c.slug, c.icon_name AS iconName,
-          COUNT(u.id) AS umkm_count
-        FROM categories c
-        LEFT JOIN umkms u ON u.category_id = c.id
-        GROUP BY c.id, c.name, c.slug, c.icon_name
-        ORDER BY c.name ASC`
-      );
+      let categories = [];
+      try {
+        categories = await Category.find().sort({ name: 1 }).lean();
+      } catch (e) {
+        categories = localDb.loadData().categories;
+      }
 
-      const data = (rows || []).map(r => ({
-        id: r.id,
-        name: r.name,
-        slug: r.slug,
-        iconName: r.iconName,
-        _count: { umkms: Number(r.umkm_count) || 0 }
-      }));
+      const data = await Promise.all(
+        (categories || []).map(async (c) => {
+          let count = 0;
+          try {
+            count = await UMKM.countDocuments({ category_id: c.id, is_verified: true });
+          } catch (e) {
+            count = (localDb.loadData().umkms || []).filter((u) => u.category_id === c.id && u.is_verified).length;
+          }
+
+          return {
+            id: c.id,
+            name: c.name,
+            slug: c.slug,
+            iconName: c.icon_name,
+            _count: { umkms: count },
+          };
+        })
+      );
 
       return res.json({ data });
     } catch (error) {
@@ -41,17 +51,23 @@ module.exports = function (sql) {
       }
 
       const id = "cat-" + crypto.randomBytes(6).toString("hex");
-      await sql.query(
-        "INSERT INTO categories (id, name, slug, icon_name) VALUES (?, ?, ?, ?)",
-        [id, name, slug, iconName]
-      );
+      const newCat = new Category({
+        id,
+        name,
+        slug,
+        icon_name: iconName,
+      });
 
-      const inserted = await sql.query(
-        "SELECT id, name, slug, icon_name AS iconName FROM categories WHERE id = ?",
-        [id]
-      );
+      await newCat.save();
 
-      return res.status(201).json({ data: inserted[0] });
+      return res.status(201).json({
+        data: {
+          id: newCat.id,
+          name: newCat.name,
+          slug: newCat.slug,
+          iconName: newCat.icon_name,
+        },
+      });
     } catch (error) {
       console.error("[POST /api/categories]", error);
       return res.status(500).json({ error: "Gagal membuat kategori baru." });

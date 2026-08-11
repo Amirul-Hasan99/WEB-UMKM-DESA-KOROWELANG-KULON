@@ -1,8 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const { authMiddleware, requireRole } = require("../middleware/auth");
+const { UMKM, User, Category } = require("../db/models");
+const localDb = require("../db/local_db");
 
-module.exports = function (sql) {
+module.exports = function () {
   // POST /api/admin/verify
   router.post("/verify", authMiddleware, requireRole("ADMIN", "SUPERADMIN"), async (req, res) => {
     try {
@@ -11,17 +13,17 @@ module.exports = function (sql) {
         return res.status(400).json({ error: "ID UMKM dibutuhkan" });
       }
 
-      await sql.query(
-        "UPDATE umkms SET is_verified = 1, updated_at = NOW() WHERE id = ?",
-        [id]
-      );
+      const updated = await UMKM.findOneAndUpdate(
+        { id: id },
+        { is_verified: true, updated_at: new Date() },
+        { new: true }
+      ).lean();
 
-      const updated = await sql.query("SELECT * FROM umkms WHERE id = ?", [id]);
-      if (!updated || updated.length === 0) {
+      if (!updated) {
         return res.status(404).json({ error: "UMKM tidak ditemukan" });
       }
 
-      return res.json({ success: true, data: updated[0] });
+      return res.json({ success: true, data: updated });
     } catch (error) {
       console.error("[POST /api/admin/verify]", error);
       return res.status(500).json({ error: "Gagal memverifikasi UMKM." });
@@ -36,7 +38,7 @@ module.exports = function (sql) {
         return res.status(400).json({ error: "ID UMKM dibutuhkan" });
       }
 
-      await sql.query("DELETE FROM umkms WHERE id = ?", [id]);
+      await UMKM.deleteOne({ id: id });
       return res.json({ success: true });
     } catch (error) {
       console.error("[DELETE /api/admin/delete]", error);
@@ -47,33 +49,46 @@ module.exports = function (sql) {
   // GET /api/admin/stats
   router.get("/stats", authMiddleware, requireRole("ADMIN", "SUPERADMIN"), async (req, res) => {
     try {
-      const totalUmkmsRes = await sql.query("SELECT COUNT(*) AS count FROM umkms");
-      const verifiedUmkmsRes = await sql.query("SELECT COUNT(*) AS count FROM umkms WHERE is_verified = 1");
-      const pendingUmkmsRes = await sql.query("SELECT COUNT(*) AS count FROM umkms WHERE is_verified = 0");
-      const totalUsersRes = await sql.query("SELECT COUNT(*) AS count FROM users");
+      let totalUmkm = 0;
+      let verifiedUmkm = 0;
+      let pendingUmkm = 0;
+      let totalUser = 0;
+      let recentPendingDocs = [];
 
-      const recentPending = await sql.query(
-        `SELECT 
-          u.id, u.name, u.slug, u.owner_name AS ownerName, u.dusun, u.created_at AS createdAt,
-          c.name AS category_name
-        FROM umkms u
-        LEFT JOIN categories c ON u.category_id = c.id
-        WHERE u.is_verified = 0
-        ORDER BY u.created_at DESC
-        LIMIT 5`
-      );
+      try {
+        totalUmkm = await UMKM.countDocuments();
+        verifiedUmkm = await UMKM.countDocuments({ is_verified: true });
+        pendingUmkm = await UMKM.countDocuments({ is_verified: false });
+        totalUser = await User.countDocuments();
+        recentPendingDocs = await UMKM.find({ is_verified: false }).sort({ created_at: -1 }).limit(5).lean();
+      } catch (e) {
+        const ld = localDb.loadData();
+        totalUmkm = ld.umkms.length;
+        verifiedUmkm = ld.umkms.filter((u) => u.is_verified).length;
+        pendingUmkm = ld.umkms.filter((u) => !u.is_verified).length;
+        totalUser = ld.users.length;
+        recentPendingDocs = ld.umkms.filter((u) => !u.is_verified).slice(0, 5);
+      }
+
+      const allCategories = await Category.find().lean().catch(() => localDb.loadData().categories);
+      const catMap = new Map(allCategories.map((c) => [c.id, c.name]));
 
       return res.json({
         stats: {
-          totalUmkm: totalUmkmsRes[0]?.count || 0,
-          verifiedUmkm: verifiedUmkmsRes[0]?.count || 0,
-          pendingUmkm: pendingUmkmsRes[0]?.count || 0,
-          totalUser: totalUsersRes[0]?.count || 0,
+          totalUmkm,
+          verifiedUmkm,
+          pendingUmkm,
+          totalUser,
         },
-        recentPending: (recentPending || []).map(r => ({
-          ...r,
-          category: { name: r.category_name }
-        }))
+        recentPending: (recentPendingDocs || []).map((r) => ({
+          id: r.id,
+          name: r.name,
+          slug: r.slug,
+          ownerName: r.owner_name,
+          dusun: r.dusun,
+          createdAt: r.created_at,
+          category: { name: catMap.get(r.category_id) || "Lainnya" },
+        })),
       });
     } catch (error) {
       console.error("[GET /api/admin/stats]", error);

@@ -5,23 +5,29 @@ const { authMiddleware } = require("../middleware/auth");
 const { verifyPassword } = require("../src/utils/password");
 const validate = require("../src/middleware/validate");
 const { loginSchema } = require("../src/validators/schemas");
+const { User } = require("../db/models");
+const localDb = require("../db/local_db");
 
-module.exports = function (sql) {
-  // POST /api/auth/login with Zod validation and Argon2 verifyPassword
+module.exports = function () {
+  // POST /api/auth/login
   router.post("/login", validate(loginSchema), async (req, res) => {
     try {
       const { email, password } = req.body;
 
-      const users = await sql.query(
-        "SELECT id, name, email, password_hash, profile_image, role FROM users WHERE email = ?",
-        [email]
-      );
-      if (!users || users.length === 0) {
+      let user = null;
+      try {
+        user = await User.findOne({ email: email.toLowerCase() }).lean();
+      } catch (e) {
+        // Fallback to local_db if MongoDB is offline
+        const localUsers = localDb.loadData().users;
+        user = localUsers.find((u) => u.email.toLowerCase() === email.toLowerCase()) || null;
+      }
+
+      if (!user) {
         return res.status(400).json({ error: "Email tidak terdaftar" });
       }
 
-      const user = users[0];
-      const hashToVerify = user.password_hash;
+      const hashToVerify = user.password_hash || user.password;
       const isPasswordValid = await verifyPassword(hashToVerify, password);
       
       if (!isPasswordValid) {
@@ -30,7 +36,7 @@ module.exports = function (sql) {
 
       const secret = process.env.JWT_SECRET;
       if (!secret) {
-        console.error("FATAL: JWT_SECRET is not set!");
+        console.error("FATAL: JWT_SECRET environment variable is not set!");
         return res.status(500).json({ error: "Konfigurasi server error." });
       }
 
@@ -59,15 +65,18 @@ module.exports = function (sql) {
   // GET /api/auth/me
   router.get("/me", authMiddleware, async (req, res) => {
     try {
-      const users = await sql.query(
-        "SELECT id, name, email, profile_image, role, created_at FROM users WHERE id = ?",
-        [req.user.id]
-      );
-      if (!users || users.length === 0) {
+      let u = null;
+      try {
+        u = await User.findOne({ id: req.user.id }).lean();
+      } catch (e) {
+        const localUsers = localDb.loadData().users;
+        u = localUsers.find((user) => user.id === req.user.id) || null;
+      }
+
+      if (!u) {
         return res.status(404).json({ error: "Pengguna tidak ditemukan" });
       }
 
-      const u = users[0];
       return res.json({
         user: {
           id: u.id,

@@ -1,40 +1,32 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-<<<<<<< HEAD
-const upload = require('../middleware/upload');
-const { authenticateToken } = require('../middleware/authMiddleware');
-const { uploadToCloudinary } = require('../config/cloudinary');
-
-// POST /api/admin/upload - File upload endpoint for images
-router.post('/', authenticateToken, upload.single('image'), async (req, res) => {
-=======
 const upload = require("../middleware/upload");
 const { uploadToCloudinary } = require("../config/cloudinary");
 const { authMiddleware } = require("../../middleware/auth");
 
 // POST /api/upload — requires authentication
 router.post("/", authMiddleware, upload.single("image"), async (req, res) => {
->>>>>>> 6b68d9c5 (Migrasi backend ke MySQL Railway + Fix keamanan kritis + Deploy config)
   try {
     if (!req.file) {
       return res.status(400).json({
         success: false,
-        message: 'Tidak ada file foto yang diunggah.',
+        message: "Tidak ada file foto yang diunggah.",
       });
     }
 
-    const imageUrl = await uploadToCloudinary(req.file.buffer, 'umkm-korowelang');
+    const imageUrl = await uploadToCloudinary(req.file.buffer, "umkm-kutoharjo");
 
     return res.status(200).json({
       success: true,
-      message: 'Foto berhasil diunggah.',
+      message: "Foto berhasil diunggah.",
       url: imageUrl,
+      imageUrl,
     });
   } catch (error) {
-    console.error('Upload Error:', error);
+    console.error("Upload Error:", error);
     return res.status(500).json({
       success: false,
-      message: 'Gagal mengunggah foto.',
+      message: "Gagal mengunggah foto.",
       error: error.message,
     });
   }

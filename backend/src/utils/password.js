@@ -1,19 +1,32 @@
-const argon2 = require('argon2');
-const bcrypt = require('bcryptjs');
+let argon2;
+try {
+  argon2 = require("argon2");
+} catch (e) {
+  argon2 = null;
+}
+const bcrypt = require("bcryptjs");
 
 /**
- * Hash a plain text password using Argon2id (OWASP recommended parameters).
- * Fallback to bcrypt if Argon2 execution encounters an environment issue.
+ * Hashes a plaintext password using Argon2 (or bcrypt fallback)
+ * @param {string} password 
+ * @returns {Promise<string>}
  */
-const hashPassword = async (plainPassword) => {
-  if (!plainPassword) {
-    throw new Error('Password wajib diisi untuk melakukan hashing.');
+async function hashPassword(password) {
+  if (!password) {
+    throw new Error("Password wajib diisi untuk melakukan hashing.");
   }
+  if (argon2) {
+    try {
+      return await argon2.hash(password, { type: argon2.argon2id });
+    } catch (err) {
+      console.warn("Argon2 hash failed, using bcrypt fallback:", err.message);
+    }
+  }
+  return await bcrypt.hash(password, 10);
+}
 
-<<<<<<< HEAD
-=======
 /**
- * Verifies a plaintext password against a hash
+ * Verifies a plaintext password against a hash (supports Argon2id and bcrypt hashes)
  * @param {string} hash 
  * @param {string} password 
  * @returns {Promise<boolean>}
@@ -30,63 +43,19 @@ async function verifyPassword(hash, password) {
         return false;
       }
     }
-    // If argon2 is not available and hash is argon2, cannot verify
     return false;
   }
 
-  // bcrypt hash verification
->>>>>>> 6b68d9c5 (Migrasi backend ke MySQL Railway + Fix keamanan kritis + Deploy config)
+  // Bcrypt hash verification ($2a$, $2b$, $2y$)
   try {
-    return await argon2.hash(plainPassword, {
-      type: argon2.argon2id,
-      memoryCost: 2 ** 16, // 64 MB (OWASP recommended)
-      timeCost: 3,         // 3 iterations
-      parallelism: 1,      // 1 degree of parallelism
-    });
+    return await bcrypt.compare(password, hash);
   } catch (err) {
-<<<<<<< HEAD
-    console.warn('⚠️ Argon2 hashing failed, falling back to bcryptjs:', err.message);
-    const salt = await bcrypt.genSalt(10);
-    return await bcrypt.hash(plainPassword, salt);
-=======
     console.warn("bcrypt compare error:", err.message);
     return false;
->>>>>>> 6b68d9c5 (Migrasi backend ke MySQL Railway + Fix keamanan kritis + Deploy config)
   }
-};
-
-/**
- * Verify a plain text password against a hash (supports Argon2id and bcrypt hashes).
- */
-const verifyPassword = async (hash, plainPassword) => {
-  if (!hash || !plainPassword) return false;
-
-  // Argon2 hash detection ($argon2i$, $argon2d$, $argon2id$)
-  if (hash.startsWith('$argon2')) {
-    try {
-      return await argon2.verify(hash, plainPassword);
-    } catch (err) {
-      console.error('❌ Argon2 verification error:', err.message);
-      return false;
-    }
-  }
-
-  // Bcrypt hash detection ($2a$, $2b$, $2y$)
-  if (hash.startsWith('$2a$') || hash.startsWith('$2b$') || hash.startsWith('$2y$')) {
-    try {
-      return await bcrypt.compare(plainPassword, hash);
-    } catch (err) {
-      console.error('❌ Bcrypt verification error:', err.message);
-      return false;
-    }
-  }
-
-  // Legacy plain text check (fallback during migration)
-  return hash === plainPassword;
-};
+}
 
 module.exports = {
   hashPassword,
   verifyPassword,
 };
-

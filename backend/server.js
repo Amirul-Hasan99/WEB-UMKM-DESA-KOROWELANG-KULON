@@ -10,30 +10,42 @@ const path = require("path");
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Initialize Database client (MySQL with automatic Local DB Fallback)
-const sql = require("./db/client");
+// Connect to MongoDB Atlas (or local fallback)
+const { connectMongoDB } = require("./db/mongodb");
+
+// Mongoose Auto-Connect Middleware for Vercel Serverless Function Invocations
+app.use(async (req, res, next) => {
+  try {
+    await connectMongoDB();
+  } catch (err) {
+    console.warn("⚠️ MongoDB connect middleware warning:", err.message);
+  }
+  next();
+});
 
 // ============================================
 // Security: Helmet HTTP Headers
 // ============================================
-app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" },
-}));
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  })
+);
 
 // ============================================
 // Security: Rate Limiting
 // ============================================
 const generalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 200, // max 200 requests per windowMs
+  windowMs: 15 * 60 * 1000,
+  max: 200,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: "Terlalu banyak permintaan. Silakan coba lagi nanti." },
 });
 
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 20, // max 20 login attempts per 15 min
+  windowMs: 15 * 60 * 1000,
+  max: 20,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: "Terlalu banyak percobaan login. Silakan coba lagi dalam 15 menit." },
@@ -53,12 +65,9 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (mobile apps, curl, server-to-server)
       if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) {
+      if (allowedOrigins.includes(origin) || process.env.NODE_ENV !== "production") {
         callback(null, true);
-      } else if (process.env.NODE_ENV !== "production") {
-        callback(null, true); // permissive in development only
       } else {
         callback(new Error("Akses CORS ditolak oleh kebijakan keamanan server."));
       }
@@ -69,9 +78,7 @@ app.use(
   })
 );
 
-// ============================================
-// Body Parsing (limited to 5MB)
-// ============================================
+// Body Parsing (5MB limit)
 app.use(express.json({ limit: "5mb" }));
 app.use(express.urlencoded({ extended: true, limit: "5mb" }));
 
@@ -79,57 +86,31 @@ app.use(express.urlencoded({ extended: true, limit: "5mb" }));
 app.use("/uploads", express.static(path.join(__dirname, "public", "uploads")));
 
 // ============================================
-// Health Check (for Railway)
+// Health Check (for Vercel & Monitoring)
 // ============================================
 app.get("/health", async (req, res) => {
+  let dbStatus = "disconnected";
   try {
-    const result = await sql.query("SELECT 1 AS ok");
-    res.json({
-      status: "healthy",
-      database: result && result[0]?.ok === 1 ? "connected" : "fallback",
-      uptime: process.uptime(),
-      timestamp: new Date().toISOString(),
-    });
-  } catch (err) {
-    res.json({
-      status: "healthy",
-      database: "fallback",
-      uptime: process.uptime(),
-      timestamp: new Date().toISOString(),
-    });
+    const conn = await connectMongoDB();
+    dbStatus = conn && conn.connection.readyState === 1 ? "connected" : "fallback";
+  } catch (e) {
+    dbStatus = "fallback";
   }
-});
 
-// Database version endpoint
-app.get("/version", async (req, res) => {
-  try {
-    const result = await sql.query("SELECT VERSION() AS version");
-    const version = result && result[0] ? result[0].version : "Local DB";
-    res.writeHead(200, { "Content-Type": "text/plain" });
-    res.end(version);
-  } catch (err) {
-    res.writeHead(500, { "Content-Type": "text/plain" });
-    res.end("Database connection error: " + err.message);
-  }
+  res.json({
+    status: "healthy",
+    database: dbStatus,
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+  });
 });
 
 // Root endpoint
-app.get("/", async (req, res) => {
-  try {
-    const result = await sql.query("SELECT VERSION() AS version");
-    const version = result && result[0] ? result[0].version : "Local DB";
-    res.json({
-      status: "online",
-      message: "Portal UMKM Kutoharjo API Server",
-      databaseVersion: version,
-    });
-  } catch (err) {
-    res.json({
-      status: "online",
-      message: "Portal UMKM Kutoharjo API Server",
-      databaseError: err.message,
-    });
-  }
+app.get("/", (req, res) => {
+  res.json({
+    status: "online",
+    message: "Portal UMKM Kutoharjo API Server (MongoDB Atlas + Vercel)",
+  });
 });
 
 // ============================================
@@ -145,13 +126,13 @@ const userRoutes = require("./routes/user");
 const uploadRoutes = require("./src/routes/uploadRoutes");
 const exportRoutes = require("./src/routes/exportRoutes");
 
-app.use("/api/auth", authLimiter, authRoutes(sql));
-app.use("/api/umkm", umkmRoutes(sql));
-app.use("/api/categories", categoriesRoutes(sql));
-app.use("/api/products", productsRoutes(sql));
-app.use("/api/admin", adminRoutes(sql));
-app.use("/api/superadmin", superadminRoutes(sql));
-app.use("/api/user", userRoutes(sql));
+app.use("/api/auth", authLimiter, authRoutes());
+app.use("/api/umkm", umkmRoutes());
+app.use("/api/categories", categoriesRoutes());
+app.use("/api/products", productsRoutes());
+app.use("/api/admin", adminRoutes());
+app.use("/api/superadmin", superadminRoutes());
+app.use("/api/user", userRoutes());
 app.use("/api/upload", uploadRoutes);
 app.use("/api/admin/upload", uploadRoutes);
 app.use("/api/export", exportRoutes);
@@ -163,17 +144,14 @@ app.use("/api/admin/export", exportRoutes);
 app.use((err, req, res, _next) => {
   console.error("❌ Unhandled error:", err);
 
-  // Multer file size error
   if (err.code === "LIMIT_FILE_SIZE") {
     return res.status(413).json({ error: "Ukuran file terlalu besar. Maksimal 5MB." });
   }
 
-  // CORS error
   if (err.message && err.message.includes("CORS")) {
     return res.status(403).json({ error: err.message });
   }
 
-  // Zod validation error
   if (err.name === "ZodError") {
     return res.status(400).json({
       error: "Validasi data gagal",
@@ -193,9 +171,7 @@ app.use((req, res) => {
   res.status(404).json({ error: "Endpoint tidak ditemukan." });
 });
 
-// ============================================
-// Start Server
-// ============================================
+// Start Server locally (skipped when running on Vercel or Vitest)
 if (process.env.NODE_ENV !== "test" && !process.env.VERCEL) {
   const server = http.createServer(app);
   server.listen(PORT, () => {

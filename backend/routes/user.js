@@ -3,6 +3,8 @@ const router = express.Router();
 const bcrypt = require("bcryptjs");
 const { z } = require("zod");
 const { authMiddleware } = require("../middleware/auth");
+const { User } = require("../db/models");
+const localDb = require("../db/local_db");
 
 const updateProfileSchema = z.object({
   name: z.string().min(3),
@@ -10,7 +12,7 @@ const updateProfileSchema = z.object({
   password: z.string().min(6).optional().or(z.literal("")),
 });
 
-module.exports = function (sql) {
+module.exports = function () {
   // PUT /api/user/settings
   router.put("/settings", authMiddleware, async (req, res) => {
     try {
@@ -21,38 +23,47 @@ module.exports = function (sql) {
 
       const { name, profileImage, password } = parsed.data;
 
-      // Build dynamic update
-      const updates = ["name = ?"];
-      const params = [name];
-
+      const updateData = { name };
       if (profileImage && profileImage.trim() !== "") {
-        updates.push("profile_image = ?");
-        params.push(profileImage);
+        updateData.profile_image = profileImage;
       }
-
       if (password && password.trim() !== "") {
-        const newPasswordHash = await bcrypt.hash(password, 10);
-        updates.push("password_hash = ?");
-        params.push(newPasswordHash);
+        updateData.password_hash = await bcrypt.hash(password, 10);
       }
 
-      params.push(req.user.id);
+      let updatedUser = null;
+      try {
+        updatedUser = await User.findOneAndUpdate(
+          { id: req.user.id },
+          updateData,
+          { new: true }
+        ).lean();
+      } catch (e) {
+        const ld = localDb.loadData();
+        const user = ld.users.find((u) => u.id === req.user.id);
+        if (user) {
+          user.name = name;
+          if (profileImage) user.profile_image = profileImage;
+          if (password) user.password_hash = bcrypt.hashSync(password, 10);
+          localDb.saveData(ld);
+          updatedUser = user;
+        }
+      }
 
-      await sql.query(
-        `UPDATE users SET ${updates.join(", ")} WHERE id = ?`,
-        params
-      );
-
-      const updated = await sql.query(
-        `SELECT id, name, email, profile_image AS profileImage, role FROM users WHERE id = ?`,
-        [req.user.id]
-      );
-
-      if (!updated || updated.length === 0) {
+      if (!updatedUser) {
         return res.status(404).json({ error: "Pengguna tidak ditemukan" });
       }
 
-      return res.json({ success: true, user: updated[0] });
+      return res.json({
+        success: true,
+        user: {
+          id: updatedUser.id,
+          name: updatedUser.name,
+          email: updatedUser.email,
+          profileImage: updatedUser.profile_image,
+          role: updatedUser.role,
+        },
+      });
     } catch (error) {
       console.error("[PUT /api/user/settings]", error);
       return res.status(500).json({ error: "Gagal memperbarui profil." });

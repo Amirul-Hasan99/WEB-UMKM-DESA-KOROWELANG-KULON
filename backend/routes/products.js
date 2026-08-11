@@ -3,6 +3,8 @@ const router = express.Router();
 const crypto = require("crypto");
 const { z } = require("zod");
 const { authMiddleware, requireRole } = require("../middleware/auth");
+const { Product, UMKM } = require("../db/models");
+const localDb = require("../db/local_db");
 
 const createProductSchema = z.object({
   umkmId: z.string(),
@@ -12,7 +14,7 @@ const createProductSchema = z.object({
   imageUrl: z.string(),
 });
 
-module.exports = function (sql) {
+module.exports = function () {
   // POST /api/products (Admin Create Product)
   router.post("/", authMiddleware, requireRole("ADMIN"), async (req, res) => {
     try {
@@ -23,24 +25,41 @@ module.exports = function (sql) {
 
       const { umkmId, title, price, description, imageUrl } = parsed.data;
 
-      const umkms = await sql.query("SELECT id FROM umkms WHERE id = ?", [umkmId]);
-      if (!umkms || umkms.length === 0) {
+      let umkmExists = false;
+      try {
+        umkmExists = await UMKM.findOne({ id: umkmId }).lean();
+      } catch (e) {
+        umkmExists = localDb.loadData().umkms.find((u) => u.id === umkmId);
+      }
+
+      if (!umkmExists) {
         return res.status(404).json({ error: "UMKM tidak ditemukan" });
       }
 
       const id = "prod-" + crypto.randomBytes(8).toString("hex");
-      await sql.query(
-        "INSERT INTO products (id, umkm_id, title, price, description, image_url) VALUES (?, ?, ?, ?, ?, ?)",
-        [id, umkmId, title, price, description, imageUrl]
-      );
+      const newProduct = new Product({
+        id,
+        umkm_id: umkmId,
+        title,
+        price,
+        description,
+        image_url: imageUrl,
+        created_at: new Date(),
+      });
 
-      const inserted = await sql.query(
-        `SELECT id, umkm_id AS umkmId, title, price, description, image_url AS imageUrl, created_at AS createdAt
-         FROM products WHERE id = ?`,
-        [id]
-      );
+      await newProduct.save();
 
-      return res.status(201).json({ data: inserted[0] });
+      return res.status(201).json({
+        data: {
+          id: newProduct.id,
+          umkmId: newProduct.umkm_id,
+          title: newProduct.title,
+          price: newProduct.price,
+          description: newProduct.description,
+          imageUrl: newProduct.image_url,
+          createdAt: newProduct.created_at,
+        },
+      });
     } catch (error) {
       console.error("[POST /api/products]", error);
       return res.status(500).json({ error: "Gagal menambahkan produk." });
@@ -51,12 +70,7 @@ module.exports = function (sql) {
   router.delete("/:id", authMiddleware, requireRole("ADMIN", "SUPERADMIN"), async (req, res) => {
     try {
       const { id } = req.params;
-      const products = await sql.query("SELECT id FROM products WHERE id = ?", [id]);
-      if (!products || products.length === 0) {
-        return res.status(404).json({ error: "Produk tidak ditemukan" });
-      }
-
-      await sql.query("DELETE FROM products WHERE id = ?", [id]);
+      await Product.deleteOne({ id: id });
       return res.json({ success: true });
     } catch (error) {
       console.error("[DELETE /api/products/:id]", error);

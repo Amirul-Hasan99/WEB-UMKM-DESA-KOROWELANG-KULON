@@ -5,17 +5,29 @@ const { authMiddleware, requireRole } = require("../middleware/auth");
 const { hashPassword } = require("../src/utils/password");
 const validate = require("../src/middleware/validate");
 const { adminSchema } = require("../src/validators/schemas");
+const { User, SiteSetting } = require("../db/models");
+const localDb = require("../db/local_db");
 
-module.exports = function (sql) {
+module.exports = function () {
   // GET /api/superadmin/admins
   router.get("/admins", authMiddleware, requireRole("SUPERADMIN"), async (req, res) => {
     try {
-      const admins = await sql.query(
-        `SELECT id, name, email, role, created_at AS createdAt
-         FROM users
-         ORDER BY created_at DESC`
-      );
-      return res.json({ data: admins || [] });
+      let admins = [];
+      try {
+        admins = await User.find().sort({ created_at: -1 }).lean();
+      } catch (e) {
+        admins = localDb.loadData().users;
+      }
+
+      return res.json({
+        data: (admins || []).map((u) => ({
+          id: u.id,
+          name: u.name,
+          email: u.email,
+          role: u.role,
+          createdAt: u.created_at,
+        })),
+      });
     } catch (error) {
       console.error("[GET /api/superadmin/admins]", error);
       return res.status(500).json({ error: "Gagal mengambil data admin." });
@@ -27,25 +39,33 @@ module.exports = function (sql) {
     try {
       const { name, email, password, role } = req.body;
 
-      const existing = await sql.query("SELECT id FROM users WHERE email = ?", [email]);
-      if (existing && existing.length > 0) {
+      const existing = await User.findOne({ email: email.toLowerCase() }).lean();
+      if (existing) {
         return res.status(400).json({ error: "Email sudah digunakan" });
       }
 
       const passwordHash = await hashPassword(password || "admin123");
       const id = "usr-" + crypto.randomBytes(8).toString("hex");
 
-      await sql.query(
-        "INSERT INTO users (id, name, email, password_hash, role) VALUES (?, ?, ?, ?, ?)",
-        [id, name, email, passwordHash, role ? role.toUpperCase() : "ADMIN"]
-      );
+      const newUser = new User({
+        id,
+        name,
+        email: email.toLowerCase(),
+        password_hash: passwordHash,
+        role: role ? role.toUpperCase() : "ADMIN",
+        created_at: new Date(),
+      });
 
-      const inserted = await sql.query(
-        "SELECT id, name, email, role FROM users WHERE id = ?",
-        [id]
-      );
+      await newUser.save();
 
-      return res.status(201).json({ data: inserted[0] });
+      return res.status(201).json({
+        data: {
+          id: newUser.id,
+          name: newUser.name,
+          email: newUser.email,
+          role: newUser.role,
+        },
+      });
     } catch (error) {
       console.error("[POST /api/superadmin/admins]", error);
       return res.status(500).json({ error: "Gagal membuat admin." });
@@ -60,12 +80,11 @@ module.exports = function (sql) {
         return res.status(400).json({ error: "ID dibutuhkan" });
       }
 
-      // Guard: prevent superadmin from deleting themselves
       if (id === req.user.id) {
         return res.status(400).json({ error: "Anda tidak dapat menghapus akun Anda sendiri." });
       }
 
-      await sql.query("DELETE FROM users WHERE id = ?", [id]);
+      await User.deleteOne({ id: id });
       return res.json({ success: true });
     } catch (error) {
       console.error("[DELETE /api/superadmin/admins]", error);
@@ -76,7 +95,13 @@ module.exports = function (sql) {
   // GET /api/superadmin/settings
   router.get("/settings", async (req, res) => {
     try {
-      const settings = await sql.query("SELECT `key`, value FROM site_settings");
+      let settings = [];
+      try {
+        settings = await SiteSetting.find().lean();
+      } catch (e) {
+        settings = localDb.loadData().site_settings;
+      }
+
       const data = (settings || []).reduce((acc, cur) => {
         acc[cur.key] = cur.value;
         return acc;
@@ -97,10 +122,10 @@ module.exports = function (sql) {
 
       for (const [key, value] of entries) {
         const id = "st-" + crypto.randomBytes(6).toString("hex");
-        // MySQL INSERT ... ON DUPLICATE KEY UPDATE
-        await sql.query(
-          "INSERT INTO site_settings (id, `key`, value) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE value = ?",
-          [id, key, String(value), String(value)]
+        await SiteSetting.findOneAndUpdate(
+          { key: key },
+          { id: id, key: key, value: String(value) },
+          { upsert: true, new: true }
         );
       }
 

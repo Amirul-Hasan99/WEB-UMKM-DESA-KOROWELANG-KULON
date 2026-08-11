@@ -5,8 +5,10 @@ const slugify = require("slugify");
 const { authMiddleware, requireRole } = require("../middleware/auth");
 const validate = require("../src/middleware/validate");
 const { umkmSchema, reviewSchema } = require("../src/validators/schemas");
+const { UMKM, Category, Product, Review, User } = require("../db/models");
+const localDb = require("../db/local_db");
 
-module.exports = function (sql) {
+module.exports = function () {
   // GET /api/umkm (Public Catalog with search, category, dusun, price filter, pagination)
   router.get("/", async (req, res) => {
     try {
@@ -20,88 +22,83 @@ module.exports = function (sql) {
       const limit = Math.min(50, Math.max(1, parseInt(req.query.limit || "6", 10)));
       const offset = (page - 1) * limit;
 
-      // Build dynamic query
-      let whereConditions = ["u.is_verified = 1"];
-      const params = [];
-
+      let categoryIdFilter = null;
       if (categorySlug) {
-        whereConditions.push("c.slug = ?");
-        params.push(categorySlug);
+        const catObj = await Category.findOne({ slug: categorySlug }).lean();
+        if (catObj) categoryIdFilter = catObj.id;
       }
-      if (dusun) {
-        whereConditions.push("u.dusun = ?");
-        params.push(dusun);
-      }
+
+      // Build Mongoose filter
+      const filter = { is_verified: true };
+      if (categoryIdFilter) filter.category_id = categoryIdFilter;
+      if (dusun) filter.dusun = dusun;
       if (search) {
-        whereConditions.push("(u.name LIKE ? OR u.description LIKE ?)");
-        params.push(`%${search}%`, `%${search}%`);
+        filter.$or = [
+          { name: { $regex: search, $options: "i" } },
+          { description: { $regex: search, $options: "i" } },
+        ];
       }
 
-      const whereClause = whereConditions.length > 0 ? "WHERE " + whereConditions.join(" AND ") : "";
+      let umkmDocs = [];
+      try {
+        umkmDocs = await UMKM.find(filter).sort({ created_at: -1 }).lean();
+      } catch (e) {
+        // Fallback to localDb
+        umkmDocs = localDb.loadData().umkms.filter((u) => u.is_verified);
+      }
 
-      const items = await sql.query(
-        `SELECT 
-          u.id, u.user_id AS userId, u.category_id AS categoryId,
-          u.name, u.slug, u.owner_name AS ownerName, u.description,
-          u.address, u.dusun, u.operational_hours AS operationalHours,
-          u.whatsapp_number AS whatsappNumber, u.maps_url AS mapsUrl,
-          u.instagram_url AS instagramUrl, u.image_url AS imageUrl,
-          u.is_verified AS isVerified, u.certifications, u.latitude, u.longitude,
-          u.rating, u.review_count AS reviewCount,
-          u.created_at AS createdAt, u.updated_at AS updatedAt,
-          c.id AS cat_id, c.name AS cat_name, c.slug AS cat_slug, c.icon_name AS cat_icon
-        FROM umkms u
-        LEFT JOIN categories c ON u.category_id = c.id
-        ${whereClause}
-        ORDER BY u.created_at DESC`,
-        params
-      );
+      const allCategories = await Category.find().lean().catch(() => localDb.loadData().categories);
+      const catMap = new Map(allCategories.map((c) => [c.id, c]));
 
-      // Fetch products for each UMKM and format
+      // Populate products & categories for each UMKM
       const formattedItems = await Promise.all(
-        (items || []).map(async (row) => {
-          const products = await sql.query(
-            `SELECT id, title, price, description, image_url AS imageUrl, created_at AS createdAt
-             FROM products WHERE umkm_id = ? ORDER BY created_at DESC`,
-            [row.id]
-          );
-
-          // Parse certifications if it's a string
-          let certs = row.certifications || [];
-          if (typeof certs === "string") {
-            try { certs = JSON.parse(certs); } catch (e) { certs = []; }
+        umkmDocs.map(async (row) => {
+          let products = [];
+          try {
+            products = await Product.find({ umkm_id: row.id }).sort({ created_at: -1 }).lean();
+          } catch (e) {
+            products = (localDb.loadData().products || []).filter((p) => p.umkm_id === row.id);
           }
+
+          const cat = catMap.get(row.category_id);
 
           return {
             id: row.id,
-            userId: row.userId,
-            categoryId: row.categoryId,
+            userId: row.user_id,
+            categoryId: row.category_id,
             name: row.name,
             slug: row.slug,
-            ownerName: row.ownerName,
+            ownerName: row.owner_name,
             description: row.description,
             address: row.address,
             dusun: row.dusun,
-            operationalHours: row.operationalHours,
-            whatsappNumber: row.whatsappNumber,
-            mapsUrl: row.mapsUrl,
-            instagramUrl: row.instagramUrl,
-            imageUrl: row.imageUrl,
-            isVerified: Boolean(row.isVerified),
-            certifications: certs,
+            operationalHours: row.operational_hours,
+            whatsappNumber: row.whatsapp_number,
+            mapsUrl: row.maps_url,
+            instagramUrl: row.instagram_url,
+            imageUrl: row.image_url,
+            isVerified: Boolean(row.is_verified),
+            certifications: row.certifications || [],
             latitude: row.latitude,
             longitude: row.longitude,
-            rating: row.rating || "0.00",
-            reviewCount: row.reviewCount || 0,
-            createdAt: row.createdAt,
-            updatedAt: row.updatedAt,
-            category: row.cat_id ? {
-              id: row.cat_id,
-              name: row.cat_name,
-              slug: row.cat_slug,
-              iconName: row.cat_icon
+            rating: row.rating ? String(row.rating) : "0.00",
+            reviewCount: row.review_count || 0,
+            createdAt: row.created_at,
+            updatedAt: row.updated_at,
+            category: cat ? {
+              id: cat.id,
+              name: cat.name,
+              slug: cat.slug,
+              iconName: cat.icon_name,
             } : null,
-            products: products || []
+            products: (products || []).map(p => ({
+              id: p.id,
+              title: p.title,
+              price: p.price,
+              description: p.description,
+              imageUrl: p.image_url,
+              createdAt: p.created_at,
+            })),
           };
         })
       );
@@ -130,7 +127,7 @@ module.exports = function (sql) {
           limit,
           total,
           totalPages: Math.ceil(total / limit) || 1,
-        }
+        },
       });
     } catch (error) {
       console.error("[GET /api/umkm]", error);
@@ -142,77 +139,78 @@ module.exports = function (sql) {
   router.get("/:slug", async (req, res) => {
     try {
       const { slug } = req.params;
-      const rows = await sql.query(
-        `SELECT 
-          u.id, u.user_id AS userId, u.category_id AS categoryId,
-          u.name, u.slug, u.owner_name AS ownerName, u.description,
-          u.address, u.dusun, u.operational_hours AS operationalHours,
-          u.whatsapp_number AS whatsappNumber, u.maps_url AS mapsUrl,
-          u.instagram_url AS instagramUrl, u.image_url AS imageUrl,
-          u.is_verified AS isVerified, u.certifications, u.latitude, u.longitude,
-          u.rating, u.review_count AS reviewCount,
-          u.created_at AS createdAt, u.updated_at AS updatedAt,
-          c.id AS cat_id, c.name AS cat_name, c.slug AS cat_slug, c.icon_name AS cat_icon
-        FROM umkms u
-        LEFT JOIN categories c ON u.category_id = c.id
-        WHERE u.slug = ? OR u.id = ?`,
-        [slug, slug]
-      );
+      let row = null;
+      try {
+        row = await UMKM.findOne({ $or: [{ slug: slug }, { id: slug }] }).lean();
+      } catch (e) {
+        const local = localDb.loadData().umkms;
+        row = local.find((u) => u.slug === slug || u.id === slug) || null;
+      }
 
-      if (!rows || rows.length === 0) {
+      if (!row) {
         return res.status(404).json({ error: "UMKM tidak ditemukan." });
       }
 
-      const row = rows[0];
-      const products = await sql.query(
-        `SELECT id, umkm_id AS umkmId, title, price, description, image_url AS imageUrl, created_at AS createdAt
-         FROM products WHERE umkm_id = ? ORDER BY created_at DESC`,
-        [row.id]
-      );
+      let products = [];
+      let reviewsList = [];
+      let cat = null;
 
-      const reviewsList = await sql.query(
-        `SELECT id, name, rating, comment, created_at AS createdAt
-         FROM reviews WHERE umkm_id = ? ORDER BY created_at DESC`,
-        [row.id]
-      );
-
-      // Parse certifications
-      let certs = row.certifications || [];
-      if (typeof certs === "string") {
-        try { certs = JSON.parse(certs); } catch (e) { certs = []; }
+      try {
+        products = await Product.find({ umkm_id: row.id }).sort({ created_at: -1 }).lean();
+        reviewsList = await Review.find({ umkm_id: row.id }).sort({ created_at: -1 }).lean();
+        cat = await Category.findOne({ id: row.category_id }).lean();
+      } catch (e) {
+        const ld = localDb.loadData();
+        products = (ld.products || []).filter((p) => p.umkm_id === row.id);
+        reviewsList = (ld.reviews || []).filter((r) => r.umkm_id === row.id);
+        cat = (ld.categories || []).find((c) => c.id === row.category_id) || null;
       }
 
       const data = {
         id: row.id,
-        userId: row.userId,
-        categoryId: row.categoryId,
+        userId: row.user_id,
+        categoryId: row.category_id,
         name: row.name,
         slug: row.slug,
-        ownerName: row.ownerName,
+        ownerName: row.owner_name,
         description: row.description,
         address: row.address,
         dusun: row.dusun,
-        operationalHours: row.operationalHours,
-        whatsappNumber: row.whatsappNumber,
-        mapsUrl: row.mapsUrl,
-        instagramUrl: row.instagramUrl,
-        imageUrl: row.imageUrl,
-        isVerified: Boolean(row.isVerified),
-        certifications: certs,
+        operationalHours: row.operational_hours,
+        whatsappNumber: row.whatsapp_number,
+        mapsUrl: row.maps_url,
+        instagramUrl: row.instagram_url,
+        imageUrl: row.image_url,
+        isVerified: Boolean(row.is_verified),
+        certifications: row.certifications || [],
         latitude: row.latitude,
         longitude: row.longitude,
-        rating: row.rating || "0.00",
-        reviewCount: row.reviewCount || 0,
-        createdAt: row.createdAt,
-        updatedAt: row.updatedAt,
-        category: row.cat_id ? {
-          id: row.cat_id,
-          name: row.cat_name,
-          slug: row.cat_slug,
-          iconName: row.cat_icon
+        rating: row.rating ? String(row.rating) : "0.00",
+        reviewCount: row.review_count || 0,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+        category: cat ? {
+          id: cat.id,
+          name: cat.name,
+          slug: cat.slug,
+          iconName: cat.icon_name,
         } : null,
-        products: products || [],
-        reviews: reviewsList || [],
+        products: (products || []).map(p => ({
+          id: p.id,
+          umkmId: p.umkm_id,
+          title: p.title,
+          price: p.price,
+          description: p.description,
+          imageUrl: p.image_url,
+          createdAt: p.created_at,
+        })),
+        reviews: (reviewsList || []).map(r => ({
+          id: r.id,
+          name: r.name,
+          rating: r.rating,
+          comment: r.comment,
+          createdAt: r.created_at,
+        })),
       };
 
       return res.json({ data });
@@ -231,46 +229,39 @@ module.exports = function (sql) {
       let generatedSlug = baseSlug;
       let suffix = 1;
       while (true) {
-        const existing = await sql.query("SELECT id FROM umkms WHERE slug = ?", [generatedSlug]);
-        if (!existing || existing.length === 0) break;
+        const existing = await UMKM.findOne({ slug: generatedSlug }).lean();
+        if (!existing) break;
         generatedSlug = `${baseSlug}-${suffix++}`;
       }
 
       const id = "umkm-" + crypto.randomBytes(8).toString("hex");
       let userId = req.user.id;
-      const userCheck = await sql.query("SELECT id FROM users WHERE id = ?", [userId]);
-      if (!userCheck || userCheck.length === 0) {
-        const fallbackUser = await sql.query("SELECT id FROM users LIMIT 1");
-        userId = fallbackUser && fallbackUser.length > 0 ? fallbackUser[0].id : null;
-      }
 
-      let categoryId = data.categoryId;
-      const catCheck = await sql.query("SELECT id FROM categories WHERE id = ?", [categoryId]);
-      if (!catCheck || catCheck.length === 0) {
-        const fallbackCat = await sql.query("SELECT id FROM categories LIMIT 1");
-        categoryId = fallbackCat && fallbackCat.length > 0 ? fallbackCat[0].id : null;
-      }
+      const newUmkm = new UMKM({
+        id,
+        user_id: userId,
+        category_id: data.categoryId,
+        name: data.name,
+        slug: generatedSlug,
+        owner_name: data.ownerName,
+        description: data.description || "",
+        address: data.address,
+        dusun: data.dusun,
+        operational_hours: data.operationalHours || null,
+        whatsapp_number: data.whatsappNumber || "",
+        maps_url: data.mapsUrl || null,
+        instagram_url: data.instagramUrl || null,
+        image_url: data.imageUrl || "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=800&q=80",
+        is_verified: true,
+        certifications: data.certifications || [],
+        latitude: data.latitude || null,
+        longitude: data.longitude || null,
+        created_at: new Date(),
+        updated_at: new Date(),
+      });
 
-      const certsJson = JSON.stringify(data.certifications || []);
-
-      await sql.query(
-        `INSERT INTO umkms (
-          id, user_id, category_id, name, slug, owner_name, description, address, dusun,
-          operational_hours, whatsapp_number, maps_url, instagram_url, image_url, is_verified,
-          certifications, latitude, longitude
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?)`,
-        [
-          id, userId, categoryId, data.name, generatedSlug, data.ownerName,
-          data.description || "", data.address, data.dusun, data.operationalHours || null,
-          data.whatsappNumber || "", data.mapsUrl || null, data.instagramUrl || null,
-          data.imageUrl || "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=800&q=80",
-          certsJson, data.latitude || null, data.longitude || null
-        ]
-      );
-
-      // Fetch the inserted row
-      const inserted = await sql.query("SELECT * FROM umkms WHERE id = ?", [id]);
-      return res.status(201).json({ data: inserted[0] });
+      await newUmkm.save();
+      return res.status(201).json({ data: newUmkm.toObject() });
     } catch (error) {
       console.error("[POST /api/umkm]", error);
       return res.status(500).json({ error: "Gagal membuat UMKM baru." });
@@ -281,48 +272,33 @@ module.exports = function (sql) {
   router.put("/:slug", authMiddleware, async (req, res) => {
     try {
       const { slug } = req.params;
-      const existing = await sql.query("SELECT id FROM umkms WHERE slug = ? OR id = ?", [slug, slug]);
-      if (!existing || existing.length === 0) {
+      const body = req.body;
+
+      const existing = await UMKM.findOne({ $or: [{ slug: slug }, { id: slug }] });
+      if (!existing) {
         return res.status(404).json({ error: "UMKM tidak ditemukan." });
       }
 
-      const umkmId = existing[0].id;
-      const body = req.body;
+      if (body.name !== undefined) existing.name = body.name;
+      if (body.ownerName !== undefined) existing.owner_name = body.ownerName;
+      if (body.description !== undefined) existing.description = body.description;
+      if (body.address !== undefined) existing.address = body.address;
+      if (body.dusun !== undefined) existing.dusun = body.dusun;
+      if (body.operationalHours !== undefined) existing.operational_hours = body.operationalHours || null;
+      if (body.whatsappNumber !== undefined) existing.whatsapp_number = body.whatsappNumber;
+      if (body.mapsUrl !== undefined) existing.maps_url = body.mapsUrl || null;
+      if (body.instagramUrl !== undefined) existing.instagram_url = body.instagramUrl || null;
+      if (body.imageUrl !== undefined) existing.image_url = body.imageUrl;
+      if (body.categoryId !== undefined) existing.category_id = body.categoryId;
+      if (body.isVerified !== undefined) existing.is_verified = Boolean(body.isVerified);
+      if (body.certifications !== undefined) existing.certifications = body.certifications;
+      if (body.latitude !== undefined) existing.latitude = body.latitude || null;
+      if (body.longitude !== undefined) existing.longitude = body.longitude || null;
 
-      // Build dynamic SET clause
-      const updates = [];
-      const params = [];
+      existing.updated_at = new Date();
+      await existing.save();
 
-      if (body.name !== undefined) { updates.push("name = ?"); params.push(body.name); }
-      if (body.ownerName !== undefined) { updates.push("owner_name = ?"); params.push(body.ownerName); }
-      if (body.description !== undefined) { updates.push("description = ?"); params.push(body.description); }
-      if (body.address !== undefined) { updates.push("address = ?"); params.push(body.address); }
-      if (body.dusun !== undefined) { updates.push("dusun = ?"); params.push(body.dusun); }
-      if (body.operationalHours !== undefined) { updates.push("operational_hours = ?"); params.push(body.operationalHours || null); }
-      if (body.whatsappNumber !== undefined) { updates.push("whatsapp_number = ?"); params.push(body.whatsappNumber); }
-      if (body.mapsUrl !== undefined) { updates.push("maps_url = ?"); params.push(body.mapsUrl || null); }
-      if (body.instagramUrl !== undefined) { updates.push("instagram_url = ?"); params.push(body.instagramUrl || null); }
-      if (body.imageUrl !== undefined) { updates.push("image_url = ?"); params.push(body.imageUrl); }
-      if (body.categoryId !== undefined) { updates.push("category_id = ?"); params.push(body.categoryId); }
-      if (body.isVerified !== undefined) { updates.push("is_verified = ?"); params.push(body.isVerified ? 1 : 0); }
-      if (body.certifications !== undefined) { updates.push("certifications = ?"); params.push(JSON.stringify(body.certifications)); }
-      if (body.latitude !== undefined) { updates.push("latitude = ?"); params.push(body.latitude || null); }
-      if (body.longitude !== undefined) { updates.push("longitude = ?"); params.push(body.longitude || null); }
-
-      if (updates.length === 0) {
-        return res.json({ data: existing[0] });
-      }
-
-      updates.push("updated_at = NOW()");
-      params.push(umkmId);
-
-      await sql.query(
-        `UPDATE umkms SET ${updates.join(", ")} WHERE id = ?`,
-        params
-      );
-
-      const updated = await sql.query("SELECT * FROM umkms WHERE id = ?", [umkmId]);
-      return res.json({ data: updated[0] });
+      return res.json({ data: existing.toObject() });
     } catch (error) {
       console.error("[PUT /api/umkm/:slug]", error);
       return res.status(500).json({ error: "Gagal memperbarui UMKM." });
@@ -333,7 +309,12 @@ module.exports = function (sql) {
   router.delete("/:slug", authMiddleware, requireRole("ADMIN", "SUPERADMIN"), async (req, res) => {
     try {
       const { slug } = req.params;
-      await sql.query("DELETE FROM umkms WHERE slug = ? OR id = ?", [slug, slug]);
+      const target = await UMKM.findOne({ $or: [{ slug: slug }, { id: slug }] });
+      if (target) {
+        await Product.deleteMany({ umkm_id: target.id });
+        await Review.deleteMany({ umkm_id: target.id });
+        await UMKM.deleteOne({ _id: target._id });
+      }
       return res.json({ data: { success: true } });
     } catch (error) {
       console.error("[DELETE /api/umkm/:slug]", error);
@@ -348,28 +329,31 @@ module.exports = function (sql) {
       const { name, rating, comment } = req.body;
 
       const reviewId = "rev-" + crypto.randomBytes(6).toString("hex");
-      await sql.query(
-        "INSERT INTO reviews (id, umkm_id, name, rating, comment) VALUES (?, ?, ?, ?, ?)",
-        [reviewId, id, name, rating, comment]
-      );
+      const newReview = new Review({
+        id: reviewId,
+        umkm_id: id,
+        name,
+        rating: Number(rating),
+        comment,
+        created_at: new Date(),
+      });
+      await newReview.save();
 
-      const inserted = await sql.query("SELECT * FROM reviews WHERE id = ?", [reviewId]);
-
-      // Update aggregate rating on umkm
-      const reviews = await sql.query("SELECT rating FROM reviews WHERE umkm_id = ?", [id]);
+      // Recalculate average rating
+      const reviews = await Review.find({ umkm_id: id }).lean();
       const count = reviews.length;
       const sum = reviews.reduce((acc, cur) => acc + Number(cur.rating), 0);
-      const avgRating = (sum / (count || 1)).toFixed(2);
+      const avgRating = parseFloat((sum / (count || 1)).toFixed(2));
 
-      await sql.query(
-        "UPDATE umkms SET rating = ?, review_count = ? WHERE id = ? OR slug = ?",
-        [avgRating, count, id, id]
+      await UMKM.updateOne(
+        { $or: [{ id: id }, { slug: id }] },
+        { rating: avgRating, review_count: count }
       );
 
       return res.status(201).json({
         success: true,
         message: "Ulasan berhasil dikirim. Terima kasih atas masukan Anda!",
-        data: inserted[0],
+        data: newReview.toObject(),
       });
     } catch (error) {
       console.error("[POST /api/umkm/:id/review]", error);
@@ -381,13 +365,16 @@ module.exports = function (sql) {
   router.get("/:id/reviews", async (req, res) => {
     try {
       const { id } = req.params;
-      const reviews = await sql.query(
-        `SELECT id, name, rating, comment, created_at AS createdAt
-         FROM reviews WHERE umkm_id = ?
-         ORDER BY created_at DESC`,
-        [id]
-      );
-      return res.json({ data: reviews || [] });
+      const reviews = await Review.find({ umkm_id: id }).sort({ created_at: -1 }).lean();
+      return res.json({
+        data: (reviews || []).map(r => ({
+          id: r.id,
+          name: r.name,
+          rating: r.rating,
+          comment: r.comment,
+          createdAt: r.created_at,
+        })),
+      });
     } catch (error) {
       console.error("[GET /api/umkm/:id/reviews]", error);
       return res.status(500).json({ error: "Gagal mengambil ulasan." });
