@@ -1,11 +1,20 @@
 const express = require('express');
 const router = express.Router();
+<<<<<<< HEAD
 const upload = require('../middleware/upload');
 const { authenticateToken } = require('../middleware/authMiddleware');
 const { uploadToCloudinary } = require('../config/cloudinary');
 
 // POST /api/admin/upload - File upload endpoint for images
 router.post('/', authenticateToken, upload.single('image'), async (req, res) => {
+=======
+const upload = require("../middleware/upload");
+const { uploadToCloudinary } = require("../config/cloudinary");
+const { authMiddleware } = require("../../middleware/auth");
+
+// POST /api/upload — requires authentication
+router.post("/", authMiddleware, upload.single("image"), async (req, res) => {
+>>>>>>> 6b68d9c5 (Migrasi backend ke MySQL Railway + Fix keamanan kritis + Deploy config)
   try {
     if (!req.file) {
       return res.status(400).json({

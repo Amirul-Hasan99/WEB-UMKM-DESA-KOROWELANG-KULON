@@ -10,6 +10,32 @@ const hashPassword = async (plainPassword) => {
     throw new Error('Password wajib diisi untuk melakukan hashing.');
   }
 
+<<<<<<< HEAD
+=======
+/**
+ * Verifies a plaintext password against a hash
+ * @param {string} hash 
+ * @param {string} password 
+ * @returns {Promise<boolean>}
+ */
+async function verifyPassword(hash, password) {
+  if (!hash || !password) return false;
+  
+  if (hash.startsWith("$argon2")) {
+    if (argon2) {
+      try {
+        return await argon2.verify(hash, password);
+      } catch (err) {
+        console.warn("Argon2 verify error:", err.message);
+        return false;
+      }
+    }
+    // If argon2 is not available and hash is argon2, cannot verify
+    return false;
+  }
+
+  // bcrypt hash verification
+>>>>>>> 6b68d9c5 (Migrasi backend ke MySQL Railway + Fix keamanan kritis + Deploy config)
   try {
     return await argon2.hash(plainPassword, {
       type: argon2.argon2id,
@@ -18,9 +44,14 @@ const hashPassword = async (plainPassword) => {
       parallelism: 1,      // 1 degree of parallelism
     });
   } catch (err) {
+<<<<<<< HEAD
     console.warn('⚠️ Argon2 hashing failed, falling back to bcryptjs:', err.message);
     const salt = await bcrypt.genSalt(10);
     return await bcrypt.hash(plainPassword, salt);
+=======
+    console.warn("bcrypt compare error:", err.message);
+    return false;
+>>>>>>> 6b68d9c5 (Migrasi backend ke MySQL Railway + Fix keamanan kritis + Deploy config)
   }
 };
 
