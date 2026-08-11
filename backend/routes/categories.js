@@ -3,28 +3,16 @@ const router = express.Router();
 const crypto = require("crypto");
 const { authMiddleware, requireRole } = require("../middleware/auth");
 const { Category, UMKM } = require("../db/models");
-const localDb = require("../db/local_db");
 
 module.exports = function () {
   // GET /api/categories
   router.get("/", async (req, res) => {
     try {
-      let categories = [];
-      try {
-        categories = await Category.find().sort({ name: 1 }).lean();
-      } catch (e) {
-        categories = localDb.loadData().categories;
-      }
+      const categories = await Category.find().sort({ name: 1 }).lean();
 
       const data = await Promise.all(
         (categories || []).map(async (c) => {
-          let count = 0;
-          try {
-            count = await UMKM.countDocuments({ category_id: c.id, is_verified: true });
-          } catch (e) {
-            count = (localDb.loadData().umkms || []).filter((u) => u.category_id === c.id && u.is_verified).length;
-          }
-
+          const count = await UMKM.countDocuments({ category_id: c.id, is_verified: true });
           return {
             id: c.id,
             name: c.name,

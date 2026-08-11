@@ -4,7 +4,6 @@ const crypto = require("crypto");
 const { z } = require("zod");
 const { authMiddleware, requireRole } = require("../middleware/auth");
 const { Product, UMKM } = require("../db/models");
-const localDb = require("../db/local_db");
 
 const createProductSchema = z.object({
   umkmId: z.string(),
@@ -25,13 +24,7 @@ module.exports = function () {
 
       const { umkmId, title, price, description, imageUrl } = parsed.data;
 
-      let umkmExists = false;
-      try {
-        umkmExists = await UMKM.findOne({ id: umkmId }).lean();
-      } catch (e) {
-        umkmExists = localDb.loadData().umkms.find((u) => u.id === umkmId);
-      }
-
+      const umkmExists = await UMKM.findOne({ id: umkmId }).lean();
       if (!umkmExists) {
         return res.status(404).json({ error: "UMKM tidak ditemukan" });
       }

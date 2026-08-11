@@ -1,6 +1,5 @@
 const ExcelJS = require("exceljs");
 const { UMKM, Product, Category } = require("../../db/models");
-const localDb = require("../../db/local_db");
 
 /**
  * Export UMKM list to Excel
@@ -23,7 +22,6 @@ const exportUmkm = async (req, res) => {
       { header: "Alamat", key: "address", width: 35 },
     ];
 
-    // Style Header Row
     const headerRow = worksheet.getRow(1);
     headerRow.font = { bold: true, color: { argb: "FFFFFF" } };
     headerRow.fill = {
@@ -32,27 +30,21 @@ const exportUmkm = async (req, res) => {
       fgColor: { argb: "0F766E" }, // Emerald 700
     };
 
-    let umkms = [];
-    try {
-      umkms = await UMKM.find().lean();
-    } catch (e) {
-      umkms = localDb.loadData().umkms || [];
-    }
-
-    const categories = await Category.find().lean().catch(() => localDb.loadData().categories || []);
+    const umkms = await UMKM.find().lean();
+    const categories = await Category.find().lean();
     const catMap = new Map(categories.map((c) => [c.id, c.name]));
 
-    umkms.forEach((u) => {
+    (umkms || []).forEach((u) => {
       worksheet.addRow({
         id: u.id,
         name: u.name,
-        ownerName: u.owner_name || u.ownerName || "-",
-        categoryName: catMap.get(u.category_id) || u.category_name || "-",
+        ownerName: u.owner_name || "-",
+        categoryName: catMap.get(u.category_id) || "-",
         dusun: u.dusun || "-",
-        whatsappNumber: u.whatsapp_number || u.whatsappNumber || "-",
+        whatsappNumber: u.whatsapp_number || "-",
         certifications: Array.isArray(u.certifications) ? u.certifications.join(", ") : "-",
         rating: u.rating ? String(u.rating) : "0.00",
-        reviewCount: u.review_count || u.reviewCount || 0,
+        reviewCount: u.review_count || 0,
         address: u.address || "-",
       });
     });
@@ -91,19 +83,11 @@ const exportProducts = async (req, res) => {
       fgColor: { argb: "0369A1" }, // Sky 700
     };
 
-    let products = [];
-    let umkms = [];
-    try {
-      products = await Product.find().lean();
-      umkms = await UMKM.find().lean();
-    } catch (e) {
-      products = localDb.loadData().products || [];
-      umkms = localDb.loadData().umkms || [];
-    }
-
+    const products = await Product.find().lean();
+    const umkms = await UMKM.find().lean();
     const umkmMap = new Map(umkms.map((u) => [u.id, u.name]));
 
-    products.forEach((p) => {
+    (products || []).forEach((p) => {
       worksheet.addRow({
         id: p.id,
         title: p.title || p.name,
@@ -148,18 +132,6 @@ const exportFeedback = async (req, res) => {
       pattern: "solid",
       fgColor: { argb: "475569" }, // Slate 600
     };
-
-    const feedbacks = localDb.loadData().feedbacks || [];
-
-    feedbacks.forEach((f) => {
-      worksheet.addRow({
-        id: f.id,
-        name: f.name,
-        email: f.email,
-        status: f.status || "pending",
-        message: f.message,
-      });
-    });
 
     res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
     res.setHeader("Content-Disposition", `attachment; filename=Rekap_Masukan_${Date.now()}.xlsx`);

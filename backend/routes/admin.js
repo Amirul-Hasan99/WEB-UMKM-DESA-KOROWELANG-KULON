@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const { authMiddleware, requireRole } = require("../middleware/auth");
 const { UMKM, User, Category } = require("../db/models");
-const localDb = require("../db/local_db");
 
 module.exports = function () {
   // POST /api/admin/verify
@@ -49,28 +48,13 @@ module.exports = function () {
   // GET /api/admin/stats
   router.get("/stats", authMiddleware, requireRole("ADMIN", "SUPERADMIN"), async (req, res) => {
     try {
-      let totalUmkm = 0;
-      let verifiedUmkm = 0;
-      let pendingUmkm = 0;
-      let totalUser = 0;
-      let recentPendingDocs = [];
+      const totalUmkm = await UMKM.countDocuments();
+      const verifiedUmkm = await UMKM.countDocuments({ is_verified: true });
+      const pendingUmkm = await UMKM.countDocuments({ is_verified: false });
+      const totalUser = await User.countDocuments();
+      const recentPendingDocs = await UMKM.find({ is_verified: false }).sort({ created_at: -1 }).limit(5).lean();
 
-      try {
-        totalUmkm = await UMKM.countDocuments();
-        verifiedUmkm = await UMKM.countDocuments({ is_verified: true });
-        pendingUmkm = await UMKM.countDocuments({ is_verified: false });
-        totalUser = await User.countDocuments();
-        recentPendingDocs = await UMKM.find({ is_verified: false }).sort({ created_at: -1 }).limit(5).lean();
-      } catch (e) {
-        const ld = localDb.loadData();
-        totalUmkm = ld.umkms.length;
-        verifiedUmkm = ld.umkms.filter((u) => u.is_verified).length;
-        pendingUmkm = ld.umkms.filter((u) => !u.is_verified).length;
-        totalUser = ld.users.length;
-        recentPendingDocs = ld.umkms.filter((u) => !u.is_verified).slice(0, 5);
-      }
-
-      const allCategories = await Category.find().lean().catch(() => localDb.loadData().categories);
+      const allCategories = await Category.find().lean();
       const catMap = new Map(allCategories.map((c) => [c.id, c.name]));
 
       return res.json({

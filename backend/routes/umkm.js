@@ -5,8 +5,7 @@ const slugify = require("slugify");
 const { authMiddleware, requireRole } = require("../middleware/auth");
 const validate = require("../src/middleware/validate");
 const { umkmSchema, reviewSchema } = require("../src/validators/schemas");
-const { UMKM, Category, Product, Review, User } = require("../db/models");
-const localDb = require("../db/local_db");
+const { UMKM, Category, Product, Review } = require("../db/models");
 
 module.exports = function () {
   // GET /api/umkm (Public Catalog with search, category, dusun, price filter, pagination)
@@ -28,7 +27,6 @@ module.exports = function () {
         if (catObj) categoryIdFilter = catObj.id;
       }
 
-      // Build Mongoose filter
       const filter = { is_verified: true };
       if (categoryIdFilter) filter.category_id = categoryIdFilter;
       if (dusun) filter.dusun = dusun;
@@ -39,27 +37,13 @@ module.exports = function () {
         ];
       }
 
-      let umkmDocs = [];
-      try {
-        umkmDocs = await UMKM.find(filter).sort({ created_at: -1 }).lean();
-      } catch (e) {
-        // Fallback to localDb
-        umkmDocs = localDb.loadData().umkms.filter((u) => u.is_verified);
-      }
-
-      const allCategories = await Category.find().lean().catch(() => localDb.loadData().categories);
+      const umkmDocs = await UMKM.find(filter).sort({ created_at: -1 }).lean();
+      const allCategories = await Category.find().lean();
       const catMap = new Map(allCategories.map((c) => [c.id, c]));
 
-      // Populate products & categories for each UMKM
       const formattedItems = await Promise.all(
         umkmDocs.map(async (row) => {
-          let products = [];
-          try {
-            products = await Product.find({ umkm_id: row.id }).sort({ created_at: -1 }).lean();
-          } catch (e) {
-            products = (localDb.loadData().products || []).filter((p) => p.umkm_id === row.id);
-          }
-
+          const products = await Product.find({ umkm_id: row.id }).sort({ created_at: -1 }).lean();
           const cat = catMap.get(row.category_id);
 
           return {
@@ -139,32 +123,15 @@ module.exports = function () {
   router.get("/:slug", async (req, res) => {
     try {
       const { slug } = req.params;
-      let row = null;
-      try {
-        row = await UMKM.findOne({ $or: [{ slug: slug }, { id: slug }] }).lean();
-      } catch (e) {
-        const local = localDb.loadData().umkms;
-        row = local.find((u) => u.slug === slug || u.id === slug) || null;
-      }
+      const row = await UMKM.findOne({ $or: [{ slug: slug }, { id: slug }] }).lean();
 
       if (!row) {
         return res.status(404).json({ error: "UMKM tidak ditemukan." });
       }
 
-      let products = [];
-      let reviewsList = [];
-      let cat = null;
-
-      try {
-        products = await Product.find({ umkm_id: row.id }).sort({ created_at: -1 }).lean();
-        reviewsList = await Review.find({ umkm_id: row.id }).sort({ created_at: -1 }).lean();
-        cat = await Category.findOne({ id: row.category_id }).lean();
-      } catch (e) {
-        const ld = localDb.loadData();
-        products = (ld.products || []).filter((p) => p.umkm_id === row.id);
-        reviewsList = (ld.reviews || []).filter((r) => r.umkm_id === row.id);
-        cat = (ld.categories || []).find((c) => c.id === row.category_id) || null;
-      }
+      const products = await Product.find({ umkm_id: row.id }).sort({ created_at: -1 }).lean();
+      const reviewsList = await Review.find({ umkm_id: row.id }).sort({ created_at: -1 }).lean();
+      const cat = await Category.findOne({ id: row.category_id }).lean();
 
       const data = {
         id: row.id,
@@ -235,11 +202,10 @@ module.exports = function () {
       }
 
       const id = "umkm-" + crypto.randomBytes(8).toString("hex");
-      let userId = req.user.id;
 
       const newUmkm = new UMKM({
         id,
-        user_id: userId,
+        user_id: req.user.id,
         category_id: data.categoryId,
         name: data.name,
         slug: generatedSlug,
@@ -339,7 +305,6 @@ module.exports = function () {
       });
       await newReview.save();
 
-      // Recalculate average rating
       const reviews = await Review.find({ umkm_id: id }).lean();
       const count = reviews.length;
       const sum = reviews.reduce((acc, cur) => acc + Number(cur.rating), 0);

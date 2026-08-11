@@ -6,19 +6,12 @@ const { hashPassword } = require("../src/utils/password");
 const validate = require("../src/middleware/validate");
 const { adminSchema } = require("../src/validators/schemas");
 const { User, SiteSetting } = require("../db/models");
-const localDb = require("../db/local_db");
 
 module.exports = function () {
   // GET /api/superadmin/admins
   router.get("/admins", authMiddleware, requireRole("SUPERADMIN"), async (req, res) => {
     try {
-      let admins = [];
-      try {
-        admins = await User.find().sort({ created_at: -1 }).lean();
-      } catch (e) {
-        admins = localDb.loadData().users;
-      }
-
+      const admins = await User.find().sort({ created_at: -1 }).lean();
       return res.json({
         data: (admins || []).map((u) => ({
           id: u.id,
@@ -95,13 +88,7 @@ module.exports = function () {
   // GET /api/superadmin/settings
   router.get("/settings", async (req, res) => {
     try {
-      let settings = [];
-      try {
-        settings = await SiteSetting.find().lean();
-      } catch (e) {
-        settings = localDb.loadData().site_settings;
-      }
-
+      const settings = await SiteSetting.find().lean();
       const data = (settings || []).reduce((acc, cur) => {
         acc[cur.key] = cur.value;
         return acc;

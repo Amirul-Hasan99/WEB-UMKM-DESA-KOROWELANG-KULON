@@ -6,7 +6,6 @@ const { verifyPassword } = require("../src/utils/password");
 const validate = require("../src/middleware/validate");
 const { loginSchema } = require("../src/validators/schemas");
 const { User } = require("../db/models");
-const localDb = require("../db/local_db");
 
 module.exports = function () {
   // POST /api/auth/login
@@ -14,15 +13,7 @@ module.exports = function () {
     try {
       const { email, password } = req.body;
 
-      let user = null;
-      try {
-        user = await User.findOne({ email: email.toLowerCase() }).lean();
-      } catch (e) {
-        // Fallback to local_db if MongoDB is offline
-        const localUsers = localDb.loadData().users;
-        user = localUsers.find((u) => u.email.toLowerCase() === email.toLowerCase()) || null;
-      }
-
+      const user = await User.findOne({ email: email.toLowerCase() }).lean();
       if (!user) {
         return res.status(400).json({ error: "Email tidak terdaftar" });
       }
@@ -65,14 +56,7 @@ module.exports = function () {
   // GET /api/auth/me
   router.get("/me", authMiddleware, async (req, res) => {
     try {
-      let u = null;
-      try {
-        u = await User.findOne({ id: req.user.id }).lean();
-      } catch (e) {
-        const localUsers = localDb.loadData().users;
-        u = localUsers.find((user) => user.id === req.user.id) || null;
-      }
-
+      const u = await User.findOne({ id: req.user.id }).lean();
       if (!u) {
         return res.status(404).json({ error: "Pengguna tidak ditemukan" });
       }

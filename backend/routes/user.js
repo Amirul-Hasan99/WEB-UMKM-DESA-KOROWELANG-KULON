@@ -4,7 +4,6 @@ const bcrypt = require("bcryptjs");
 const { z } = require("zod");
 const { authMiddleware } = require("../middleware/auth");
 const { User } = require("../db/models");
-const localDb = require("../db/local_db");
 
 const updateProfileSchema = z.object({
   name: z.string().min(3),
@@ -31,24 +30,11 @@ module.exports = function () {
         updateData.password_hash = await bcrypt.hash(password, 10);
       }
 
-      let updatedUser = null;
-      try {
-        updatedUser = await User.findOneAndUpdate(
-          { id: req.user.id },
-          updateData,
-          { new: true }
-        ).lean();
-      } catch (e) {
-        const ld = localDb.loadData();
-        const user = ld.users.find((u) => u.id === req.user.id);
-        if (user) {
-          user.name = name;
-          if (profileImage) user.profile_image = profileImage;
-          if (password) user.password_hash = bcrypt.hashSync(password, 10);
-          localDb.saveData(ld);
-          updatedUser = user;
-        }
-      }
+      const updatedUser = await User.findOneAndUpdate(
+        { id: req.user.id },
+        updateData,
+        { new: true }
+      ).lean();
 
       if (!updatedUser) {
         return res.status(404).json({ error: "Pengguna tidak ditemukan" });

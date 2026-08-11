@@ -1,7 +1,5 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import bcrypt from "bcryptjs";
-import { findUserByEmailStore } from "./store";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
 
@@ -18,45 +16,28 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Email dan kata sandi wajib diisi");
         }
 
-        try {
-          const res = await fetch(`${BACKEND_URL}/api/auth/login`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              email: credentials.email,
-              password: credentials.password,
-            }),
-          });
+        const res = await fetch(`${BACKEND_URL}/api/auth/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: credentials.email,
+            password: credentials.password,
+          }),
+        });
 
-          if (res.ok) {
-            const data = await res.json();
-            if (data.user) {
-              return {
-                id: data.user.id,
-                email: data.user.email,
-                name: data.user.name,
-                role: data.user.role,
-                token: data.token,
-              };
-            }
-          }
-        } catch (error) {
-          // Backend not reachable, fallback to store
+        const data = await res.json();
+
+        if (!res.ok || !data.user) {
+          throw new Error(data.error || data.message || "Email atau password salah");
         }
 
-        // Fallback store authentication
-        const user = findUserByEmailStore(credentials.email);
-        if (user && bcrypt.compareSync(credentials.password, user.passwordHash)) {
-          return {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            role: user.role,
-            token: "store-session-token",
-          };
-        }
-
-        throw new Error("Email atau password salah");
+        return {
+          id: data.user.id,
+          email: data.user.email,
+          name: data.user.name,
+          role: data.user.role,
+          token: data.token,
+        };
       },
     }),
   ],
