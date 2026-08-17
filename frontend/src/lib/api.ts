@@ -157,17 +157,9 @@ export const fetchUmkms = async (search?: string, category?: string): Promise<UM
       return res.data.data.map(normalizeUmkm);
     }
   } catch (e) {
-    console.warn("Using local fallback for fetchUmkms", e);
+    console.warn("fetchUmkms error:", e);
   }
-  let result = [...initialUmkms];
-  if (category && category !== 'Semua') {
-    result = result.filter(u => u.category.toLowerCase() === category.toLowerCase());
-  }
-  if (search) {
-    const q = search.toLowerCase();
-    result = result.filter(u => u.name.toLowerCase().includes(q) || u.owner.toLowerCase().includes(q));
-  }
-  return result;
+  return [];
 };
 
 export const fetchUmkmById = async (id: number | string): Promise<UMKM | null> => {
@@ -177,9 +169,9 @@ export const fetchUmkmById = async (id: number | string): Promise<UMKM | null> =
       return normalizeUmkm(res.data.data);
     }
   } catch (e) {
-    console.warn("Using local fallback for fetchUmkmById", e);
+    console.warn("fetchUmkmById error:", e);
   }
-  return initialUmkms.find(u => String(u.id) === String(id)) || null;
+  return null;
 };
 
 export const fetchDynamicContent = async (): Promise<DynamicContent> => {

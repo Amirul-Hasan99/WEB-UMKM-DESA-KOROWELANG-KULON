@@ -22,11 +22,6 @@ module.exports = function () {
 
       const umkmIdStr = String(umkmIdRaw);
       let umkmExists = await UMKM.findOne({ $or: [{ id: umkmIdStr }, { slug: umkmIdStr }] }).lean();
-      
-      if (!umkmExists && !isNaN(Number(umkmIdRaw))) {
-        // Fallback search by index or string match
-        umkmExists = await UMKM.findOne().lean();
-      }
 
       if (!umkmExists) {
         return res.status(404).json({ error: "UMKM tujuan tidak ditemukan." });

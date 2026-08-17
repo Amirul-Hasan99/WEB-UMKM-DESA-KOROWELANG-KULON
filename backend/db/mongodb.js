@@ -110,44 +110,6 @@ async function seedInitialDataIfNeeded() {
       ]);
     }
 
-    // 4. Seed UMKMs & Products if empty
-    const umkmCount = await UMKM.countDocuments();
-    if (umkmCount === 0) {
-      console.log("🌱 Seeding initial UMKMs into MongoDB Atlas...");
-      await UMKM.insertMany([
-        {
-          id: "umkm-1", user_id: "usr-admin-kutoharjo", category_id: "cat-1",
-          name: "Bandeng Presto & Cabut Duri Mbak Sum", slug: "bandeng-presto-mbak-sum",
-          owner_name: "Mbak Sumiati",
-          description: "Produk unggulan olahan ikan bandeng presto dan cabut duri resep tradisional khas Kaliwungu, Desa Kutoharjo.",
-          address: "Jl. Raya Kutoharjo No. 42, RT 02 / RW 03", dusun: "Kutoharjo",
-          operational_hours: "08:00 - 20:00 WIB", whatsapp_number: "6281234567891",
-          maps_url: "https://maps.google.com/?q=-6.9535,110.2642",
-          instagram_url: "https://instagram.com/bandeng_mbaksum",
-          image_url: "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=800&q=80",
-          is_verified: true, certifications: ["Halal MUI", "P-IRT", "Unggulan Desa"],
-          rating: 4.90, review_count: 12,
-        },
-        {
-          id: "umkm-2", user_id: "usr-admin-kutoharjo", category_id: "cat-1",
-          name: "Kerupuk Rambak Sapi Berkah Barokah", slug: "rambak-sapi-berkah-barokah",
-          owner_name: "H. Ahmad Rofiq",
-          description: "Produsen kerupuk rambak kulit sapi asli khas Kutoharjo Kaliwungu.",
-          address: "Dukuh Gambiran RT 04 / RW 01, Desa Kutoharjo", dusun: "Gambiran",
-          operational_hours: "07:00 - 17:00 WIB", whatsapp_number: "6285712345678",
-          maps_url: "https://maps.google.com/?q=-6.9540,110.2650",
-          instagram_url: "https://instagram.com/rambak_berkah_kutoharjo",
-          image_url: "https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?auto=format&fit=crop&w=800&q=80",
-          is_verified: true, certifications: ["Halal MUI", "P-IRT"],
-          rating: 4.80, review_count: 15,
-        },
-      ]);
-
-      await Product.insertMany([
-        { id: "prod-101", umkm_id: "umkm-1", title: "Bandeng Presto Vacuum (500gr)", price: 45000, description: "Ikan bandeng presto duri lunak dengan bumbu rempah pilihan.", image_url: "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=800&q=80" },
-        { id: "prod-201", umkm_id: "umkm-2", title: "Kerupuk Rambak Sapi 250gr", price: 25000, description: "Rambak kulit sapi goreng renyah dan gurih.", image_url: "https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?auto=format&fit=crop&w=800&q=80" },
-      ]);
-    }
   } catch (err) {
     console.warn("⚠️ MongoDB auto-seed notice:", err.message);
   }
