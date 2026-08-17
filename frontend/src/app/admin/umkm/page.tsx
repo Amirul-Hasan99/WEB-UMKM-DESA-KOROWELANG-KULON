@@ -7,11 +7,13 @@ import SoftCard from '@/components/SoftCard';
 import SoftInput from '@/components/SoftInput';
 import SoftButton from '@/components/SoftButton';
 import ImageUploadInput from '@/components/ImageUploadInput';
-import { fetchUmkms } from '@/lib/api';
+import { fetchUmkms, createUmkm, updateUmkm, deleteUmkm, createProduct, deleteProduct } from '@/lib/api';
 import { UMKM, UMKMProduct } from '@/lib/types';
 
 export default function AdminUmkmPage() {
   const [umkms, setUmkms] = useState<UMKM[]>([]);
+  const [submitting, setSubmitting] = useState(false);
+  const [productSubmitting, setProductSubmitting] = useState(false);
   
   // UMKM Modal Form states
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -41,8 +43,13 @@ export default function AdminUmkmPage() {
   const [pDescription, setPDescription] = useState('');
   const [pImage, setPImage] = useState('');
 
+  const loadData = async () => {
+    const list = await fetchUmkms();
+    setUmkms(list);
+  };
+
   useEffect(() => {
-    fetchUmkms().then(setUmkms);
+    loadData();
   }, []);
 
   // --- UMKM HANDLERS ---
@@ -78,57 +85,53 @@ export default function AdminUmkmPage() {
     setIsModalOpen(true);
   };
 
-  const handleSubmitUmkm = (e: React.FormEvent) => {
+  const handleSubmitUmkm = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitting(true);
+
+    const payload: Partial<UMKM> = {
+      name,
+      owner,
+      category,
+      address: address || 'Desa Kutoharjo',
+      phone,
+      whatsapp: whatsapp || phone,
+      gmapsUrl,
+      gmapsEmbed,
+      description,
+      landingText,
+      profileImage: profileImage || 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=600&q=80',
+    };
+
     if (editingUmkm) {
-      setUmkms(prev =>
-        prev.map(u =>
-          u.id === editingUmkm.id
-            ? {
-                ...u,
-                name,
-                owner,
-                category,
-                address,
-                phone,
-                whatsapp,
-                gmapsUrl,
-                gmapsEmbed,
-                description,
-                landingText,
-                profileImage: profileImage || u.profileImage,
-              }
-            : u
-        )
-      );
+      const res = await updateUmkm(editingUmkm.id, payload);
+      if (res.success && res.data) {
+        setUmkms(prev => prev.map(u => (String(u.id) === String(editingUmkm.id) ? { ...u, ...res.data } : u)));
+      } else {
+        alert(res.error || 'Gagal memperbarui data UMKM.');
+      }
     } else {
-      const newUmkm: UMKM = {
-        id: umkms.length > 0 ? Math.max(...umkms.map(u => u.id)) + 1 : 1,
-        name,
-        owner,
-        category,
-        address: address || 'Desa Kutoharjo',
-        phone,
-        whatsapp: whatsapp || phone,
-        gmapsUrl,
-        gmapsEmbed,
-        description,
-        landingText,
-        profileImage: profileImage || 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=600&q=80',
-        bannerImage: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=1200&q=80',
-        rating: 5.0,
-        reviewCount: 0,
-        createdAt: new Date().toISOString(),
-        products: []
-      };
-      setUmkms(prev => [newUmkm, ...prev]);
+      const res = await createUmkm(payload);
+      if (res.success && res.data) {
+        setUmkms(prev => [res.data!, ...prev]);
+      } else {
+        alert(res.error || 'Gagal membuat UMKM baru.');
+      }
     }
+
+    setSubmitting(false);
     setIsModalOpen(false);
+    loadData();
   };
 
-  const handleDeleteUmkm = (id: number) => {
+  const handleDeleteUmkm = async (id: number | string) => {
     if (confirm('Apakah Anda yakin ingin menghapus UMKM ini beserta seluruh produknya?')) {
-      setUmkms(prev => prev.filter(u => u.id !== id));
+      const res = await deleteUmkm(id);
+      if (res.success) {
+        setUmkms(prev => prev.filter(u => String(u.id) !== String(id)));
+      } else {
+        alert(res.error || 'Gagal menghapus UMKM.');
+      }
     }
   };
 
@@ -159,50 +162,47 @@ export default function AdminUmkmPage() {
     setIsProductFormOpen(true);
   };
 
-  const handleSaveProduct = (e: React.FormEvent) => {
+  const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedUmkmForProducts) return;
+    setProductSubmitting(true);
 
-    let updatedProducts: UMKMProduct[] = [];
-    if (editingProduct) {
-      updatedProducts = (selectedUmkmForProducts.products || []).map(p =>
-        p.id === editingProduct.id
-          ? {
-              ...p,
-              name: pName,
-              price: parseFloat(pPrice) || 0,
-              unit: pUnit,
-              description: pDescription,
-              image: pImage || p.image,
-            }
-          : p
-      );
-    } else {
-      const newProd: UMKMProduct = {
-        id: Date.now(),
-        umkmId: selectedUmkmForProducts.id,
-        name: pName,
-        price: parseFloat(pPrice) || 0,
-        unit: pUnit,
-        description: pDescription,
-        image: pImage || 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=500&q=80',
-      };
-      updatedProducts = [newProd, ...(selectedUmkmForProducts.products || [])];
-    }
+    const productPayload: Partial<UMKMProduct> = {
+      umkmId: selectedUmkmForProducts.id,
+      name: pName,
+      price: parseFloat(pPrice) || 0,
+      unit: pUnit,
+      description: pDescription,
+      image: pImage || 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=500&q=80',
+    };
 
-    const updatedUmkm = { ...selectedUmkmForProducts, products: updatedProducts };
-    setSelectedUmkmForProducts(updatedUmkm);
-    setUmkms(prev => prev.map(u => (u.id === updatedUmkm.id ? updatedUmkm : u)));
-    setIsProductFormOpen(false);
-  };
-
-  const handleDeleteProduct = (productId: number) => {
-    if (!selectedUmkmForProducts) return;
-    if (confirm('Hapus produk ini dari UMKM?')) {
-      const updatedProducts = (selectedUmkmForProducts.products || []).filter(p => p.id !== productId);
+    const res = await createProduct(productPayload);
+    if (res.success && res.data) {
+      const updatedProducts = [res.data, ...(selectedUmkmForProducts.products || []).filter(p => String(p.id) !== String(res.data!.id))];
       const updatedUmkm = { ...selectedUmkmForProducts, products: updatedProducts };
       setSelectedUmkmForProducts(updatedUmkm);
-      setUmkms(prev => prev.map(u => (u.id === updatedUmkm.id ? updatedUmkm : u)));
+      setUmkms(prev => prev.map(u => (String(u.id) === String(updatedUmkm.id) ? updatedUmkm : u)));
+    } else {
+      alert(res.error || 'Gagal menyimpan produk.');
+    }
+
+    setProductSubmitting(false);
+    setIsProductFormOpen(false);
+    loadData();
+  };
+
+  const handleDeleteProduct = async (productId: number | string) => {
+    if (!selectedUmkmForProducts) return;
+    if (confirm('Hapus produk ini dari UMKM?')) {
+      const res = await deleteProduct(productId);
+      if (res.success) {
+        const updatedProducts = (selectedUmkmForProducts.products || []).filter(p => String(p.id) !== String(productId));
+        const updatedUmkm = { ...selectedUmkmForProducts, products: updatedProducts };
+        setSelectedUmkmForProducts(updatedUmkm);
+        setUmkms(prev => prev.map(u => (String(u.id) === String(updatedUmkm.id) ? updatedUmkm : u)));
+      } else {
+        alert(res.error || 'Gagal menghapus produk.');
+      }
     }
   };
 
@@ -344,8 +344,8 @@ export default function AdminUmkmPage() {
                   <SoftButton type="button" variant="default" onClick={() => setIsModalOpen(false)}>
                     Batal
                   </SoftButton>
-                  <SoftButton type="submit" variant="primary" icon={<Check className="w-4 h-4" />}>
-                    Simpan Data UMKM
+                  <SoftButton type="submit" variant="primary" disabled={submitting} icon={<Check className="w-4 h-4" />}>
+                    {submitting ? 'Menyimpan...' : 'Simpan Data UMKM'}
                   </SoftButton>
                 </div>
               </form>
@@ -422,8 +422,8 @@ export default function AdminUmkmPage() {
                     <SoftButton type="button" variant="default" onClick={() => setIsProductFormOpen(false)}>
                       Batal
                     </SoftButton>
-                    <SoftButton type="submit" variant="primary" icon={<Check className="w-4 h-4" />}>
-                      {editingProduct ? 'Simpan Perubahan Produk' : 'Tambah Produk Ini'}
+                    <SoftButton type="submit" variant="primary" disabled={productSubmitting} icon={<Check className="w-4 h-4" />}>
+                      {productSubmitting ? 'Menyimpan...' : (editingProduct ? 'Simpan Perubahan Produk' : 'Tambah Produk Ini')}
                     </SoftButton>
                   </div>
                 </form>

@@ -7,32 +7,96 @@ const validate = require("../src/middleware/validate");
 const { umkmSchema, reviewSchema } = require("../src/validators/schemas");
 const { UMKM, Category, Product, Review } = require("../db/models");
 
+function formatUmkmItem(row, products = [], cat = null) {
+  const categoryName = cat ? cat.name : "Kuliner";
+  return {
+    id: row.id,
+    userId: row.user_id,
+    categoryId: row.category_id,
+    name: row.name,
+    slug: row.slug,
+    owner: row.owner_name,
+    ownerName: row.owner_name,
+    category: categoryName,
+    categoryDetails: cat ? {
+      id: cat.id,
+      name: cat.name,
+      slug: cat.slug,
+      iconName: cat.icon_name,
+    } : null,
+    description: row.description || "",
+    landingText: row.landing_text || row.description || "",
+    address: row.address,
+    dusun: row.dusun || "Desa Kutoharjo",
+    operationalHours: row.operational_hours,
+    phone: row.whatsapp_number || "",
+    whatsapp: row.whatsapp_number || "",
+    whatsappNumber: row.whatsapp_number || "",
+    mapsUrl: row.maps_url || "",
+    gmapsUrl: row.maps_url || "",
+    gmapsEmbed: row.gmaps_embed || "",
+    instagramUrl: row.instagram_url,
+    imageUrl: row.image_url,
+    profileImage: row.image_url,
+    bannerImage: row.image_url,
+    isVerified: Boolean(row.is_verified),
+    certifications: row.certifications || [],
+    latitude: row.latitude,
+    longitude: row.longitude,
+    rating: row.rating ? Number(row.rating) : 5.0,
+    reviewCount: row.review_count || 0,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    products: (products || []).map(p => ({
+      id: p.id,
+      umkmId: p.umkm_id,
+      name: p.title,
+      title: p.title,
+      price: Number(p.price) || 0,
+      unit: p.unit || "pcs",
+      description: p.description || "",
+      image: p.image_url,
+      imageUrl: p.image_url,
+      createdAt: p.created_at,
+    })),
+  };
+}
+
 module.exports = function () {
-  // GET /api/umkm (Public Catalog with search, category, dusun, price filter, pagination)
+  // GET /api/umkm (Public & Admin Catalog)
   router.get("/", async (req, res) => {
     try {
       const search = (req.query.search || "").trim();
-      const categorySlug = req.query.category || null;
+      const categoryParam = req.query.category || null;
       const dusun = req.query.dusun || null;
       const minPrice = req.query.minPrice ? parseFloat(req.query.minPrice) : null;
       const maxPrice = req.query.maxPrice ? parseFloat(req.query.maxPrice) : null;
 
       const page = Math.max(1, parseInt(req.query.page || "1", 10));
-      const limit = Math.min(50, Math.max(1, parseInt(req.query.limit || "6", 10)));
+      const limit = Math.min(100, Math.max(1, parseInt(req.query.limit || "50", 10)));
       const offset = (page - 1) * limit;
 
-      let categoryIdFilter = null;
-      if (categorySlug) {
-        const catObj = await Category.findOne({ slug: categorySlug }).lean();
-        if (catObj) categoryIdFilter = catObj.id;
+      const filter = {};
+      if (req.query.all !== "true" && req.query.isAdmin !== "true") {
+        filter.is_verified = true;
       }
 
-      const filter = { is_verified: true };
-      if (categoryIdFilter) filter.category_id = categoryIdFilter;
+      if (categoryParam && categoryParam !== "Semua") {
+        const catObj = await Category.findOne({
+          $or: [
+            { slug: categoryParam },
+            { name: new RegExp(`^${categoryParam}$`, "i") },
+            { id: categoryParam }
+          ]
+        }).lean();
+        if (catObj) filter.category_id = catObj.id;
+      }
+
       if (dusun) filter.dusun = dusun;
       if (search) {
         filter.$or = [
           { name: { $regex: search, $options: "i" } },
+          { owner_name: { $regex: search, $options: "i" } },
           { description: { $regex: search, $options: "i" } },
         ];
       }
@@ -45,49 +109,10 @@ module.exports = function () {
         umkmDocs.map(async (row) => {
           const products = await Product.find({ umkm_id: row.id }).sort({ created_at: -1 }).lean();
           const cat = catMap.get(row.category_id);
-
-          return {
-            id: row.id,
-            userId: row.user_id,
-            categoryId: row.category_id,
-            name: row.name,
-            slug: row.slug,
-            ownerName: row.owner_name,
-            description: row.description,
-            address: row.address,
-            dusun: row.dusun,
-            operationalHours: row.operational_hours,
-            whatsappNumber: row.whatsapp_number,
-            mapsUrl: row.maps_url,
-            instagramUrl: row.instagram_url,
-            imageUrl: row.image_url,
-            isVerified: Boolean(row.is_verified),
-            certifications: row.certifications || [],
-            latitude: row.latitude,
-            longitude: row.longitude,
-            rating: row.rating ? String(row.rating) : "0.00",
-            reviewCount: row.review_count || 0,
-            createdAt: row.created_at,
-            updatedAt: row.updated_at,
-            category: cat ? {
-              id: cat.id,
-              name: cat.name,
-              slug: cat.slug,
-              iconName: cat.icon_name,
-            } : null,
-            products: (products || []).map(p => ({
-              id: p.id,
-              title: p.title,
-              price: p.price,
-              description: p.description,
-              imageUrl: p.image_url,
-              createdAt: p.created_at,
-            })),
-          };
+          return formatUmkmItem(row, products, cat);
         })
       );
 
-      // Price Filtering logic
       let filtered = formattedItems;
       if (minPrice !== null || maxPrice !== null) {
         filtered = formattedItems.filter((u) => {
@@ -105,6 +130,7 @@ module.exports = function () {
       const paginatedItems = filtered.slice(offset, offset + limit);
 
       return res.json({
+        success: true,
         data: paginatedItems,
         meta: {
           page,
@@ -133,54 +159,16 @@ module.exports = function () {
       const reviewsList = await Review.find({ umkm_id: row.id }).sort({ created_at: -1 }).lean();
       const cat = await Category.findOne({ id: row.category_id }).lean();
 
-      const data = {
-        id: row.id,
-        userId: row.user_id,
-        categoryId: row.category_id,
-        name: row.name,
-        slug: row.slug,
-        ownerName: row.owner_name,
-        description: row.description,
-        address: row.address,
-        dusun: row.dusun,
-        operationalHours: row.operational_hours,
-        whatsappNumber: row.whatsapp_number,
-        mapsUrl: row.maps_url,
-        instagramUrl: row.instagram_url,
-        imageUrl: row.image_url,
-        isVerified: Boolean(row.is_verified),
-        certifications: row.certifications || [],
-        latitude: row.latitude,
-        longitude: row.longitude,
-        rating: row.rating ? String(row.rating) : "0.00",
-        reviewCount: row.review_count || 0,
-        createdAt: row.created_at,
-        updatedAt: row.updated_at,
-        category: cat ? {
-          id: cat.id,
-          name: cat.name,
-          slug: cat.slug,
-          iconName: cat.icon_name,
-        } : null,
-        products: (products || []).map(p => ({
-          id: p.id,
-          umkmId: p.umkm_id,
-          title: p.title,
-          price: p.price,
-          description: p.description,
-          imageUrl: p.image_url,
-          createdAt: p.created_at,
-        })),
-        reviews: (reviewsList || []).map(r => ({
-          id: r.id,
-          name: r.name,
-          rating: r.rating,
-          comment: r.comment,
-          createdAt: r.created_at,
-        })),
-      };
+      const formattedData = formatUmkmItem(row, products, cat);
+      formattedData.reviews = (reviewsList || []).map(r => ({
+        id: r.id,
+        name: r.name,
+        rating: r.rating,
+        comment: r.comment,
+        createdAt: r.created_at,
+      }));
 
-      return res.json({ data });
+      return res.json({ success: true, data: formattedData });
     } catch (error) {
       console.error("[GET /api/umkm/:slug]", error);
       return res.status(500).json({ error: "Gagal mengambil detail UMKM." });
@@ -188,10 +176,10 @@ module.exports = function () {
   });
 
   // POST /api/umkm (Admin Create UMKM)
-  router.post("/", authMiddleware, requireRole("ADMIN"), validate(umkmSchema), async (req, res) => {
+  router.post("/", authMiddleware, requireRole("ADMIN", "SUPERADMIN"), validate(umkmSchema), async (req, res) => {
     try {
       const data = req.body;
-      const baseSlug = slugify(data.name, { lower: true, strict: true }) || "umkm";
+      const baseSlug = slugify(data.name || "umkm", { lower: true, strict: true }) || "umkm";
 
       let generatedSlug = baseSlug;
       let suffix = 1;
@@ -201,23 +189,52 @@ module.exports = function () {
         generatedSlug = `${baseSlug}-${suffix++}`;
       }
 
+      const categoryName = data.category || "Kuliner";
+      let categoryId = data.categoryId;
+
+      if (!categoryId && categoryName) {
+        const existingCat = await Category.findOne({
+          $or: [
+            { name: new RegExp(`^${categoryName}$`, "i") },
+            { slug: slugify(categoryName, { lower: true }) },
+            { id: categoryName }
+          ]
+        }).lean();
+
+        if (existingCat) {
+          categoryId = existingCat.id;
+        } else {
+          const newCatId = "cat-" + crypto.randomBytes(4).toString("hex");
+          const newCat = new Category({
+            id: newCatId,
+            name: categoryName,
+            slug: slugify(categoryName, { lower: true }) || newCatId,
+            icon_name: "Store",
+          });
+          await newCat.save();
+          categoryId = newCatId;
+        }
+      }
+
       const id = "umkm-" + crypto.randomBytes(8).toString("hex");
 
       const newUmkm = new UMKM({
         id,
-        user_id: req.user.id,
-        category_id: data.categoryId,
+        user_id: req.user ? req.user.id : "admin",
+        category_id: categoryId || "cat-1",
         name: data.name,
         slug: generatedSlug,
-        owner_name: data.ownerName,
+        owner_name: data.owner || data.ownerName || "Pemilik UMKM",
         description: data.description || "",
+        landing_text: data.landingText || data.description || "",
         address: data.address,
-        dusun: data.dusun,
+        dusun: data.dusun || "Desa Kutoharjo",
         operational_hours: data.operationalHours || null,
-        whatsapp_number: data.whatsappNumber || "",
-        maps_url: data.mapsUrl || null,
+        whatsapp_number: data.whatsapp || data.whatsappNumber || data.phone || "",
+        maps_url: data.gmapsUrl || data.mapsUrl || null,
+        gmaps_embed: data.gmapsEmbed || null,
         instagram_url: data.instagramUrl || null,
-        image_url: data.imageUrl || "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=800&q=80",
+        image_url: data.profileImage || data.imageUrl || "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=800&q=80",
         is_verified: true,
         certifications: data.certifications || [],
         latitude: data.latitude || null,
@@ -227,7 +244,10 @@ module.exports = function () {
       });
 
       await newUmkm.save();
-      return res.status(201).json({ data: newUmkm.toObject() });
+      const cat = await Category.findOne({ id: newUmkm.category_id }).lean();
+      const formatted = formatUmkmItem(newUmkm.toObject(), [], cat);
+
+      return res.status(201).json({ success: true, data: formatted });
     } catch (error) {
       console.error("[POST /api/umkm]", error);
       return res.status(500).json({ error: "Gagal membuat UMKM baru." });
@@ -235,7 +255,7 @@ module.exports = function () {
   });
 
   // PUT /api/umkm/:slug (Admin Edit UMKM)
-  router.put("/:slug", authMiddleware, async (req, res) => {
+  router.put("/:slug", authMiddleware, requireRole("ADMIN", "SUPERADMIN"), async (req, res) => {
     try {
       const { slug } = req.params;
       const body = req.body;
@@ -246,16 +266,42 @@ module.exports = function () {
       }
 
       if (body.name !== undefined) existing.name = body.name;
-      if (body.ownerName !== undefined) existing.owner_name = body.ownerName;
+      if (body.owner !== undefined || body.ownerName !== undefined) {
+        existing.owner_name = body.owner || body.ownerName;
+      }
       if (body.description !== undefined) existing.description = body.description;
+      if (body.landingText !== undefined) existing.landing_text = body.landingText;
       if (body.address !== undefined) existing.address = body.address;
       if (body.dusun !== undefined) existing.dusun = body.dusun;
       if (body.operationalHours !== undefined) existing.operational_hours = body.operationalHours || null;
-      if (body.whatsappNumber !== undefined) existing.whatsapp_number = body.whatsappNumber;
-      if (body.mapsUrl !== undefined) existing.maps_url = body.mapsUrl || null;
+      if (body.whatsapp !== undefined || body.whatsappNumber !== undefined || body.phone !== undefined) {
+        existing.whatsapp_number = body.whatsapp || body.whatsappNumber || body.phone;
+      }
+      if (body.gmapsUrl !== undefined || body.mapsUrl !== undefined) {
+        existing.maps_url = body.gmapsUrl || body.mapsUrl || null;
+      }
+      if (body.gmapsEmbed !== undefined) existing.gmaps_embed = body.gmapsEmbed || null;
       if (body.instagramUrl !== undefined) existing.instagram_url = body.instagramUrl || null;
-      if (body.imageUrl !== undefined) existing.image_url = body.imageUrl;
-      if (body.categoryId !== undefined) existing.category_id = body.categoryId;
+      if (body.profileImage !== undefined || body.imageUrl !== undefined) {
+        existing.image_url = body.profileImage || body.imageUrl;
+      }
+
+      if (body.category || body.categoryId) {
+        const categoryName = body.category;
+        let categoryId = body.categoryId;
+        if (!categoryId && categoryName) {
+          const existingCat = await Category.findOne({
+            $or: [
+              { name: new RegExp(`^${categoryName}$`, "i") },
+              { slug: slugify(categoryName, { lower: true }) },
+              { id: categoryName }
+            ]
+          }).lean();
+          if (existingCat) categoryId = existingCat.id;
+        }
+        if (categoryId) existing.category_id = categoryId;
+      }
+
       if (body.isVerified !== undefined) existing.is_verified = Boolean(body.isVerified);
       if (body.certifications !== undefined) existing.certifications = body.certifications;
       if (body.latitude !== undefined) existing.latitude = body.latitude || null;
@@ -264,7 +310,11 @@ module.exports = function () {
       existing.updated_at = new Date();
       await existing.save();
 
-      return res.json({ data: existing.toObject() });
+      const products = await Product.find({ umkm_id: existing.id }).sort({ created_at: -1 }).lean();
+      const cat = await Category.findOne({ id: existing.category_id }).lean();
+      const formatted = formatUmkmItem(existing.toObject(), products, cat);
+
+      return res.json({ success: true, data: formatted });
     } catch (error) {
       console.error("[PUT /api/umkm/:slug]", error);
       return res.status(500).json({ error: "Gagal memperbarui UMKM." });
@@ -281,7 +331,7 @@ module.exports = function () {
         await Review.deleteMany({ umkm_id: target.id });
         await UMKM.deleteOne({ _id: target._id });
       }
-      return res.json({ data: { success: true } });
+      return res.json({ success: true, data: { success: true } });
     } catch (error) {
       console.error("[DELETE /api/umkm/:slug]", error);
       return res.status(500).json({ error: "Gagal menghapus UMKM." });
@@ -332,6 +382,7 @@ module.exports = function () {
       const { id } = req.params;
       const reviews = await Review.find({ umkm_id: id }).sort({ created_at: -1 }).lean();
       return res.json({
+        success: true,
         data: (reviews || []).map(r => ({
           id: r.id,
           name: r.name,

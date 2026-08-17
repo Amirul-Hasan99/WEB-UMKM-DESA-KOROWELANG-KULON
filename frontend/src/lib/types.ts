@@ -1,6 +1,6 @@
 export interface UMKMProduct {
-  id: number;
-  umkmId: number;
+  id: number | string;
+  umkmId: number | string;
   name: string;
   price: number;
   unit: string;
@@ -9,7 +9,7 @@ export interface UMKMProduct {
 }
 
 export interface UMKM {
-  id: number;
+  id: number | string;
   name: string;
   owner: string;
   category: string;

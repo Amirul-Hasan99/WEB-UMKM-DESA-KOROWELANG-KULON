@@ -17,17 +17,23 @@ const profileSchema = z.object({
 
 // UMKM Schema
 const umkmSchema = z.object({
-  name: z.string().min(3, { message: 'Nama UMKM minimal 3 karakter.' }),
-  owner: z.string().min(2, { message: 'Nama pemilik minimal 2 karakter.' }),
-  category: z.string().default('Kuliner'),
-  address: z.string().min(5, { message: 'Alamat lengkap minimal 5 karakter.' }),
+  name: z.string().min(2, { message: 'Nama UMKM minimal 2 karakter.' }),
+  owner: z.string().optional(),
+  ownerName: z.string().optional(),
+  category: z.string().optional().default('Kuliner'),
+  categoryId: z.string().optional(),
+  address: z.string().min(3, { message: 'Alamat lengkap minimal 3 karakter.' }),
+  dusun: z.string().optional(),
   phone: z.string().optional(),
   whatsapp: z.string().optional(),
+  whatsappNumber: z.string().optional(),
   gmapsUrl: z.string().optional(),
+  mapsUrl: z.string().optional(),
   gmapsEmbed: z.string().optional(),
   description: z.string().optional(),
   landingText: z.string().optional(),
   profileImage: z.string().optional(),
+  imageUrl: z.string().optional(),
   bannerImage: z.string().optional(),
   certifications: z.array(z.string()).optional(),
   latitude: z.union([z.string(), z.number()]).optional(),
@@ -39,12 +45,14 @@ const umkmUpdateSchema = umkmSchema.partial();
 
 // Product Schema
 const productSchema = z.object({
-  umkmId: z.number({ required_error: 'UMKM ID wajib diisi.' }).int(),
-  name: z.string().min(2, { message: 'Nama produk minimal 2 karakter.' }),
-  price: z.number({ required_error: 'Harga wajib diisi.' }).positive({ message: 'Harga harus bernilai positif.' }),
-  unit: z.string().default('pcs'),
+  umkmId: z.union([z.string(), z.number()]),
+  name: z.string().optional(),
+  title: z.string().optional(),
+  price: z.number({ required_error: 'Harga wajib diisi.' }).min(0, { message: 'Harga tidak boleh negatif.' }),
+  unit: z.string().optional().default('pcs'),
   description: z.string().optional(),
   image: z.string().optional(),
+  imageUrl: z.string().optional(),
 });
 
 // Product Update Schema
