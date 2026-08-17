@@ -7,7 +7,7 @@ import SoftCard from '@/components/SoftCard';
 import SoftInput from '@/components/SoftInput';
 import SoftButton from '@/components/SoftButton';
 import ImageUploadInput from '@/components/ImageUploadInput';
-import { fetchDynamicContent } from '@/lib/api';
+import { fetchDynamicContent, saveDynamicContent } from '@/lib/api';
 import { DynamicContent } from '@/lib/types';
 
 export default function SuperAdminKontenPage() {
@@ -45,7 +45,7 @@ export default function SuperAdminKontenPage() {
     });
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const updatedContent: DynamicContent = {
@@ -64,13 +64,14 @@ export default function SuperAdminKontenPage() {
       footerText,
     };
 
-    // Save to local storage for instant client reflection
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('umkm_dynamic_content', JSON.stringify(updatedContent));
+    // Simpan ke database via API — bukan localStorage
+    const res = await saveDynamicContent(updatedContent);
+    if (res.success) {
+      setSavedSuccess(true);
+      setTimeout(() => setSavedSuccess(false), 3000);
+    } else {
+      alert(res.error || 'Gagal menyimpan konten ke database.');
     }
-
-    setSavedSuccess(true);
-    setTimeout(() => setSavedSuccess(false), 3000);
   };
 
   return (

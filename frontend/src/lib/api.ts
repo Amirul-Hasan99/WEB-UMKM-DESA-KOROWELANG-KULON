@@ -185,24 +185,12 @@ export const fetchUmkmById = async (id: number | string): Promise<UMKM | null> =
 };
 
 export const fetchDynamicContent = async (): Promise<DynamicContent> => {
-  if (typeof window !== 'undefined') {
-    const local = localStorage.getItem('umkm_dynamic_content');
-    if (local) {
-      try {
-        const parsed = JSON.parse(local);
-        return {
-          ...initialDynamicContent,
-          ...parsed,
-          logoUrl: parsed.logoUrl && !parsed.logoUrl.includes('unsplash') ? parsed.logoUrl : '/logo-kendal.png'
-        };
-      } catch (e) {}
-    }
-  }
+  // Selalu ambil dari database — jangan cache di localStorage
   try {
     const res = await axiosInstance.get('/public/konten');
     if (res.data && res.data.data) return res.data.data;
   } catch (e) {
-    console.warn("Using local state fallback for fetchDynamicContent");
+    console.warn('fetchDynamicContent: gagal fetch dari server, pakai fallback.');
   }
   return initialDynamicContent;
 };
@@ -218,31 +206,38 @@ export const sendFeedback = async (name: string, email: string, message: string)
 
 // --- AUTH & ADMIN API CALLS ---
 
+export const saveDynamicContent = async (content: DynamicContent): Promise<{ success: boolean; error?: string }> => {
+  try {
+    const res = await axiosInstance.put('/superadmin/konten', content);
+    if (res.data && (res.data.success || res.data.data)) {
+      return { success: true };
+    }
+    const err = res.data?.error || res.data?.message;
+    return { success: false, error: typeof err === 'string' ? err : 'Gagal menyimpan konten.' };
+  } catch (e: any) {
+    console.error('saveDynamicContent error:', e);
+    const err = e.response?.data?.error || e.response?.data?.message;
+    return { success: false, error: typeof err === 'string' ? err : 'Gagal menghubungkan ke server.' };
+  }
+};
+
 export const loginAdmin = async (email: string, password: string) => {
   try {
     const res = await axiosInstance.post('/auth/login', { email, password });
     if (res.data && res.data.token) {
+      // Simpan token asli dari backend ke localStorage
       localStorage.setItem('umkm_token', res.data.token);
       localStorage.setItem('umkm_user', JSON.stringify(res.data.user));
       return { success: true, token: res.data.token, user: res.data.user };
     }
-    return { success: false, message: res.data?.error || "Login gagal." };
+    return { success: false, message: res.data?.error || 'Login gagal.' };
   } catch (e: any) {
-    if (email === 'superadmin@kutoharjo.desa.id' && password === 'superadmin123') {
-      const user = { id: 1, name: "Super Admin Kelurahan", email, role: "superadmin", phone: "081234567890" };
-      const token = "mock_superadmin_jwt_token";
-      localStorage.setItem('umkm_token', token);
-      localStorage.setItem('umkm_user', JSON.stringify(user));
-      return { success: true, token, user };
+    // Tidak ada fallback mock — backend harus bisa diakses
+    const errMsg = e.response?.data?.error || e.response?.data?.message;
+    if (e.code === 'ECONNREFUSED' || e.message?.includes('Network')) {
+      return { success: false, message: 'Tidak dapat terhubung ke server. Pastikan backend berjalan.' };
     }
-    if (email === 'admin@kutoharjo.desa.id' && password === 'admin123') {
-      const user = { id: 2, name: "Budi Santoso (Admin Staff)", email, role: "admin", phone: "081987654321" };
-      const token = "mock_admin_jwt_token";
-      localStorage.setItem('umkm_token', token);
-      localStorage.setItem('umkm_user', JSON.stringify(user));
-      return { success: true, token, user };
-    }
-    return { success: false, message: e.response?.data?.error || e.response?.data?.message || "Login gagal. Periksa email & password Anda." };
+    return { success: false, message: typeof errMsg === 'string' ? errMsg : 'Login gagal. Periksa email & password Anda.' };
   }
 };
 

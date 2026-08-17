@@ -48,7 +48,10 @@ const productSchema = z.object({
   umkmId: z.union([z.string(), z.number()]),
   name: z.string().optional(),
   title: z.string().optional(),
-  price: z.number({ required_error: 'Harga wajib diisi.' }).min(0, { message: 'Harga tidak boleh negatif.' }),
+  price: z.preprocess(
+    (val) => (typeof val === 'string' ? parseFloat(val) || 0 : val),
+    z.number().min(0, { message: 'Harga tidak boleh negatif.' })
+  ),
   unit: z.string().optional().default('pcs'),
   description: z.string().optional(),
   image: z.string().optional(),
