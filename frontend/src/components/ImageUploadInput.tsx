@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { Upload, X, Check } from '@/components/Icons';
+import { uploadImage } from '@/lib/api';
 
 interface ImageUploadInputProps {
   label: string;
@@ -16,26 +17,37 @@ export const ImageUploadInput: React.FC<ImageUploadInputProps> = ({
   onChange,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 3 * 1024 * 1024) {
-        alert('Ukuran file maksimal adalah 3MB (karena batasan Vercel Serverless).');
-        return;
-      }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (typeof reader.result === 'string') {
-          onChange(reader.result);
-        }
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      setUploadError('Ukuran file maksimal adalah 5MB.');
+      return;
     }
+
+    setUploadError(null);
+    setUploading(true);
+
+    const res = await uploadImage(file);
+
+    if (res.success && res.url) {
+      onChange(res.url);
+    } else {
+      setUploadError(res.error || 'Gagal mengupload gambar. Coba lagi.');
+    }
+
+    setUploading(false);
+    // Reset input agar file yang sama bisa dipilih lagi
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleClear = () => {
     onChange('');
+    setUploadError(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -53,21 +65,28 @@ export const ImageUploadInput: React.FC<ImageUploadInputProps> = ({
         accept="image/*"
         onChange={handleFileChange}
         className="hidden"
+        disabled={uploading}
       />
 
       <div className="flex items-center gap-3">
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          className="flex-1 flex items-center justify-center gap-2 p-3 rounded-2xl soft-button text-xs font-bold text-gray-700 hover:text-blue-600 hover:bg-white/80 transition-all border border-dashed border-gray-400/60"
+          disabled={uploading}
+          className="flex-1 flex items-center justify-center gap-2 p-3 rounded-2xl soft-button text-xs font-bold text-gray-700 hover:text-blue-600 hover:bg-white/80 transition-all border border-dashed border-gray-400/60 disabled:opacity-60 disabled:cursor-not-allowed"
         >
           <Upload className="w-4 h-4 text-blue-600" />
-          <span>Pilih File Foto dari Perangkat (Device)</span>
+          <span>{uploading ? 'Mengupload gambar...' : 'Pilih File Foto dari Perangkat (Device)'}</span>
         </button>
       </div>
 
-      {/* Image Preview Thumbnail */}
-      {value && (
+      {/* Error message */}
+      {uploadError && (
+        <p className="text-xs text-red-500 font-semibold ml-1">{uploadError}</p>
+      )}
+
+      {/* Image Preview Thumbnail — hanya tampil jika sudah ada URL dari server */}
+      {value && !value.startsWith('data:') && (
         <div className="mt-1 flex items-center justify-between p-2.5 rounded-2xl soft-card-sm bg-white/70">
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-12 h-12 rounded-xl overflow-hidden bg-gray-200 shrink-0 border border-gray-300">
@@ -79,7 +98,7 @@ export const ImageUploadInput: React.FC<ImageUploadInputProps> = ({
                 Foto Terpilih dari Perangkat
               </span>
               <span className="text-[10px] text-gray-500 truncate max-w-[200px] sm:max-w-xs">
-                {value.startsWith('data:') ? 'File Gambar Siap Digunakan' : value}
+                File Gambar Siap Digunakan
               </span>
             </div>
           </div>

@@ -334,3 +334,30 @@ export const deleteProduct = async (productId: number | string): Promise<{ succe
     return { success: false, error: typeof err === 'string' ? err : (err?.message || "Gagal menghapus produk dari server.") };
   }
 };
+
+/**
+ * Upload gambar ke backend (Cloudinary) dan kembalikan URL publik.
+ * Digunakan oleh ImageUploadInput agar tidak mengirim base64 besar ke endpoint UMKM.
+ */
+export const uploadImage = async (file: File): Promise<{ success: boolean; url?: string; error?: string }> => {
+  try {
+    const formData = new FormData();
+    formData.append('image', file);
+
+    const token = typeof window !== 'undefined' ? localStorage.getItem('umkm_token') : null;
+    const res = await fetch('/api/admin/upload', {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: formData,
+    });
+
+    const data = await res.json();
+    if (res.ok && (data.url || data.imageUrl)) {
+      return { success: true, url: data.url || data.imageUrl };
+    }
+    return { success: false, error: data.message || 'Gagal mengupload gambar.' };
+  } catch (e: any) {
+    console.error('uploadImage error:', e);
+    return { success: false, error: e.message || 'Gagal menghubungkan ke server upload.' };
+  }
+};

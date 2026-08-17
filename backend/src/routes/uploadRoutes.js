@@ -2,10 +2,10 @@ const express = require("express");
 const router = express.Router();
 const upload = require("../middleware/upload");
 const { uploadToCloudinary } = require("../config/cloudinary");
-const { authMiddleware } = require("../../middleware/auth");
+const { authenticateToken } = require("../middleware/authMiddleware");
 
-// POST /api/upload — requires authentication
-router.post("/", authMiddleware, upload.single("image"), async (req, res) => {
+// POST /api/admin/upload — requires authentication
+router.post("/", authenticateToken, upload.single("image"), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({
