@@ -19,6 +19,11 @@ export default withAuth(
     if (pathname.startsWith("/dashboard/superadmin") && token?.role !== "SUPERADMIN") {
       return NextResponse.redirect(new URL("/dashboard/admin", req.url));
     }
+
+    // Mencegah ADMIN biasa mengakses halaman superadmin
+    if (pathname.startsWith("/superadmin") && token?.role !== "superadmin" && token?.role !== "SUPERADMIN") {
+      return NextResponse.redirect(new URL("/admin/dashboard", req.url));
+    }
   },
   {
     callbacks: {
@@ -32,5 +37,6 @@ export default withAuth(
 );
 
 export const config = {
-  matcher: ["/dashboard/:path*"],
+  matcher: ["/dashboard/:path*", "/admin/:path*", "/superadmin/:path*"],
 };
+

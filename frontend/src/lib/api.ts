@@ -337,19 +337,45 @@ export const deleteProduct = async (productId: number | string): Promise<{ succe
 
 /**
  * Upload gambar ke backend (Cloudinary) dan kembalikan URL publik.
- * Digunakan oleh ImageUploadInput agar tidak mengirim base64 besar ke endpoint UMKM.
+ * Mendukung dua sistem auth: token JWT di localStorage (custom login) dan NextAuth session.
  */
 export const uploadImage = async (file: File): Promise<{ success: boolean; url?: string; error?: string }> => {
   try {
     const formData = new FormData();
     formData.append('image', file);
 
-    const token = typeof window !== 'undefined' ? localStorage.getItem('umkm_token') : null;
+    // Ambil token: coba dari localStorage dulu (custom JWT login)
+    let token = typeof window !== 'undefined' ? localStorage.getItem('umkm_token') : null;
+
+    // Jika tidak ada di localStorage, coba ambil dari NextAuth session via API
+    if (!token) {
+      try {
+        const sessionRes = await fetch('/api/auth/session');
+        if (sessionRes.ok) {
+          const session = await sessionRes.json();
+          token = session?.accessToken || null;
+        }
+      } catch (_) {}
+    }
+
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const res = await fetch('/api/admin/upload', {
       method: 'POST',
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      headers,
       body: formData,
     });
+
+    // Cek apakah respons JSON atau HTML error
+    const contentType = res.headers.get('content-type') || '';
+    if (!contentType.includes('application/json')) {
+      const text = await res.text();
+      console.error('Upload non-JSON response:', text.slice(0, 200));
+      return { success: false, error: 'Server tidak merespons dengan benar. Pastikan Anda sudah login.' };
+    }
 
     const data = await res.json();
     if (res.ok && (data.url || data.imageUrl)) {
@@ -361,3 +387,4 @@ export const uploadImage = async (file: File): Promise<{ success: boolean; url?:
     return { success: false, error: e.message || 'Gagal menghubungkan ke server upload.' };
   }
 };
+
