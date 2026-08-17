@@ -9,6 +9,7 @@ const { db } = require('./db');
 const publicRoutes = require('./routes/publicRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const superadminRoutes = require('./routes/superadminRoutes');
+const authRoutes = require('./routes/authRoutes');
 
 const app = express();
 const PORT = env.PORT;
@@ -85,6 +86,7 @@ app.get(['/api', '/api/health'], async (req, res) => {
 
 // Routes
 app.use('/api/public', publicRoutes);
+app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/superadmin', superadminRoutes);
 

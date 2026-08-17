@@ -250,7 +250,7 @@ export const loginAdmin = async (email: string, password: string) => {
 
 export const createUmkm = async (data: Partial<UMKM>): Promise<{ success: boolean; data?: UMKM; error?: string }> => {
   try {
-    const res = await axiosInstance.post('/umkm', data);
+    const res = await axiosInstance.post('/admin/umkm', data);
     if (res.data && res.data.data) {
       return { success: true, data: normalizeUmkm(res.data.data) };
     }
@@ -265,7 +265,7 @@ export const createUmkm = async (data: Partial<UMKM>): Promise<{ success: boolea
 
 export const updateUmkm = async (id: number | string, data: Partial<UMKM>): Promise<{ success: boolean; data?: UMKM; error?: string }> => {
   try {
-    const res = await axiosInstance.put(`/umkm/${id}`, data);
+    const res = await axiosInstance.put(`/admin/umkm/${id}`, data);
     if (res.data && res.data.data) {
       return { success: true, data: normalizeUmkm(res.data.data) };
     }
@@ -280,7 +280,7 @@ export const updateUmkm = async (id: number | string, data: Partial<UMKM>): Prom
 
 export const deleteUmkm = async (id: number | string): Promise<{ success: boolean; error?: string }> => {
   try {
-    const res = await axiosInstance.delete(`/umkm/${id}`);
+    const res = await axiosInstance.delete(`/admin/umkm/${id}`);
     if (res.data && (res.data.success || res.data.data)) {
       return { success: true };
     }
@@ -295,7 +295,7 @@ export const deleteUmkm = async (id: number | string): Promise<{ success: boolea
 
 export const createProduct = async (productData: Partial<UMKMProduct>): Promise<{ success: boolean; data?: UMKMProduct; error?: string }> => {
   try {
-    const res = await axiosInstance.post('/products', productData);
+    const res = await axiosInstance.post('/admin/products', productData);
     if (res.data && res.data.data) {
       const p = res.data.data;
       return {
@@ -322,7 +322,7 @@ export const createProduct = async (productData: Partial<UMKMProduct>): Promise<
 
 export const deleteProduct = async (productId: number | string): Promise<{ success: boolean; error?: string }> => {
   try {
-    const res = await axiosInstance.delete(`/products/${productId}`);
+    const res = await axiosInstance.delete(`/admin/products/${productId}`);
     if (res.data && (res.data.success || res.data.data)) {
       return { success: true };
     }
