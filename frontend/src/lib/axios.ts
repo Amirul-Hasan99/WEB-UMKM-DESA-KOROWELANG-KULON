@@ -1,7 +1,9 @@
 import axios from 'axios';
 
-// Base API URL pointing to Express Backend
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+// Base API URL pointing to Express Backend. Uses relative path on client to leverage Next.js rewrites, and absolute URL on server.
+const API_BASE_URL = typeof window !== 'undefined' 
+  ? '/api' 
+  : (process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000') + '/api';
 
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,

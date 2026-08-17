@@ -10,9 +10,6 @@ const exportRoutes = require('./exportRoutes');
 
 const { loginLimiter } = require('../middleware/rateLimiter');
 
-// Login Route (with Zod validation & Brute-Force Rate Limiting)
-router.post('/login', loginLimiter, validate(loginSchema), adminController.login);
-
 // Protected Admin & SuperAdmin Routes
 router.use(authenticateToken);
 router.use(requireRole('admin', 'superadmin'));
@@ -32,12 +29,12 @@ router.put('/umkm/:id', validate(umkmUpdateSchema), adminController.updateUmkm);
 router.delete('/umkm/:id', adminController.deleteUmkm);
 
 // Product CRUD
-router.get('/produk', adminController.getAllProducts);
-router.post('/produk', validate(productSchema), adminController.createProduct);
-router.put('/produk/:id', validate(productUpdateSchema), adminController.updateProduct);
-router.delete('/produk/:id', adminController.deleteProduct);
+router.get('/products', adminController.getAllProducts);
+router.post('/products', validate(productSchema), adminController.createProduct);
+router.put('/products/:id', validate(productUpdateSchema), adminController.updateProduct);
+router.delete('/products/:id', adminController.deleteProduct);
 
 // Feedback List
-router.get('/feedback', adminController.getFeedbacks);
+router.get('/feedbacks', adminController.getFeedbacks);
 
 module.exports = router;

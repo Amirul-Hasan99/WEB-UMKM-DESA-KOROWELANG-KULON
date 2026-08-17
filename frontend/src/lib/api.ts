@@ -152,7 +152,7 @@ export const normalizeUmkm = (raw: any): UMKM => {
 
 export const fetchUmkms = async (search?: string, category?: string): Promise<UMKM[]> => {
   try {
-    const res = await axiosInstance.get('/umkm', { params: { search, category, all: 'true' } });
+    const res = await axiosInstance.get('/public/umkm', { params: { search, category, all: 'true' } });
     if (res.data && Array.isArray(res.data.data)) {
       return res.data.data.map(normalizeUmkm);
     }
@@ -164,7 +164,7 @@ export const fetchUmkms = async (search?: string, category?: string): Promise<UM
 
 export const fetchUmkmById = async (id: number | string): Promise<UMKM | null> => {
   try {
-    const res = await axiosInstance.get(`/umkm/${id}`);
+    const res = await axiosInstance.get(`/public/umkm/${id}`);
     if (res.data && res.data.data) {
       return normalizeUmkm(res.data.data);
     }

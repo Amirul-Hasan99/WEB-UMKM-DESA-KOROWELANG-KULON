@@ -10,18 +10,8 @@ const path = require("path");
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Connect to MongoDB Atlas (or local fallback)
-const { connectMongoDB } = require("./db/mongodb");
-
-// Mongoose Auto-Connect Middleware for Vercel Serverless Function Invocations
-app.use(async (req, res, next) => {
-  try {
-    await connectMongoDB();
-  } catch (err) {
-    console.warn("⚠️ MongoDB connect middleware warning:", err.message);
-  }
-  next();
-});
+// Connect to PostgreSQL via Drizzle
+const { db } = require("./src/db");
 
 // ============================================
 // Security: Helmet HTTP Headers
@@ -87,10 +77,15 @@ app.use("/uploads", express.static(path.join(__dirname, "public", "uploads")));
 app.get("/health", async (req, res) => {
   let dbStatus = "disconnected";
   try {
-    const conn = await connectMongoDB();
-    dbStatus = conn && conn.connection.readyState === 1 ? "connected" : "fallback";
+    if (db) {
+      // Simple query to check connection
+      await db.execute('SELECT 1');
+      dbStatus = "connected";
+    } else {
+      dbStatus = "fallback (mockData)";
+    }
   } catch (e) {
-    dbStatus = "fallback";
+    dbStatus = "error";
   }
 
   res.json({
@@ -105,34 +100,29 @@ app.get("/health", async (req, res) => {
 app.get("/", (req, res) => {
   res.json({
     status: "online",
-    message: "Portal UMKM Kutoharjo API Server (MongoDB Atlas + Vercel)",
+    message: "Portal UMKM Kutoharjo API Server (PostgreSQL + Vercel)",
   });
 });
 
 // ============================================
 // API Routers
 // ============================================
-const authRoutes = require("./routes/auth");
-const umkmRoutes = require("./routes/umkm");
-const categoriesRoutes = require("./routes/categories");
-const productsRoutes = require("./routes/products");
-const adminRoutes = require("./routes/admin");
-const superadminRoutes = require("./routes/superadmin");
-const userRoutes = require("./routes/user");
+const authRoutes = require("./src/routes/authRoutes");
+const adminRoutes = require("./src/routes/adminRoutes");
+const superadminRoutes = require("./src/routes/superadminRoutes");
 const uploadRoutes = require("./src/routes/uploadRoutes");
 const exportRoutes = require("./src/routes/exportRoutes");
+const publicRoutes = require("./src/routes/publicRoutes");
 
-app.use("/api/auth", authLimiter, authRoutes());
-app.use("/api/umkm", umkmRoutes());
-app.use("/api/categories", categoriesRoutes());
-app.use("/api/products", productsRoutes());
-app.use("/api/admin", adminRoutes());
-app.use("/api/superadmin", superadminRoutes());
-app.use("/api/user", userRoutes());
+app.use("/api/auth", authLimiter, authRoutes);
+app.use("/api/public", publicRoutes);
+
+// Admin / SuperAdmin paths 
+// (Wait, frontend calls /api/umkm for admin creation, let's mount adminRoutes at /api instead of /api/admin so it maps perfectly to what frontend expects if it calls /api/umkm and /api/products)
+app.use("/api", adminRoutes); 
+app.use("/api/superadmin", superadminRoutes);
 app.use("/api/upload", uploadRoutes);
-app.use("/api/admin/upload", uploadRoutes);
 app.use("/api/export", exportRoutes);
-app.use("/api/admin/export", exportRoutes);
 
 // ============================================
 // Global Error Handler
