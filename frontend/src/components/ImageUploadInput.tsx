@@ -20,8 +20,8 @@ export const ImageUploadInput: React.FC<ImageUploadInputProps> = ({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        alert('Ukuran file maksimal adalah 5MB.');
+      if (file.size > 3 * 1024 * 1024) {
+        alert('Ukuran file maksimal adalah 3MB (karena batasan Vercel Serverless).');
         return;
       }
       const reader = new FileReader();

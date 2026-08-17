@@ -1,10 +1,11 @@
 const { db, schema } = require('../db');
 const { eq, ilike, or, and, gte, lte, sql } = require('drizzle-orm');
-const mockData = require('../data/store');
 
 // GET /api/public/umkm (With search, category, minPrice, maxPrice, page, limit)
 const getUmkms = async (req, res) => {
   try {
+    if (!db) return res.status(500).json({ success: false, message: 'Database tidak terhubung.' });
+
     const { search, category, minPrice, maxPrice, page = 1, limit = 9 } = req.query;
     const pageNum = parseInt(page) || 1;
     const limitNum = parseInt(limit) || 9;
@@ -13,56 +14,32 @@ const getUmkms = async (req, res) => {
     let result = [];
     let totalCount = 0;
 
-    if (db) {
-      try {
-        let conditions = [];
-        if (category && category !== 'Semua') {
-          conditions.push(eq(schema.umkms.category, category));
-        }
-        if (search) {
-          const q = `%${search.toLowerCase()}%`;
-          conditions.push(
-            or(
-              ilike(schema.umkms.name, q),
-              ilike(schema.umkms.owner, q),
-              ilike(schema.umkms.description, q)
-            )
-          );
-        }
-
-        const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
-
-        result = await db.select().from(schema.umkms).where(whereClause).limit(limitNum).offset(offset);
-        const countRes = await db.select({ count: sql`count(*)` }).from(schema.umkms).where(whereClause);
-        totalCount = parseInt(countRes[0]?.count || 0);
-
-        const allProducts = await db.select().from(schema.products);
-        result = result.map(u => ({
-          ...u,
-          products: allProducts.filter(p => p.umkmId === u.id)
-        }));
-      } catch (err) {}
+    let conditions = [];
+    if (category && category !== 'Semua') {
+      conditions.push(eq(schema.umkms.category, category));
+    }
+    if (search) {
+      const q = `%${search.toLowerCase()}%`;
+      conditions.push(
+        or(
+          ilike(schema.umkms.name, q),
+          ilike(schema.umkms.owner, q),
+          ilike(schema.umkms.description, q)
+        )
+      );
     }
 
-    if (!result || result.length === 0) {
-      let filtered = [...mockData.umkms];
-      if (category && category !== 'Semua') {
-        filtered = filtered.filter(u => u.category.toLowerCase() === category.toLowerCase());
-      }
-      if (search) {
-        const q = search.toLowerCase();
-        filtered = filtered.filter(u =>
-          u.name.toLowerCase().includes(q) ||
-          u.owner.toLowerCase().includes(q) ||
-          u.description.toLowerCase().includes(q)
-        );
-      }
-      totalCount = filtered.length;
-      result = filtered.slice(offset, offset + limitNum).map(u => ({
-        ...u,
-        products: mockData.products.filter(p => p.umkmId === u.id)
-      }));
-    }
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+    result = await db.select().from(schema.umkms).where(whereClause).limit(limitNum).offset(offset);
+    const countRes = await db.select({ count: sql`count(*)` }).from(schema.umkms).where(whereClause);
+    totalCount = parseInt(countRes[0]?.count || 0);
+
+    const allProducts = await db.select().from(schema.products);
+    result = result.map(u => ({
+      ...u,
+      products: allProducts.filter(p => p.umkmId === u.id)
+    }));
 
     return res.status(200).json({
       success: true,
@@ -80,27 +57,18 @@ const getUmkms = async (req, res) => {
 // GET /api/public/umkm/:id
 const getUmkmById = async (req, res) => {
   try {
+    if (!db) return res.status(500).json({ success: false, message: 'Database tidak terhubung.' });
+
     const id = parseInt(req.params.id);
     let umkm = null;
     let products = [];
     let reviewsList = [];
 
-    if (db) {
-      try {
-        const result = await db.select().from(schema.umkms).where(eq(schema.umkms.id, id));
-        if (result.length > 0) {
-          umkm = result[0];
-          products = await db.select().from(schema.products).where(eq(schema.products.umkmId, id));
-          reviewsList = await db.select().from(schema.reviews).where(eq(schema.reviews.umkmId, id));
-        }
-      } catch (err) {}
-    }
-
-    if (!umkm) {
-      umkm = mockData.umkms.find(u => u.id === id);
-      if (umkm) {
-        products = mockData.products.filter(p => p.umkmId === id);
-      }
+    const result = await db.select().from(schema.umkms).where(eq(schema.umkms.id, id));
+    if (result.length > 0) {
+      umkm = result[0];
+      products = await db.select().from(schema.products).where(eq(schema.products.umkmId, id));
+      reviewsList = await db.select().from(schema.reviews).where(eq(schema.reviews.umkmId, id));
     }
 
     if (!umkm) {
@@ -123,6 +91,8 @@ const getUmkmById = async (req, res) => {
 // POST /api/public/feedback
 const submitFeedback = async (req, res) => {
   try {
+    if (!db) return res.status(500).json({ success: false, message: 'Database tidak terhubung.' });
+
     const { name, email, message } = req.body;
 
     const payload = {
@@ -132,32 +102,16 @@ const submitFeedback = async (req, res) => {
       createdAt: new Date()
     };
 
-    if (db) {
-      try {
-        const inserted = await db.insert(schema.feedbacks).values(payload).returning();
-        if (inserted.length > 0) {
-          return res.status(201).json({
-            success: true,
-            message: 'Feedback berhasil dikirim. Terima kasih atas masukan Anda!',
-            data: inserted[0]
-          });
-        }
-      } catch (err) {}
+    const inserted = await db.insert(schema.feedbacks).values(payload).returning();
+    if (inserted.length > 0) {
+      return res.status(201).json({
+        success: true,
+        message: 'Feedback berhasil dikirim. Terima kasih atas masukan Anda!',
+        data: inserted[0]
+      });
     }
 
-    // Fallback mockData
-    const newFeedback = {
-      id: mockData.feedbacks.length > 0 ? Math.max(...mockData.feedbacks.map(f => f.id)) + 1 : 1,
-      ...payload,
-      createdAt: new Date().toISOString()
-    };
-    mockData.feedbacks.push(newFeedback);
-
-    return res.status(201).json({
-      success: true,
-      message: 'Feedback berhasil dikirim. Terima kasih atas masukan Anda!',
-      data: newFeedback
-    });
+    return res.status(400).json({ success: false, message: 'Gagal mengirim feedback.' });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }
@@ -166,16 +120,14 @@ const submitFeedback = async (req, res) => {
 // GET /api/public/konten
 const getDynamicContent = async (req, res) => {
   try {
+    if (!db) return res.status(500).json({ success: false, message: 'Database tidak terhubung.' });
+
     let content = null;
-    if (db) {
-      try {
-        const result = await db.select().from(schema.dynamicContent);
-        if (result.length > 0) content = result[0];
-      } catch (err) {}
-    }
+    const result = await db.select().from(schema.dynamicContent);
+    if (result.length > 0) content = result[0];
 
     if (!content) {
-      content = mockData.dynamicContent;
+      return res.status(404).json({ success: false, message: 'Konten tidak ditemukan.' });
     }
 
     return res.status(200).json({
@@ -190,6 +142,8 @@ const getDynamicContent = async (req, res) => {
 // POST /api/public/umkm/:id/review (Public Ratings & Reviews)
 const submitReview = async (req, res) => {
   try {
+    if (!db) return res.status(500).json({ success: false, message: 'Database tidak terhubung.' });
+
     const umkmId = parseInt(req.params.id);
     const { name, rating, comment } = req.body;
 
@@ -201,32 +155,22 @@ const submitReview = async (req, res) => {
       createdAt: new Date()
     };
 
-    if (db) {
-      try {
-        const inserted = await db.insert(schema.reviews).values(reviewPayload).returning();
-        // Calculate new average rating
-        const allReviews = await db.select().from(schema.reviews).where(eq(schema.reviews.umkmId, umkmId));
-        const avgRating = allReviews.reduce((acc, r) => acc + r.rating, 0) / allReviews.length;
+    const inserted = await db.insert(schema.reviews).values(reviewPayload).returning();
+    // Calculate new average rating
+    const allReviews = await db.select().from(schema.reviews).where(eq(schema.reviews.umkmId, umkmId));
+    const avgRating = allReviews.reduce((acc, r) => acc + r.rating, 0) / allReviews.length;
 
-        await db.update(schema.umkms)
-          .set({
-            rating: Math.round(avgRating * 10) / 10,
-            reviewCount: allReviews.length
-          })
-          .where(eq(schema.umkms.id, umkmId));
-
-        return res.status(201).json({
-          success: true,
-          message: 'Ulasan Anda telah berhasil dipublikasikan!',
-          data: inserted[0]
-        });
-      } catch (err) {}
-    }
+    await db.update(schema.umkms)
+      .set({
+        rating: Math.round(avgRating * 10) / 10,
+        reviewCount: allReviews.length
+      })
+      .where(eq(schema.umkms.id, umkmId));
 
     return res.status(201).json({
       success: true,
       message: 'Ulasan Anda telah berhasil dipublikasikan!',
-      data: { id: Date.now(), ...reviewPayload, createdAt: new Date().toISOString() }
+      data: inserted[0]
     });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });

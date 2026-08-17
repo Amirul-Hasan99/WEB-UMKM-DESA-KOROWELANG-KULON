@@ -1,6 +1,16 @@
 import axiosInstance from './axios';
 import { UMKM, UMKMProduct, Feedback, DynamicContent, UserAdmin } from './types';
 
+// Helper to safely extract error message from response objects
+const extractError = (e: any, defaultMsg: string): string => {
+  const err = e.response?.data?.error || e.response?.data?.message || e.message;
+  if (typeof err === 'string') return err;
+  if (err && typeof err === 'object') {
+    return err.message || JSON.stringify(err);
+  }
+  return defaultMsg;
+};
+
 // Fallback Mock Data for initial client state when backend is booting up
 export const initialDynamicContent: DynamicContent = {
   siteName: "UMKM Kutoharjo",
@@ -244,10 +254,12 @@ export const createUmkm = async (data: Partial<UMKM>): Promise<{ success: boolea
     if (res.data && res.data.data) {
       return { success: true, data: normalizeUmkm(res.data.data) };
     }
-    return { success: false, error: res.data?.error || "Gagal mendaftarkan UMKM." };
+    const err = res.data?.error || res.data?.message;
+    return { success: false, error: typeof err === 'string' ? err : (err?.message || "Gagal mendaftarkan UMKM.") };
   } catch (e: any) {
     console.error("createUmkm error:", e);
-    return { success: false, error: e.response?.data?.error || "Gagal menghubungkan ke server." };
+    const err = e.response?.data?.error || e.response?.data?.message;
+    return { success: false, error: typeof err === 'string' ? err : (err?.message || "Gagal menghubungkan ke server.") };
   }
 };
 
@@ -257,10 +269,12 @@ export const updateUmkm = async (id: number | string, data: Partial<UMKM>): Prom
     if (res.data && res.data.data) {
       return { success: true, data: normalizeUmkm(res.data.data) };
     }
-    return { success: false, error: res.data?.error || "Gagal meng-update UMKM." };
+    const err = res.data?.error || res.data?.message;
+    return { success: false, error: typeof err === 'string' ? err : (err?.message || "Gagal meng-update UMKM.") };
   } catch (e: any) {
     console.error("updateUmkm error:", e);
-    return { success: false, error: e.response?.data?.error || "Gagal menghubungkan ke server." };
+    const err = e.response?.data?.error || e.response?.data?.message;
+    return { success: false, error: typeof err === 'string' ? err : (err?.message || "Gagal menghubungkan ke server.") };
   }
 };
 
@@ -270,10 +284,12 @@ export const deleteUmkm = async (id: number | string): Promise<{ success: boolea
     if (res.data && (res.data.success || res.data.data)) {
       return { success: true };
     }
-    return { success: false, error: res.data?.error || "Gagal menghapus UMKM." };
+    const err = res.data?.error || res.data?.message;
+    return { success: false, error: typeof err === 'string' ? err : (err?.message || "Gagal menghapus UMKM.") };
   } catch (e: any) {
     console.error("deleteUmkm error:", e);
-    return { success: false, error: e.response?.data?.error || "Gagal menghapus data dari server." };
+    const err = e.response?.data?.error || e.response?.data?.message;
+    return { success: false, error: typeof err === 'string' ? err : (err?.message || "Gagal menghapus data dari server.") };
   }
 };
 
@@ -295,10 +311,12 @@ export const createProduct = async (productData: Partial<UMKMProduct>): Promise<
         }
       };
     }
-    return { success: false, error: res.data?.error || "Gagal menambahkan produk." };
+    const err = res.data?.error || res.data?.message;
+    return { success: false, error: typeof err === 'string' ? err : (err?.message || "Gagal menambahkan produk.") };
   } catch (e: any) {
     console.error("createProduct error:", e);
-    return { success: false, error: e.response?.data?.error || "Gagal menyimpan produk ke server." };
+    const err = e.response?.data?.error || e.response?.data?.message;
+    return { success: false, error: typeof err === 'string' ? err : (err?.message || "Gagal menyimpan produk ke server.") };
   }
 };
 
@@ -308,9 +326,11 @@ export const deleteProduct = async (productId: number | string): Promise<{ succe
     if (res.data && (res.data.success || res.data.data)) {
       return { success: true };
     }
-    return { success: false, error: res.data?.error || "Gagal menghapus produk." };
+    const err = res.data?.error || res.data?.message;
+    return { success: false, error: typeof err === 'string' ? err : (err?.message || "Gagal menghapus produk.") };
   } catch (e: any) {
     console.error("deleteProduct error:", e);
-    return { success: false, error: e.response?.data?.error || "Gagal menghapus produk dari server." };
+    const err = e.response?.data?.error || e.response?.data?.message;
+    return { success: false, error: typeof err === 'string' ? err : (err?.message || "Gagal menghapus produk dari server.") };
   }
 };
