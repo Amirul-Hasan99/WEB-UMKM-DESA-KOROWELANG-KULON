@@ -1,5 +1,5 @@
 import axiosInstance from './axios';
-import { UMKM, UMKMProduct, Feedback, DynamicContent } from './types';
+import { UMKM, UMKMProduct, Feedback, DynamicContent, UserAdmin } from './types';
 
 // ============================================================
 // Helper: Extract error message from response
@@ -226,6 +226,52 @@ export const logoutAdmin = () => {
   }
   deleteCookie('umkm_token');
   deleteCookie('umkm_user');
+};
+
+export const fetchUserProfile = async (): Promise<{ success: boolean; data?: UserAdmin; error?: string }> => {
+  try {
+    const res = await axiosInstance.get('/admin/profile');
+    if (res.data && res.data.data) {
+      const u = res.data.data;
+      const userAdmin: UserAdmin = {
+        id: u.id,
+        name: u.name || '',
+        email: u.email || '',
+        role: u.role || 'admin',
+        phone: u.phone || '',
+        avatar: u.avatar || '',
+        bio: u.bio || '',
+      };
+      return { success: true, data: userAdmin };
+    }
+    return { success: false, error: res.data?.message || 'Gagal memuat profil.' };
+  } catch (e: any) {
+    return { success: false, error: extractError(e, 'Gagal mengambil data profil dari server.') };
+  }
+};
+
+export const updateUserProfile = async (
+  payload: Partial<UserAdmin> & { password?: string }
+): Promise<{ success: boolean; data?: UserAdmin; error?: string }> => {
+  try {
+    const res = await axiosInstance.put('/admin/profile', payload);
+    if (res.data && res.data.data) {
+      const u = res.data.data;
+      const userAdmin: UserAdmin = {
+        id: u.id,
+        name: u.name || '',
+        email: u.email || '',
+        role: u.role || 'admin',
+        phone: u.phone || '',
+        avatar: u.avatar || '',
+        bio: u.bio || '',
+      };
+      return { success: true, data: userAdmin };
+    }
+    return { success: false, error: res.data?.message || 'Gagal memperbarui profil.' };
+  } catch (e: any) {
+    return { success: false, error: extractError(e, 'Gagal menyimpan profil ke server.') };
+  }
 };
 
 // ============================================================

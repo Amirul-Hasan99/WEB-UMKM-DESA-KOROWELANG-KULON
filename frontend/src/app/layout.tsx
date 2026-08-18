@@ -32,6 +32,13 @@ export const metadata: Metadata = {
     title: 'UMKM Desa Kutoharjo',
     description: 'Portal Resmi Produk & Usaha Desa Kutoharjo, Kendal.',
   },
+  icons: {
+    icon: [
+      { url: '/logo-kendal.png', type: 'image/png' },
+    ],
+    shortcut: '/logo-kendal.png',
+    apple: '/logo-kendal.png',
+  },
   robots: {
     index: true,
     follow: true,
@@ -60,6 +67,9 @@ export default function RootLayout({
   return (
     <html lang="id">
       <head>
+        <link rel="icon" type="image/png" href="/logo-kendal.png" />
+        <link rel="shortcut icon" type="image/png" href="/logo-kendal.png" />
+        <link rel="apple-touch-icon" href="/logo-kendal.png" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
