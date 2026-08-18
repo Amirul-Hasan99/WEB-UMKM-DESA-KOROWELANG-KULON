@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Mail, Lock, LogIn, ShieldCheck, AlertCircle, Clock } from '@/components/Icons';
@@ -9,7 +9,7 @@ import SoftInput from '@/components/SoftInput';
 import SoftButton from '@/components/SoftButton';
 import { loginAdmin } from '@/lib/api';
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -166,5 +166,22 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="h-screen w-full flex items-center justify-center bg-[#eef2f6]">
+          <div className="animate-pulse flex flex-col items-center gap-2">
+            <div className="w-10 h-10 rounded-xl bg-gray-300 soft-card" />
+            <p className="text-xs text-gray-500 font-semibold">Memuat...</p>
+          </div>
+        </div>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   );
 }
