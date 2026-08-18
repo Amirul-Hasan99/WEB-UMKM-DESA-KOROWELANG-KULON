@@ -81,9 +81,17 @@ export default function UmkmDetailPage() {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex items-end p-6">
               <div className="flex flex-col gap-2 text-white">
-                <span className="bg-red-600/90 backdrop-blur-md px-3 py-1 rounded-xl text-xs font-bold self-start uppercase tracking-wider">
-                  {umkm.category}
-                </span>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="bg-red-600/90 backdrop-blur-md px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider">
+                    {umkm.category}
+                  </span>
+                  {umkm.isHalal && (
+                    <span className="bg-emerald-600/95 text-white backdrop-blur-md px-3 py-1 rounded-xl text-xs font-extrabold flex items-center gap-1.5 shadow-sm border border-emerald-400/40">
+                      <ShieldCheck className="w-4 h-4 text-emerald-200" />
+                      Bersertifikat Halal
+                    </span>
+                  )}
+                </div>
                 <h1 className="text-2xl md:text-4xl font-extrabold">{umkm.name}</h1>
                 <p className="text-xs md:text-sm text-gray-200 flex items-center gap-2 font-medium">
                   <ShieldCheck className="w-4 h-4 text-red-400" />
@@ -104,11 +112,17 @@ export default function UmkmDetailPage() {
             </div>
 
             <div className="flex flex-col gap-1">
-              <span className="text-xs font-bold text-gray-400 uppercase">Rating Pelanggan</span>
+              <span className="text-xs font-bold text-gray-400 uppercase">Rating & Legalitas</span>
               <p className="text-sm font-bold text-gray-800 flex items-center gap-1.5">
                 <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
-                {umkm.rating} <span className="text-xs text-gray-500 font-normal">({umkm.reviewCount} ulasan pembeli)</span>
+                {umkm.rating} <span className="text-xs text-gray-500 font-normal">({umkm.reviewCount} ulasan)</span>
               </p>
+              {umkm.isHalal && umkm.halalNumber && (
+                <p className="text-xs font-bold text-emerald-700 flex items-center gap-1 mt-0.5">
+                  <Award className="w-3.5 h-3.5 text-emerald-600" />
+                  No. Halal: {umkm.halalNumber}
+                </p>
+              )}
             </div>
 
             <div className="flex justify-start md:justify-end">
@@ -129,6 +143,36 @@ export default function UmkmDetailPage() {
               </a>
             </div>
           </div>
+
+          {/* Certifications Bar */}
+          {((umkm.certifications && umkm.certifications.length > 0) || umkm.isHalal) && (
+            <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold shrink-0 shadow-sm">
+                  <ShieldCheck className="w-4 h-4" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xs font-extrabold text-emerald-950">Sertifikasi & Legalitas Usaha Terverifikasi</span>
+                  <span className="text-[11px] text-emerald-700 font-medium">
+                    {umkm.halalNumber ? `Nomor Sertifikat Halal: ${umkm.halalNumber}` : 'Telah diverifikasi oleh Balai Desa Kutoharjo'}
+                  </span>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {umkm.isHalal && (
+                  <span className="px-2.5 py-1 rounded-lg text-xs font-extrabold bg-emerald-600 text-white shadow-sm flex items-center gap-1">
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    Halal Resmi
+                  </span>
+                )}
+                {umkm.certifications?.map((cert, idx) => (
+                  <span key={idx} className="px-2.5 py-1 rounded-lg text-xs font-bold bg-white text-emerald-800 border border-emerald-200 shadow-sm">
+                    {cert}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Description */}
           <div className="flex flex-col gap-3">
@@ -157,11 +201,27 @@ export default function UmkmDetailPage() {
               {umkm.products.map((product) => (
                 <SoftCard key={product.id} className="flex flex-col justify-between gap-4">
                   <div className="flex flex-col gap-3">
-                    <div className="h-44 rounded-xl overflow-hidden bg-gray-200">
+                    <div className="relative h-44 rounded-xl overflow-hidden bg-gray-200">
                       <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                      {product.isHalal && (
+                        <div className="absolute top-2.5 right-2.5 bg-emerald-600 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-md">
+                          <ShieldCheck className="w-3 h-3" />
+                          Halal
+                        </div>
+                      )}
                     </div>
-                    <h3 className="font-bold text-gray-900 text-base">{product.name}</h3>
-                    <p className="text-xs text-gray-600 line-clamp-2">{product.description}</p>
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-bold text-gray-900 text-base">{product.name}</h3>
+                      </div>
+                      {product.isHalal && product.halalNumber && (
+                        <span className="text-[10px] text-emerald-700 font-semibold flex items-center gap-1">
+                          <Award className="w-3 h-3 text-emerald-600" />
+                          No. Halal: {product.halalNumber}
+                        </span>
+                      )}
+                      <p className="text-xs text-gray-600 line-clamp-2 mt-0.5">{product.description}</p>
+                    </div>
                   </div>
 
                   <div className="pt-3 border-t border-gray-200 flex items-center justify-between">

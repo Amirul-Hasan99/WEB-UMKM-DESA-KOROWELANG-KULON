@@ -181,6 +181,8 @@ const createUmkm = async (req, res) => {
       imageUrl,
       bannerImage,
       certifications,
+      isHalal,
+      halalNumber,
       latitude,
       longitude,
     } = req.body;
@@ -201,6 +203,8 @@ const createUmkm = async (req, res) => {
       bannerImage: bannerImage || '',
       rating: 5.0,
       reviewCount: 0,
+      isHalal: isHalal ? 1 : 0,
+      halalNumber: halalNumber || '',
       certifications: certifications || ['Unggulan Desa'],
       latitude: latitude ? String(latitude) : '-6.890000',
       longitude: longitude ? String(longitude) : '110.145000',
@@ -254,6 +258,8 @@ const updateUmkm = async (req, res) => {
       imageUrl,
       bannerImage,
       certifications,
+      isHalal,
+      halalNumber,
       latitude,
       longitude,
     } = req.body;
@@ -275,6 +281,8 @@ const updateUmkm = async (req, res) => {
     else if (imageUrl !== undefined) updatePayload.profileImage = imageUrl;
     if (bannerImage !== undefined) updatePayload.bannerImage = bannerImage;
     if (certifications !== undefined) updatePayload.certifications = certifications;
+    if (isHalal !== undefined) updatePayload.isHalal = isHalal ? 1 : 0;
+    if (halalNumber !== undefined) updatePayload.halalNumber = halalNumber;
     if (latitude !== undefined) updatePayload.latitude = String(latitude);
     if (longitude !== undefined) updatePayload.longitude = String(longitude);
 
@@ -370,7 +378,7 @@ const createProduct = async (req, res) => {
   try {
     if (!db) return res.status(500).json({ success: false, message: 'Database tidak terhubung.' });
 
-    const { umkmId, name, title, price, unit, description, image, imageUrl } = req.body;
+    const { umkmId, name, title, price, unit, description, image, imageUrl, isHalal, halalNumber } = req.body;
 
     const umkmIdInt = parseInt(umkmId);
     if (isNaN(umkmIdInt)) {
@@ -395,6 +403,8 @@ const createProduct = async (req, res) => {
       unit: unit || 'pcs',
       description: description || '',
       image: image || imageUrl || '',
+      isHalal: isHalal ? 1 : 0,
+      halalNumber: halalNumber || '',
     };
 
     const inserted = await db.insert(schema.products).values(payload).returning();
@@ -424,7 +434,7 @@ const updateProduct = async (req, res) => {
     }
 
     // Only allow updating safe fields — don't allow changing id or umkmId arbitrarily
-    const { name, title, price, unit, description, image, imageUrl, umkmId } = req.body;
+    const { name, title, price, unit, description, image, imageUrl, isHalal, halalNumber, umkmId } = req.body;
 
     const updatePayload = {};
     if (name !== undefined) updatePayload.name = name;
@@ -434,6 +444,8 @@ const updateProduct = async (req, res) => {
     if (description !== undefined) updatePayload.description = description;
     if (image !== undefined) updatePayload.image = image;
     else if (imageUrl !== undefined) updatePayload.image = imageUrl;
+    if (isHalal !== undefined) updatePayload.isHalal = isHalal ? 1 : 0;
+    if (halalNumber !== undefined) updatePayload.halalNumber = halalNumber;
     if (umkmId !== undefined) updatePayload.umkmId = parseInt(umkmId);
 
     if (Object.keys(updatePayload).length === 0) {

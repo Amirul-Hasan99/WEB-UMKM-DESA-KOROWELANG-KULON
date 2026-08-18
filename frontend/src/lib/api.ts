@@ -46,6 +46,13 @@ export const normalizeUmkm = (raw: any): UMKM => {
     bannerImage: raw.bannerImage || raw.imageUrl || '',
     rating: typeof raw.rating === 'number' ? raw.rating : parseFloat(raw.rating || '5.0'),
     reviewCount: raw.reviewCount || 0,
+    isHalal: Boolean(raw.isHalal || raw.is_halal),
+    halalNumber: raw.halalNumber || raw.halal_number || '',
+    certifications: Array.isArray(raw.certifications)
+      ? raw.certifications
+      : (typeof raw.certifications === 'string' && raw.certifications.startsWith('[')
+        ? JSON.parse(raw.certifications)
+        : []),
     createdAt: raw.createdAt || new Date().toISOString(),
     products: (raw.products || []).map((p: any) => ({
       id: p.id,
@@ -55,6 +62,8 @@ export const normalizeUmkm = (raw: any): UMKM => {
       unit: p.unit || 'pcs',
       description: p.description || '',
       image: p.image || p.imageUrl || '',
+      isHalal: Boolean(p.isHalal || p.is_halal),
+      halalNumber: p.halalNumber || p.halal_number || '',
     })),
   };
 };
@@ -248,6 +257,8 @@ export const fetchAdminProducts = async (umkmId?: number | string): Promise<UMKM
         unit: p.unit || 'pcs',
         description: p.description || '',
         image: p.image || '',
+        isHalal: Boolean(p.isHalal || p.is_halal),
+        halalNumber: p.halalNumber || p.halal_number || '',
       }));
     }
   } catch (e) {
@@ -273,6 +284,8 @@ export const createProduct = async (
           unit: p.unit || 'pcs',
           description: p.description || '',
           image: p.image || '',
+          isHalal: Boolean(p.isHalal || p.is_halal),
+          halalNumber: p.halalNumber || p.halal_number || '',
         },
       };
     }
@@ -302,6 +315,8 @@ export const updateProduct = async (
           unit: p.unit || 'pcs',
           description: p.description || '',
           image: p.image || '',
+          isHalal: Boolean(p.isHalal || p.is_halal),
+          halalNumber: p.halalNumber || p.halal_number || '',
         },
       };
     }

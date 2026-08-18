@@ -6,6 +6,8 @@ export interface UMKMProduct {
   unit: string;
   description: string;
   image: string;
+  isHalal?: boolean;
+  halalNumber?: string;
 }
 
 export interface UMKM {
@@ -24,6 +26,9 @@ export interface UMKM {
   bannerImage: string;
   rating: number;
   reviewCount: number;
+  isHalal?: boolean;
+  halalNumber?: string;
+  certifications?: string[];
   createdAt: string;
   products?: UMKMProduct[];
 }

@@ -30,6 +30,8 @@ const umkms = pgTable('umkms', {
   bannerImage: text('banner_image'),
   rating: real('rating').default(5.0),
   reviewCount: integer('review_count').default(0),
+  isHalal: integer('is_halal').default(0), // 0: Belum/Tidak, 1: Bersertifikat Halal
+  halalNumber: varchar('halal_number', { length: 100 }),
   certifications: jsonb('certifications').default([]), // ['Halal MUI', 'P-IRT', 'BPOM', 'Unggulan Desa']
   latitude: numeric('latitude', { precision: 10, scale: 6 }).default('-6.890000'),
   longitude: numeric('longitude', { precision: 10, scale: 6 }).default('110.145000'),
@@ -45,6 +47,8 @@ const products = pgTable('products', {
   unit: varchar('unit', { length: 50 }).default('pcs'),
   description: text('description'),
   image: text('image'),
+  isHalal: integer('is_halal').default(0), // 0: Belum/Tidak, 1: Bersertifikat Halal
+  halalNumber: varchar('halal_number', { length: 100 }),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 

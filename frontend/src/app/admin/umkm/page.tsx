@@ -1,7 +1,21 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Store, Plus, Edit2, Trash2, X, Check, MapPin, Package, ArrowLeft } from '@/components/Icons';
+import {
+  Store,
+  Plus,
+  Edit2,
+  Trash2,
+  X,
+  Check,
+  MapPin,
+  Package,
+  ArrowLeft,
+  ShieldCheck,
+  Award,
+  Sparkles,
+  CheckCircle2,
+} from '@/components/Icons';
 import AdminSidebar from '@/components/AdminSidebar';
 import SoftCard from '@/components/SoftCard';
 import SoftInput from '@/components/SoftInput';
@@ -39,6 +53,9 @@ export default function AdminUmkmPage() {
   const [description, setDescription] = useState('');
   const [landingText, setLandingText] = useState('');
   const [profileImage, setProfileImage] = useState('');
+  const [isHalal, setIsHalal] = useState(false);
+  const [halalNumber, setHalalNumber] = useState('');
+  const [certifications, setCertifications] = useState<string[]>([]);
 
   // Product Management Modal states
   const [selectedUmkmForProducts, setSelectedUmkmForProducts] = useState<UMKM | null>(null);
@@ -51,6 +68,8 @@ export default function AdminUmkmPage() {
   const [pUnit, setPUnit] = useState('pcs');
   const [pDescription, setPDescription] = useState('');
   const [pImage, setPImage] = useState('');
+  const [pIsHalal, setPIsHalal] = useState(false);
+  const [pHalalNumber, setPHalalNumber] = useState('');
 
   // ============================================================
   // Load Data — using ADMIN endpoint (requires auth)
@@ -82,6 +101,9 @@ export default function AdminUmkmPage() {
     setDescription('');
     setLandingText('');
     setProfileImage('');
+    setIsHalal(false);
+    setHalalNumber('');
+    setCertifications([]);
     setIsModalOpen(true);
   };
 
@@ -98,7 +120,16 @@ export default function AdminUmkmPage() {
     setDescription(umkm.description || '');
     setLandingText(umkm.landingText || '');
     setProfileImage(umkm.profileImage || '');
+    setIsHalal(Boolean(umkm.isHalal));
+    setHalalNumber(umkm.halalNumber || '');
+    setCertifications(umkm.certifications || []);
     setIsModalOpen(true);
+  };
+
+  const toggleCertification = (cert: string) => {
+    setCertifications((prev) =>
+      prev.includes(cert) ? prev.filter((c) => c !== cert) : [...prev, cert]
+    );
   };
 
   const handleSubmitUmkm = async (e: React.FormEvent) => {
@@ -117,6 +148,9 @@ export default function AdminUmkmPage() {
       description,
       landingText,
       profileImage,
+      isHalal,
+      halalNumber: isHalal ? halalNumber : '',
+      certifications,
     };
 
     if (editingUmkm) {
@@ -172,6 +206,8 @@ export default function AdminUmkmPage() {
     setPUnit('pcs');
     setPDescription('');
     setPImage('');
+    setPIsHalal(Boolean(selectedUmkmForProducts?.isHalal));
+    setPHalalNumber(selectedUmkmForProducts?.halalNumber || '');
     setIsProductFormOpen(true);
   };
 
@@ -182,6 +218,8 @@ export default function AdminUmkmPage() {
     setPUnit(prod.unit || 'pcs');
     setPDescription(prod.description || '');
     setPImage(prod.image || '');
+    setPIsHalal(Boolean(prod.isHalal));
+    setPHalalNumber(prod.halalNumber || '');
     setIsProductFormOpen(true);
   };
 
@@ -197,6 +235,8 @@ export default function AdminUmkmPage() {
       unit: pUnit,
       description: pDescription,
       image: pImage,
+      isHalal: pIsHalal,
+      halalNumber: pIsHalal ? pHalalNumber : '',
     };
 
     if (editingProduct) {
@@ -324,20 +364,43 @@ export default function AdminUmkmPage() {
                     )}
                   </div>
                   <div className="flex flex-col gap-1 min-w-0 flex-1">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold text-red-600 uppercase tracking-wider">
-                        {umkm.category}
-                      </span>
-                      <span className="text-[10px] font-extrabold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-[10px] font-bold text-red-600 uppercase tracking-wider">
+                          {umkm.category}
+                        </span>
+                        {umkm.isHalal && (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-extrabold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full border border-emerald-200">
+                            <ShieldCheck className="w-3 h-3 text-emerald-600" />
+                            Halal
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-[10px] font-extrabold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full shrink-0">
                         {umkm.products?.length || 0} Produk
                       </span>
                     </div>
                     <h3 className="font-extrabold text-base text-gray-900 truncate">{umkm.name}</h3>
                     <p className="text-xs text-gray-600">Pemilik: {umkm.owner}</p>
-                    <p className="text-xs text-gray-500 truncate flex items-center gap-1 mt-1">
+                    {umkm.isHalal && umkm.halalNumber && (
+                      <p className="text-[11px] font-semibold text-emerald-700 flex items-center gap-1">
+                        <Award className="w-3 h-3 shrink-0" />
+                        No. Halal: {umkm.halalNumber}
+                      </p>
+                    )}
+                    <p className="text-xs text-gray-500 truncate flex items-center gap-1 mt-0.5">
                       <MapPin className="w-3 h-3 text-red-500 shrink-0" />
                       {umkm.address}
                     </p>
+                    {umkm.certifications && umkm.certifications.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {umkm.certifications.slice(0, 3).map((c, i) => (
+                          <span key={i} className="text-[9px] font-bold bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded-md">
+                            {c}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -439,6 +502,66 @@ export default function AdminUmkmPage() {
                   onChange={(e) => setAddress(e.target.value)}
                   required
                 />
+
+                {/* SECTION: SERTIFIKASI & LEGALITAS UMKM */}
+                <div className="p-4 rounded-2xl bg-white/70 border border-gray-200 flex flex-col gap-3.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                        <ShieldCheck className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-extrabold text-gray-900">Sertifikasi Halal (BPJPH / MUI)</h4>
+                        <p className="text-[11px] text-gray-500">Tandai jika usaha ini memiliki sertifikasi halal resmi</p>
+                      </div>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={isHalal}
+                        onChange={(e) => setIsHalal(e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                    </label>
+                  </div>
+
+                  {isHalal && (
+                    <SoftInput
+                      label="Nomor Registrasi Sertifikat Halal (Opsional)"
+                      value={halalNumber}
+                      onChange={(e) => setHalalNumber(e.target.value)}
+                      placeholder="Contoh: ID33110001234560723"
+                      icon={<Award className="w-4 h-4 text-emerald-600" />}
+                    />
+                  )}
+
+                  <div className="flex flex-col gap-1.5 pt-1 border-t border-gray-100">
+                    <label className="text-xs font-bold uppercase text-gray-500 ml-1">
+                      Sertifikasi & Izin Usaha Tambahan
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {['Halal MUI/BPJPH', 'P-IRT', 'BPOM', 'NIB', 'Unggulan Desa', 'SNI'].map((cert) => {
+                        const active = certifications.includes(cert);
+                        return (
+                          <button
+                            key={cert}
+                            type="button"
+                            onClick={() => toggleCertification(cert)}
+                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                              active
+                                ? 'bg-emerald-600 text-white shadow-sm'
+                                : 'bg-white text-gray-600 border border-gray-200 hover:border-emerald-300'
+                            }`}
+                          >
+                            {active && <Check className="w-3.5 h-3.5" />}
+                            {cert}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <SoftInput
@@ -596,6 +719,40 @@ export default function AdminUmkmPage() {
 
                   <ImageUploadInput label="Foto Produk" value={pImage} onChange={setPImage} />
 
+                  {/* HALAL TOGGLE PRODUK */}
+                  <div className="p-3.5 rounded-2xl bg-white/70 border border-gray-200 flex flex-col gap-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                          <ShieldCheck className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <h4 className="text-xs font-extrabold text-gray-900">Produk Bersertifikat Halal</h4>
+                          <p className="text-[11px] text-gray-500">Tandai jika varian produk ini tersertifikasi halal</p>
+                        </div>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={pIsHalal}
+                          onChange={(e) => setPIsHalal(e.target.checked)}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                      </label>
+                    </div>
+
+                    {pIsHalal && (
+                      <SoftInput
+                        label="Nomor Sertifikat Halal Produk (Opsional)"
+                        value={pHalalNumber}
+                        onChange={(e) => setPHalalNumber(e.target.value)}
+                        placeholder="Contoh: ID3311000..."
+                        icon={<Award className="w-4 h-4 text-emerald-600" />}
+                      />
+                    )}
+                  </div>
+
                   <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-bold uppercase text-gray-500 ml-1">
                       Deskripsi Produk
@@ -665,10 +822,23 @@ export default function AdminUmkmPage() {
                               )}
                             </div>
                             <div className="flex flex-col min-w-0 flex-1">
-                              <h4 className="font-bold text-gray-900 text-xs truncate">{prod.name}</h4>
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <h4 className="font-bold text-gray-900 text-xs truncate">{prod.name}</h4>
+                                {prod.isHalal && (
+                                  <span className="inline-flex items-center gap-1 text-[9px] font-extrabold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded-md border border-emerald-200">
+                                    <ShieldCheck className="w-2.5 h-2.5 text-emerald-600" />
+                                    Halal
+                                  </span>
+                                )}
+                              </div>
                               <span className="text-xs font-extrabold text-red-600 mt-0.5">
                                 Rp {prod.price.toLocaleString('id-ID')} / {prod.unit}
                               </span>
+                              {prod.isHalal && prod.halalNumber && (
+                                <span className="text-[10px] text-emerald-700 font-semibold truncate">
+                                  No. Halal: {prod.halalNumber}
+                                </span>
+                              )}
                               <p className="text-[11px] text-gray-500 line-clamp-2 mt-1">
                                 {prod.description}
                               </p>
