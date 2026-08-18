@@ -98,12 +98,19 @@ app.use("/uploads", express.static(path.join(__dirname, "public", "uploads")));
 // ============================================
 app.get(["/", "/health", "/api", "/api/health"], async (req, res) => {
   let dbStatus = "disconnected";
+  const connStr =
+    process.env.DATABASE_URL ||
+    process.env.DATABASE_URI ||
+    process.env.POSTGRES_URL ||
+    process.env.SUPABASE_DATABASE_URL ||
+    process.env.SUPABASE_URL;
+
   try {
     if (db) {
       await db.execute("SELECT 1");
-      dbStatus = process.env.DATABASE_URL?.includes(".neon.tech")
+      dbStatus = connStr?.includes(".neon.tech")
         ? "Neon PostgreSQL Connected"
-        : process.env.DATABASE_URL?.includes("supabase")
+        : connStr?.includes("supabase")
         ? "Supabase PostgreSQL Connected"
         : "PostgreSQL Connected";
     } else {

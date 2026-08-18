@@ -1,7 +1,12 @@
 const schema = require('./schema');
 require('dotenv').config();
 
-const connectionString = process.env.DATABASE_URL;
+const connectionString =
+  process.env.DATABASE_URL ||
+  process.env.DATABASE_URI ||
+  process.env.POSTGRES_URL ||
+  process.env.SUPABASE_DATABASE_URL ||
+  process.env.SUPABASE_URL;
 
 let db = null;
 
