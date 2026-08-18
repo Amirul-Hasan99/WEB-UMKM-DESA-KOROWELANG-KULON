@@ -23,7 +23,6 @@ if not exist ".git" (
     git remote add origin https://github.com/Amirul-Hasan99/WEB-UMKM-DESA-KOROWELANG-KULON.git
 ) else (
     echo [1/5] Repository Git lokal sudah terinisialisasi.
-    git remote set-url origin https://github.com/Amirul-Hasan99/WEB-UMKM-DESA-KOROWELANG-KULON.git
 )
 
 echo.
