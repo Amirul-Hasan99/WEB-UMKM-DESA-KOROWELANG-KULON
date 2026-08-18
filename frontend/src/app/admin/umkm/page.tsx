@@ -30,6 +30,7 @@ import {
   createProduct,
   updateProduct,
   deleteProduct,
+  parseGmapsEmbedUrl,
 } from '@/lib/api';
 import { UMKM, UMKMProduct } from '@/lib/types';
 
@@ -137,6 +138,8 @@ export default function AdminUmkmPage() {
     e.preventDefault();
     setSubmitting(true);
 
+    const cleanEmbed = parseGmapsEmbedUrl(gmapsEmbed, `${name} ${address} Kutoharjo Kendal`);
+
     const payload: Partial<UMKM> = {
       name,
       owner,
@@ -145,7 +148,7 @@ export default function AdminUmkmPage() {
       phone,
       whatsapp: whatsapp || phone,
       gmapsUrl,
-      gmapsEmbed,
+      gmapsEmbed: cleanEmbed,
       description,
       landingText,
       profileImage,
@@ -576,17 +579,26 @@ export default function AdminUmkmPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <SoftInput
-                    label="URL Google Maps"
+                    label="URL Google Maps (Buka di App Maps)"
                     value={gmapsUrl}
                     onChange={(e) => setGmapsUrl(e.target.value)}
                     placeholder="https://maps.google.com/?q=..."
                   />
-                  <SoftInput
-                    label="Embed Iframe Google Maps"
-                    value={gmapsEmbed}
-                    onChange={(e) => setGmapsEmbed(e.target.value)}
-                    placeholder="https://www.google.com/maps/embed?..."
-                  />
+                  <div className="flex flex-col gap-1">
+                    <SoftInput
+                      label="Embed Iframe Google Maps"
+                      value={gmapsEmbed}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        const match = val.match(/src=["']([^"']+)["']/i);
+                        setGmapsEmbed(match ? match[1] : val);
+                      }}
+                      placeholder='https://www.google.com/maps/embed?... (atau paste full <iframe>)'
+                    />
+                    <p className="text-[11px] text-gray-500 ml-1">
+                      💡 <em>Bisa langsung copy-paste kode &lt;iframe...&gt; dari Google Maps &quot;Sematkan Peta&quot;.</em>
+                    </p>
+                  </div>
                 </div>
 
                 <ImageUploadInput

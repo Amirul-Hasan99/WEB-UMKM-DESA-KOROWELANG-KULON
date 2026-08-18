@@ -27,9 +27,65 @@ const deleteCookie = (name: string) => {
 };
 
 // ============================================================
+// Helper: Clean and extract Google Maps embed URL
+// ============================================================
+export const parseGmapsEmbedUrl = (input?: string, fallbackQuery?: string): string => {
+  if (!input || !input.trim()) {
+    if (fallbackQuery && fallbackQuery.trim()) {
+      return `https://maps.google.com/maps?q=${encodeURIComponent(fallbackQuery.trim())}&output=embed`;
+    }
+    return '';
+  }
+
+  let text = input.trim();
+
+  // If full HTML <iframe ... src="..." ...> was pasted
+  const srcMatch = text.match(/src=["']([^"']+)["']/i);
+  if (srcMatch && srcMatch[1]) {
+    text = srcMatch[1];
+  }
+
+  // Remove leading/trailing quotes or extra slashes
+  text = text.replace(/^['"]|['"]$/g, '').trim();
+
+  // If it's already a valid embed URL
+  if (text.includes('google.com/maps/embed') || text.includes('output=embed')) {
+    return text;
+  }
+
+  // If it's a standard Google Maps link
+  if (text.startsWith('http://') || text.startsWith('https://')) {
+    try {
+      const url = new URL(text);
+      const q = url.searchParams.get('q') || url.searchParams.get('query');
+      if (q) {
+        return `https://maps.google.com/maps?q=${encodeURIComponent(q)}&output=embed`;
+      }
+    } catch {}
+
+    if (text.includes('google.com/maps')) {
+      return `${text}${text.includes('?') ? '&' : '?'}output=embed`;
+    }
+  }
+
+  // Fallback query if valid
+  if (fallbackQuery && fallbackQuery.trim()) {
+    return `https://maps.google.com/maps?q=${encodeURIComponent(fallbackQuery.trim())}&output=embed`;
+  }
+
+  return text;
+};
+
+// ============================================================
 // Normalizer: Convert raw backend data to frontend UMKM type
 // ============================================================
 export const normalizeUmkm = (raw: any): UMKM => {
+  const gmapsRaw = raw.gmapsEmbed || '';
+  const gmapsEmbedParsed = parseGmapsEmbedUrl(
+    gmapsRaw,
+    `${raw.name || ''} ${raw.address || ''} Kutoharjo Kendal`
+  );
+
   return {
     id: raw.id,
     name: raw.name || '',
@@ -39,7 +95,7 @@ export const normalizeUmkm = (raw: any): UMKM => {
     phone: raw.phone || raw.whatsappNumber || raw.whatsapp || '',
     whatsapp: raw.whatsapp || raw.whatsappNumber || raw.phone || '',
     gmapsUrl: raw.gmapsUrl || raw.mapsUrl || '',
-    gmapsEmbed: raw.gmapsEmbed || '',
+    gmapsEmbed: gmapsEmbedParsed,
     description: raw.description || '',
     landingText: raw.landingText || raw.description || '',
     profileImage: raw.profileImage || raw.imageUrl || '',

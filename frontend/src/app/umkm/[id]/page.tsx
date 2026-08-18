@@ -8,7 +8,7 @@ import Footer from '@/components/Footer';
 import SoftCard from '@/components/SoftCard';
 import SoftButton from '@/components/SoftButton';
 import { HalalCornerBadge, HalalVerifiedPill, HalalIndonesiaLogo } from '@/components/HalalBadge';
-import { fetchUmkmById } from '@/lib/api';
+import { fetchUmkmById, parseGmapsEmbedUrl } from '@/lib/api';
 import { UMKM } from '@/lib/types';
 
 export default function UmkmDetailPage() {
@@ -266,22 +266,33 @@ export default function UmkmDetailPage() {
           </div>
 
           <SoftCard className="p-3 overflow-hidden rounded-3xl">
-            {umkm.gmapsEmbed ? (
-              <iframe
-                src={umkm.gmapsEmbed}
-                width="100%"
-                height="360"
-                style={{ border: 0, borderRadius: '1.25rem' }}
-                allowFullScreen
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                title={`Peta Lokasi ${umkm.name}`}
-              />
-            ) : (
-              <div className="h-64 flex items-center justify-center text-sm font-medium text-gray-500 bg-gray-100 rounded-2xl">
-                Google Maps Embed belum dikonfigurasi untuk UMKM ini.
-              </div>
-            )}
+            {(() => {
+              const gmapsEmbedSrc = parseGmapsEmbedUrl(
+                umkm.gmapsEmbed || umkm.gmapsUrl,
+                `${umkm.name} ${umkm.address} Kutoharjo Kendal`
+              );
+
+              if (gmapsEmbedSrc) {
+                return (
+                  <iframe
+                    src={gmapsEmbedSrc}
+                    width="100%"
+                    height="360"
+                    style={{ border: 0, borderRadius: '1.25rem' }}
+                    allowFullScreen
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    title={`Peta Lokasi ${umkm.name}`}
+                  />
+                );
+              }
+
+              return (
+                <div className="h-64 flex items-center justify-center text-sm font-medium text-gray-500 bg-gray-100 rounded-2xl">
+                  Google Maps Embed belum dikonfigurasi untuk UMKM ini.
+                </div>
+              );
+            })()}
           </SoftCard>
         </section>
 
