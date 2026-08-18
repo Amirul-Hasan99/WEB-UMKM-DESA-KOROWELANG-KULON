@@ -14,23 +14,13 @@ const mockData = {
     },
     {
       id: 2,
-      name: "Budi Santoso (Admin Staff)",
+      name: "Budi Santoso (Admin Desa)",
       email: "admin@korowelangkulon.desa.id",
       password: "admin123",
       role: "admin",
       phone: "081987654321",
       avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80",
       bio: "Staff Pendamping UMKM Desa Korowelang Kulon."
-    },
-    {
-      id: 3,
-      name: "Siti Rahma (Admin Staff)",
-      email: "siti@korowelangkulon.desa.id",
-      password: "admin123",
-      role: "admin",
-      phone: "085712345678",
-      avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80",
-      bio: "Staff Administrasi & Publikasi UMKM Desa Korowelang Kulon."
     }
   ],
 

@@ -81,6 +81,10 @@ async function seed() {
     console.log('Inserting dynamic site content...');
     await db.insert(schema.dynamicContent).values(mockData.dynamicContent).onConflictDoNothing();
 
+    // 6. Sync serial sequences
+    const { syncAllSequences } = require('./syncSequences');
+    await syncAllSequences(db);
+
     console.log('✅ Seeding completed successfully!');
     process.exit(0);
   } catch (error) {

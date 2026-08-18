@@ -81,3 +81,5 @@ npm install
 npm run dev
 ```
 Frontend berjalan di: `http://localhost:3000`
+
+JWT_SECRET	String acak minimal 32 karakter (misal: k0r0w3lang_kulon_sup3r_s3cur3_jwt_2026_xYz)	WAJIB
