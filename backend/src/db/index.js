@@ -15,12 +15,19 @@ if (connectionString) {
       db = drizzle(sql, { schema });
       console.log('✅ Connected to Neon Cloud PostgreSQL database via Drizzle ORM');
     } else {
-      // Local PostgreSQL or Standard TCP Postgres Connection
+      // Supabase, Railway, AWS RDS, or Local PostgreSQL
       const { Pool } = require('pg');
       const { drizzle } = require('drizzle-orm/node-postgres');
-      const pool = new Pool({ connectionString });
+      const isRemote = !connectionString.includes('localhost') && !connectionString.includes('127.0.0.1');
+      const pool = new Pool({
+        connectionString,
+        ssl: isRemote ? { rejectUnauthorized: false } : false,
+      });
+      pool.on('error', (err) => {
+        console.error('⚠️ Unexpected error on idle pg client:', err.message);
+      });
       db = drizzle(pool, { schema });
-      console.log('✅ Connected to Local PostgreSQL database via Drizzle ORM (node-postgres)');
+      console.log('✅ Connected to PostgreSQL database via Drizzle ORM (node-postgres)');
     }
   } catch (error) {
     console.error('❌ Failed to initialize database connection:', error.message);
