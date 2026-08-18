@@ -12,6 +12,7 @@ const PORT = process.env.PORT || 5000;
 
 // Connect to PostgreSQL via Drizzle
 const { db } = require("./src/db");
+const { sql } = require("drizzle-orm");
 
 // ============================================
 // Security: Helmet HTTP Headers
@@ -107,7 +108,7 @@ app.get(["/", "/health", "/api", "/api/health"], async (req, res) => {
 
   try {
     if (db) {
-      await db.execute("SELECT 1");
+      await db.execute(sql`SELECT 1`);
       dbStatus = connStr?.includes(".neon.tech")
         ? "Neon PostgreSQL Connected"
         : connStr?.includes("supabase")
