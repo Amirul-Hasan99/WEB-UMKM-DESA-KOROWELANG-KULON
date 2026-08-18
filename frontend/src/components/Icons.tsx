@@ -46,6 +46,7 @@ import {
   MagnifyingGlass,
   Funnel,
   ChatCircle,
+  ArrowsClockwise,
   IconProps
 } from '@phosphor-icons/react';
 
@@ -102,3 +103,4 @@ export const ExternalLink = wrap(ArrowSquareOut);
 export const Search = wrap(MagnifyingGlass);
 export const Filter = wrap(Funnel);
 export const MessageCircle = wrap(ChatCircle);
+export const RotateCw = wrap(ArrowsClockwise);

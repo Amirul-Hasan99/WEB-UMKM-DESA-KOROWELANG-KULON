@@ -1,5 +1,5 @@
 const { db, schema } = require('../db');
-const { eq, sql } = require('drizzle-orm');
+const { eq, desc, sql } = require('drizzle-orm');
 const { generateToken } = require('../config/jwt');
 const { verifyPassword, hashPassword } = require('../utils/password');
 
@@ -549,7 +549,10 @@ const getFeedbacks = async (req, res) => {
   try {
     if (!db) return res.status(500).json({ success: false, message: 'Database tidak terhubung.' });
 
-    const feedbacks = await db.select().from(schema.feedbacks);
+    const feedbacks = await db
+      .select()
+      .from(schema.feedbacks)
+      .orderBy(desc(schema.feedbacks.createdAt));
 
     return res.status(200).json({
       success: true,
@@ -557,6 +560,31 @@ const getFeedbacks = async (req, res) => {
       data: feedbacks,
     });
   } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// DELETE /api/admin/feedbacks/:id
+const deleteFeedback = async (req, res) => {
+  try {
+    if (!db) return res.status(500).json({ success: false, message: 'Database tidak terhubung.' });
+
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ success: false, message: 'ID feedback tidak valid.' });
+    }
+
+    const deleted = await db.delete(schema.feedbacks).where(eq(schema.feedbacks.id, id)).returning();
+    if (deleted.length > 0) {
+      return res.status(200).json({
+        success: true,
+        message: 'Feedback berhasil dihapus.',
+      });
+    }
+
+    return res.status(404).json({ success: false, message: 'Feedback tidak ditemukan.' });
+  } catch (error) {
+    console.error('deleteFeedback error:', error);
     return res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -574,4 +602,5 @@ module.exports = {
   updateProduct,
   deleteProduct,
   getFeedbacks,
+  deleteFeedback,
 };

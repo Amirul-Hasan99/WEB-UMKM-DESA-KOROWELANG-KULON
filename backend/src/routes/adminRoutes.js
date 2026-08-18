@@ -34,7 +34,8 @@ router.post('/products', validate(productSchema), adminController.createProduct)
 router.put('/products/:id', validate(productUpdateSchema), adminController.updateProduct);
 router.delete('/products/:id', adminController.deleteProduct);
 
-// Feedback List
+// Feedback List & Management
 router.get('/feedbacks', adminController.getFeedbacks);
+router.delete('/feedbacks/:id', adminController.deleteFeedback);
 
 module.exports = router;

@@ -400,6 +400,40 @@ export const deleteProduct = async (
   }
 };
 
+export const fetchAdminFeedbacks = async (): Promise<Feedback[]> => {
+  try {
+    const res = await axiosInstance.get('/admin/feedbacks');
+    if (res.data && Array.isArray(res.data.data)) {
+      return res.data.data.map((f: any) => ({
+        id: f.id,
+        name: f.name || 'Anonim',
+        email: f.email || '',
+        message: f.message || '',
+        createdAt: f.createdAt || f.created_at || new Date().toISOString(),
+      }));
+    }
+  } catch (e: any) {
+    console.error('fetchAdminFeedbacks error:', e);
+  }
+  return [];
+};
+
+export const deleteAdminFeedback = async (
+  feedbackId: number | string
+): Promise<{ success: boolean; error?: string }> => {
+  try {
+    const res = await axiosInstance.delete(`/admin/feedbacks/${feedbackId}`);
+    if (res.data && res.data.success) {
+      return { success: true };
+    }
+    const err = res.data?.error || res.data?.message;
+    return { success: false, error: typeof err === 'string' ? err : 'Gagal menghapus feedback.' };
+  } catch (e: any) {
+    console.error('deleteAdminFeedback error:', e);
+    return { success: false, error: extractError(e, 'Gagal menghapus feedback dari server.') };
+  }
+};
+
 // ============================================================
 // SUPERADMIN API
 // ============================================================
