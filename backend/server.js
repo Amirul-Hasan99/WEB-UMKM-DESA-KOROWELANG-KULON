@@ -50,7 +50,8 @@ app.use(generalLimiter);
 const allowedOrigins = [
   "http://localhost:3000",
   "http://127.0.0.1:3000",
-  process.env.FRONTEND_URL,
+  "https://umkm-desa-kutoharjo.vercel.app",
+  ...(process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',').map((s) => s.trim()) : []),
 ].filter(Boolean);
 
 app.use(
@@ -58,9 +59,22 @@ app.use(
     origin: (origin, callback) => {
       // Allow requests with no origin (mobile apps, curl, Postman)
       if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) return callback(null, true);
+
+      const normalizedOrigin = origin.replace(/\/$/, '');
+
+      // Allow exact match or if origin is in allowedOrigins
+      if (allowedOrigins.some((allowed) => allowed.replace(/\/$/, '') === normalizedOrigin)) {
+        return callback(null, true);
+      }
+
+      // Allow any vercel deployment for this project (*.vercel.app)
+      if (/^https:\/\/[a-zA-Z0-9-]+(\.vercel\.app)$/.test(normalizedOrigin)) {
+        return callback(null, true);
+      }
+
       // In development, allow all
       if (process.env.NODE_ENV !== "production") return callback(null, true);
+
       return callback(new Error(`CORS: Origin ${origin} tidak diizinkan.`));
     },
     credentials: true,

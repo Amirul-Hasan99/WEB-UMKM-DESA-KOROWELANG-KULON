@@ -24,13 +24,23 @@ app.use(helmet({
 app.use('/api', apiLimiter);
 
 // CORS Restriction configuration
-const allowedOrigins = env.NODE_ENV === 'production'
-  ? [env.FRONTEND_URL, 'https://umkm-korowelang.vercel.app'].filter(Boolean)
-  : ['http://localhost:3000', 'http://127.0.0.1:3000'];
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'https://umkm-desa-kutoharjo.vercel.app',
+  ...(env.FRONTEND_URL ? env.FRONTEND_URL.split(',').map((s) => s.trim()) : []),
+].filter(Boolean);
 
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || env.NODE_ENV !== 'production' || allowedOrigins.includes(origin)) {
+    if (!origin || env.NODE_ENV !== 'production') {
+      return callback(null, true);
+    }
+    const normalizedOrigin = origin.replace(/\/$/, '');
+    if (allowedOrigins.some((allowed) => allowed.replace(/\/$/, '') === normalizedOrigin)) {
+      return callback(null, true);
+    }
+    if (/^https:\/\/[a-zA-Z0-9-]+(\.vercel\.app)$/.test(normalizedOrigin)) {
       return callback(null, true);
     }
     return callback(new Error(`Akses CORS ditolak untuk origin: ${origin}`));
