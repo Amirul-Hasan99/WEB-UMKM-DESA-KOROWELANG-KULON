@@ -5,6 +5,11 @@ const env = require('./config/env');
 const logger = require('./utils/logger');
 const { apiLimiter } = require('./middleware/rateLimiter');
 const { db } = require('./db');
+const { syncAllSequences } = require('./db/syncSequences');
+
+if (db) {
+  syncAllSequences(db).catch(() => {});
+}
 
 const publicRoutes = require('./routes/publicRoutes');
 const adminRoutes = require('./routes/adminRoutes');

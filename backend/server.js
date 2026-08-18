@@ -13,6 +13,12 @@ const PORT = process.env.PORT || 5000;
 // Connect to PostgreSQL via Drizzle
 const { db } = require("./src/db");
 const { sql } = require("drizzle-orm");
+const { syncAllSequences } = require("./src/db/syncSequences");
+
+// Run automatic sequence synchronization in background
+if (db) {
+  syncAllSequences(db).catch(() => {});
+}
 
 // ============================================
 // Security: Helmet HTTP Headers

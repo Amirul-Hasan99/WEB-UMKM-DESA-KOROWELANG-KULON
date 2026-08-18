@@ -1,5 +1,5 @@
 const { db, schema } = require('../db');
-const { eq } = require('drizzle-orm');
+const { eq, sql } = require('drizzle-orm');
 const { generateToken } = require('../config/jwt');
 const { verifyPassword, hashPassword } = require('../utils/password');
 
@@ -210,7 +210,28 @@ const createUmkm = async (req, res) => {
       longitude: longitude ? String(longitude) : '110.145000',
     };
 
-    const inserted = await db.insert(schema.umkms).values(newUmkmPayload).returning();
+    let inserted = [];
+    try {
+      inserted = await db.insert(schema.umkms).values(newUmkmPayload).returning();
+    } catch (insertErr) {
+      if (insertErr.message && (insertErr.message.includes('unique constraint') || insertErr.message.includes('umkms_pkey'))) {
+        try {
+          await db.execute(sql.raw(`
+            SELECT setval(
+              COALESCE(pg_get_serial_sequence('umkms', 'id'), 'umkms_id_seq'),
+              COALESCE((SELECT MAX(id) FROM umkms), 0) + 1,
+              false
+            );
+          `));
+          inserted = await db.insert(schema.umkms).values(newUmkmPayload).returning();
+        } catch (retryErr) {
+          throw insertErr;
+        }
+      } else {
+        throw insertErr;
+      }
+    }
+
     if (inserted.length > 0) {
       return res.status(201).json({
         success: true,
@@ -407,7 +428,28 @@ const createProduct = async (req, res) => {
       halalNumber: halalNumber || '',
     };
 
-    const inserted = await db.insert(schema.products).values(payload).returning();
+    let inserted = [];
+    try {
+      inserted = await db.insert(schema.products).values(payload).returning();
+    } catch (insertErr) {
+      if (insertErr.message && (insertErr.message.includes('unique constraint') || insertErr.message.includes('products_pkey'))) {
+        try {
+          await db.execute(sql.raw(`
+            SELECT setval(
+              COALESCE(pg_get_serial_sequence('products', 'id'), 'products_id_seq'),
+              COALESCE((SELECT MAX(id) FROM products), 0) + 1,
+              false
+            );
+          `));
+          inserted = await db.insert(schema.products).values(payload).returning();
+        } catch (retryErr) {
+          throw insertErr;
+        }
+      } else {
+        throw insertErr;
+      }
+    }
+
     if (inserted.length > 0) {
       return res.status(201).json({
         success: true,

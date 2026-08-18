@@ -96,18 +96,40 @@ const submitFeedback = async (req, res) => {
     const { name, email, message } = req.body;
 
     const payload = {
-      name,
-      email,
-      message,
-      createdAt: new Date()
+      name: name || 'Anonim',
+      email: email || '',
+      message: message || '',
+      createdAt: new Date(),
     };
 
-    const inserted = await db.insert(schema.feedbacks).values(payload).returning();
+    let inserted = [];
+    try {
+      inserted = await db.insert(schema.feedbacks).values(payload).returning();
+    } catch (insertErr) {
+      // Auto-sync sequence if duplicate key violation occurs (e.g. after manual seeding)
+      if (insertErr.message && (insertErr.message.includes('unique constraint') || insertErr.message.includes('feedbacks_pkey'))) {
+        try {
+          await db.execute(sql.raw(`
+            SELECT setval(
+              COALESCE(pg_get_serial_sequence('feedbacks', 'id'), 'feedbacks_id_seq'),
+              COALESCE((SELECT MAX(id) FROM feedbacks), 0) + 1,
+              false
+            );
+          `));
+          inserted = await db.insert(schema.feedbacks).values(payload).returning();
+        } catch (retryErr) {
+          throw insertErr;
+        }
+      } else {
+        throw insertErr;
+      }
+    }
+
     if (inserted.length > 0) {
       return res.status(201).json({
         success: true,
         message: 'Feedback berhasil dikirim. Terima kasih atas masukan Anda!',
-        data: inserted[0]
+        data: inserted[0],
       });
     }
 
