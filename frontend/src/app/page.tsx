@@ -7,6 +7,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import SoftCard from '@/components/SoftCard';
 import SoftButton from '@/components/SoftButton';
+import { HalalCornerBadge } from '@/components/HalalBadge';
 import { fetchDynamicContent, fetchUmkms } from '@/lib/api';
 import { DynamicContent, UMKM } from '@/lib/types';
 
@@ -147,16 +148,13 @@ export default function LandingPage() {
                     alt={umkm.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
-                  {umkm.isHalal && (
-                    <div className="absolute top-3 left-3 bg-emerald-600/95 text-white backdrop-blur-md text-[10px] font-extrabold px-2.5 py-1 rounded-xl flex items-center gap-1 shadow-md border border-emerald-400/40">
-                      <ShieldCheck className="w-3 h-3 text-emerald-200" />
-                      Halal
-                    </div>
-                  )}
-                  <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-md px-2.5 py-1 rounded-xl text-xs font-bold text-gray-800 flex items-center gap-1 shadow-sm">
+                  <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-md px-2.5 py-1 rounded-xl text-xs font-bold text-gray-800 flex items-center gap-1 shadow-sm">
                     <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
                     <span>{umkm.rating}</span>
                   </div>
+                  {umkm.isHalal && (
+                    <HalalCornerBadge className="absolute top-3 right-3 z-10 shadow-md" size="sm" />
+                  )}
                   <div className="absolute bottom-3 left-3 bg-red-600 text-white text-[11px] font-bold px-3 py-1 rounded-xl uppercase tracking-wider shadow-sm">
                     {umkm.category}
                   </div>

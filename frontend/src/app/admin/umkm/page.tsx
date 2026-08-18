@@ -21,6 +21,7 @@ import SoftCard from '@/components/SoftCard';
 import SoftInput from '@/components/SoftInput';
 import SoftButton from '@/components/SoftButton';
 import ImageUploadInput from '@/components/ImageUploadInput';
+import { HalalIndonesiaLogo, HalalCornerBadge, HalalVerifiedPill } from '@/components/HalalBadge';
 import {
   fetchAdminUmkms,
   createUmkm,
@@ -346,7 +347,7 @@ export default function AdminUmkmPage() {
             {umkms.map((umkm) => (
               <SoftCard key={umkm.id} className="flex flex-col justify-between gap-4">
                 <div className="flex gap-4">
-                  <div className="w-24 h-24 rounded-2xl overflow-hidden bg-gray-200 shrink-0">
+                  <div className="relative w-24 h-24 rounded-2xl overflow-hidden bg-gray-200 shrink-0">
                     {umkm.profileImage ? (
                       <img
                         src={umkm.profileImage}
@@ -362,6 +363,9 @@ export default function AdminUmkmPage() {
                         <Store className="w-10 h-10 text-gray-400" />
                       </div>
                     )}
+                    {umkm.isHalal && (
+                      <HalalCornerBadge className="absolute top-1 right-1 z-10 shadow-md" size="sm" showText={false} />
+                    )}
                   </div>
                   <div className="flex flex-col gap-1 min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
@@ -370,9 +374,9 @@ export default function AdminUmkmPage() {
                           {umkm.category}
                         </span>
                         {umkm.isHalal && (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-extrabold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full border border-emerald-200">
-                            <ShieldCheck className="w-3 h-3 text-emerald-600" />
-                            Halal
+                          <span className="inline-flex items-center gap-1 text-[10px] font-extrabold text-[#672982] bg-purple-50 px-2 py-0.5 rounded-full border border-purple-200">
+                            <HalalIndonesiaLogo className="w-3 h-3.5 text-[#672982]" />
+                            Halal Indonesia
                           </span>
                         )}
                       </div>
@@ -383,8 +387,8 @@ export default function AdminUmkmPage() {
                     <h3 className="font-extrabold text-base text-gray-900 truncate">{umkm.name}</h3>
                     <p className="text-xs text-gray-600">Pemilik: {umkm.owner}</p>
                     {umkm.isHalal && umkm.halalNumber && (
-                      <p className="text-[11px] font-semibold text-emerald-700 flex items-center gap-1">
-                        <Award className="w-3 h-3 shrink-0" />
+                      <p className="text-[11px] font-bold text-[#672982] flex items-center gap-1">
+                        <HalalIndonesiaLogo className="w-3 h-3 text-[#672982]" />
                         No. Halal: {umkm.halalNumber}
                       </p>
                     )}
@@ -503,16 +507,23 @@ export default function AdminUmkmPage() {
                   required
                 />
 
-                {/* SECTION: SERTIFIKASI & LEGALITAS UMKM */}
-                <div className="p-4 rounded-2xl bg-white/70 border border-gray-200 flex flex-col gap-3.5">
+                {/* SECTION: SERTIFIKASI & LEGALITAS UMKM (KHUSUS KULINER / SEMUA) */}
+                <div className="p-4 rounded-2xl bg-white/80 border border-purple-200/80 flex flex-col gap-3.5 shadow-sm">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
-                        <ShieldCheck className="w-4 h-4" />
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-xl bg-purple-100 text-[#672982] flex items-center justify-center shrink-0 border border-purple-200">
+                        <HalalIndonesiaLogo className="w-5 h-6 text-[#672982]" />
                       </div>
                       <div>
-                        <h4 className="text-xs font-extrabold text-gray-900">Sertifikasi Halal (BPJPH / MUI)</h4>
-                        <p className="text-[11px] text-gray-500">Tandai jika usaha ini memiliki sertifikasi halal resmi</p>
+                        <div className="flex items-center gap-2">
+                          <h4 className="text-xs font-extrabold text-gray-900">Sertifikasi Halal Indonesia (BPJPH / MUI)</h4>
+                          {(category === 'Kuliner' || category === 'Makanan Ringan') && (
+                            <span className="text-[9px] font-extrabold px-1.5 py-0.5 bg-red-100 text-red-600 rounded">
+                              Disarankan untuk Kuliner
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-gray-500">Aktifkan untuk menampilkan logo Halal Indonesia pada foto UMKM & katalog</p>
                       </div>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
@@ -522,17 +533,17 @@ export default function AdminUmkmPage() {
                         onChange={(e) => setIsHalal(e.target.checked)}
                         className="sr-only peer"
                       />
-                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#672982]"></div>
                     </label>
                   </div>
 
                   {isHalal && (
                     <SoftInput
-                      label="Nomor Registrasi Sertifikat Halal (Opsional)"
+                      label="Nomor Registrasi Sertifikat Halal (Contoh: ID33110001234560723)"
                       value={halalNumber}
                       onChange={(e) => setHalalNumber(e.target.value)}
                       placeholder="Contoh: ID33110001234560723"
-                      icon={<Award className="w-4 h-4 text-emerald-600" />}
+                      icon={<Award className="w-4 h-4 text-[#672982]" />}
                     />
                   )}
 
@@ -550,8 +561,8 @@ export default function AdminUmkmPage() {
                             onClick={() => toggleCertification(cert)}
                             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
                               active
-                                ? 'bg-emerald-600 text-white shadow-sm'
-                                : 'bg-white text-gray-600 border border-gray-200 hover:border-emerald-300'
+                                ? 'bg-[#672982] text-white shadow-sm'
+                                : 'bg-white text-gray-600 border border-gray-200 hover:border-purple-300'
                             }`}
                           >
                             {active && <Check className="w-3.5 h-3.5" />}
@@ -720,15 +731,15 @@ export default function AdminUmkmPage() {
                   <ImageUploadInput label="Foto Produk" value={pImage} onChange={setPImage} />
 
                   {/* HALAL TOGGLE PRODUK */}
-                  <div className="p-3.5 rounded-2xl bg-white/70 border border-gray-200 flex flex-col gap-3">
+                  <div className="p-3.5 rounded-2xl bg-white/80 border border-purple-200 flex flex-col gap-3 shadow-sm">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
-                          <ShieldCheck className="w-4 h-4" />
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-lg bg-purple-100 text-[#672982] flex items-center justify-center shrink-0 border border-purple-200">
+                          <HalalIndonesiaLogo className="w-4 h-5 text-[#672982]" />
                         </div>
                         <div>
-                          <h4 className="text-xs font-extrabold text-gray-900">Produk Bersertifikat Halal</h4>
-                          <p className="text-[11px] text-gray-500">Tandai jika varian produk ini tersertifikasi halal</p>
+                          <h4 className="text-xs font-extrabold text-gray-900">Produk Bersertifikat Halal Indonesia</h4>
+                          <p className="text-[11px] text-gray-500">Tandai jika varian produk ini tersertifikasi halal resmi</p>
                         </div>
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer">
@@ -738,7 +749,7 @@ export default function AdminUmkmPage() {
                           onChange={(e) => setPIsHalal(e.target.checked)}
                           className="sr-only peer"
                         />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#672982]"></div>
                       </label>
                     </div>
 
@@ -748,7 +759,7 @@ export default function AdminUmkmPage() {
                         value={pHalalNumber}
                         onChange={(e) => setPHalalNumber(e.target.value)}
                         placeholder="Contoh: ID3311000..."
-                        icon={<Award className="w-4 h-4 text-emerald-600" />}
+                        icon={<Award className="w-4 h-4 text-[#672982]" />}
                       />
                     )}
                   </div>
@@ -805,7 +816,7 @@ export default function AdminUmkmPage() {
                           className="p-4 rounded-2xl soft-card flex flex-col justify-between gap-3"
                         >
                           <div className="flex gap-3">
-                            <div className="w-16 h-16 rounded-xl overflow-hidden bg-gray-200 shrink-0">
+                            <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-gray-200 shrink-0">
                               {prod.image ? (
                                 <img
                                   src={prod.image}
@@ -820,13 +831,16 @@ export default function AdminUmkmPage() {
                                   <Package className="w-8 h-8 text-gray-400" />
                                 </div>
                               )}
+                              {prod.isHalal && (
+                                <HalalCornerBadge className="absolute top-1 right-1 z-10 shadow-sm" size="sm" showText={false} />
+                              )}
                             </div>
                             <div className="flex flex-col min-w-0 flex-1">
                               <div className="flex items-center gap-1.5 flex-wrap">
                                 <h4 className="font-bold text-gray-900 text-xs truncate">{prod.name}</h4>
                                 {prod.isHalal && (
-                                  <span className="inline-flex items-center gap-1 text-[9px] font-extrabold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded-md border border-emerald-200">
-                                    <ShieldCheck className="w-2.5 h-2.5 text-emerald-600" />
+                                  <span className="inline-flex items-center gap-1 text-[9px] font-extrabold text-[#672982] bg-purple-50 px-1.5 py-0.5 rounded-md border border-purple-200">
+                                    <HalalIndonesiaLogo className="w-2.5 h-3 text-[#672982]" />
                                     Halal
                                   </span>
                                 )}
@@ -835,8 +849,9 @@ export default function AdminUmkmPage() {
                                 Rp {prod.price.toLocaleString('id-ID')} / {prod.unit}
                               </span>
                               {prod.isHalal && prod.halalNumber && (
-                                <span className="text-[10px] text-emerald-700 font-semibold truncate">
-                                  No. Halal: {prod.halalNumber}
+                                <span className="text-[10px] text-[#672982] font-semibold truncate flex items-center gap-1">
+                                  <HalalIndonesiaLogo className="w-2.5 h-3 text-[#672982]" />
+                                  No. {prod.halalNumber}
                                 </span>
                               )}
                               <p className="text-[11px] text-gray-500 line-clamp-2 mt-1">

@@ -7,6 +7,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import SoftCard from '@/components/SoftCard';
 import SoftButton from '@/components/SoftButton';
+import { HalalCornerBadge, HalalVerifiedPill, HalalIndonesiaLogo } from '@/components/HalalBadge';
 import { fetchUmkmById } from '@/lib/api';
 import { UMKM } from '@/lib/types';
 
@@ -79,6 +80,9 @@ export default function UmkmDetailPage() {
               alt={umkm.name}
               className="w-full h-full object-cover"
             />
+            {umkm.isHalal && (
+              <HalalCornerBadge className="absolute top-4 right-4 z-10 shadow-xl" size="lg" />
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex items-end p-6">
               <div className="flex flex-col gap-2 text-white">
                 <div className="flex items-center gap-2 flex-wrap">
@@ -86,9 +90,9 @@ export default function UmkmDetailPage() {
                     {umkm.category}
                   </span>
                   {umkm.isHalal && (
-                    <span className="bg-emerald-600/95 text-white backdrop-blur-md px-3 py-1 rounded-xl text-xs font-extrabold flex items-center gap-1.5 shadow-sm border border-emerald-400/40">
-                      <ShieldCheck className="w-4 h-4 text-emerald-200" />
-                      Bersertifikat Halal
+                    <span className="bg-[#672982]/95 text-white backdrop-blur-md px-3 py-1 rounded-xl text-xs font-extrabold flex items-center gap-1.5 shadow-sm border border-purple-300/40">
+                      <HalalIndonesiaLogo className="w-3.5 h-4 text-white" />
+                      Bersertifikat Halal Indonesia
                     </span>
                   )}
                 </div>
@@ -117,11 +121,13 @@ export default function UmkmDetailPage() {
                 <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
                 {umkm.rating} <span className="text-xs text-gray-500 font-normal">({umkm.reviewCount} ulasan)</span>
               </p>
-              {umkm.isHalal && umkm.halalNumber && (
-                <p className="text-xs font-bold text-emerald-700 flex items-center gap-1 mt-0.5">
-                  <Award className="w-3.5 h-3.5 text-emerald-600" />
-                  No. Halal: {umkm.halalNumber}
-                </p>
+              {umkm.isHalal && (
+                <div className="flex items-center gap-1 mt-0.5">
+                  <HalalIndonesiaLogo className="w-3 h-3.5 text-[#672982]" />
+                  <span className="text-xs font-bold text-[#672982]">
+                    {umkm.halalNumber ? `No. Halal: ${umkm.halalNumber}` : 'Halal Terverifikasi'}
+                  </span>
+                </div>
               )}
             </div>
 
@@ -146,27 +152,24 @@ export default function UmkmDetailPage() {
 
           {/* Certifications Bar */}
           {((umkm.certifications && umkm.certifications.length > 0) || umkm.isHalal) && (
-            <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold shrink-0 shadow-sm">
-                  <ShieldCheck className="w-4 h-4" />
+            <div className="p-4 rounded-2xl bg-purple-50/60 border border-purple-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-white text-[#672982] flex items-center justify-center font-bold shrink-0 shadow-sm border border-purple-200">
+                  <HalalIndonesiaLogo className="w-6 h-7 text-[#672982]" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-xs font-extrabold text-emerald-950">Sertifikasi & Legalitas Usaha Terverifikasi</span>
-                  <span className="text-[11px] text-emerald-700 font-medium">
-                    {umkm.halalNumber ? `Nomor Sertifikat Halal: ${umkm.halalNumber}` : 'Telah diverifikasi oleh Balai Desa Kutoharjo'}
+                  <span className="text-xs font-extrabold text-[#672982]">Sertifikasi & Legalitas Usaha Terverifikasi</span>
+                  <span className="text-[11px] text-purple-800 font-medium">
+                    {umkm.halalNumber ? `Nomor Sertifikat Halal: ${umkm.halalNumber}` : 'Telah diverifikasi resmi oleh Balai Desa & Instansi Berwenang'}
                   </span>
                 </div>
               </div>
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap items-center gap-2">
                 {umkm.isHalal && (
-                  <span className="px-2.5 py-1 rounded-lg text-xs font-extrabold bg-emerald-600 text-white shadow-sm flex items-center gap-1">
-                    <ShieldCheck className="w-3.5 h-3.5" />
-                    Halal Resmi
-                  </span>
+                  <HalalVerifiedPill halalNumber={umkm.halalNumber} />
                 )}
                 {umkm.certifications?.map((cert, idx) => (
-                  <span key={idx} className="px-2.5 py-1 rounded-lg text-xs font-bold bg-white text-emerald-800 border border-emerald-200 shadow-sm">
+                  <span key={idx} className="px-2.5 py-1.5 rounded-xl text-xs font-bold bg-white text-gray-700 border border-gray-200 shadow-sm">
                     {cert}
                   </span>
                 ))}
@@ -204,10 +207,7 @@ export default function UmkmDetailPage() {
                     <div className="relative h-44 rounded-xl overflow-hidden bg-gray-200">
                       <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
                       {product.isHalal && (
-                        <div className="absolute top-2.5 right-2.5 bg-emerald-600 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-md">
-                          <ShieldCheck className="w-3 h-3" />
-                          Halal
-                        </div>
+                        <HalalCornerBadge className="absolute top-2.5 right-2.5 z-10 shadow-md" size="sm" />
                       )}
                     </div>
                     <div className="flex flex-col gap-1">
@@ -215,8 +215,8 @@ export default function UmkmDetailPage() {
                         <h3 className="font-bold text-gray-900 text-base">{product.name}</h3>
                       </div>
                       {product.isHalal && product.halalNumber && (
-                        <span className="text-[10px] text-emerald-700 font-semibold flex items-center gap-1">
-                          <Award className="w-3 h-3 text-emerald-600" />
+                        <span className="text-[10px] text-[#672982] font-bold flex items-center gap-1">
+                          <HalalIndonesiaLogo className="w-3 h-3.5 text-[#672982]" />
                           No. Halal: {product.halalNumber}
                         </span>
                       )}
