@@ -29,19 +29,21 @@ export default function SuperAdminKontenPage() {
 
   useEffect(() => {
     fetchDynamicContent().then((c) => {
-      setSiteName(c.siteName);
-      setHeaderTitle(c.headerTitle);
-      setHeaderSubtitle(c.headerSubtitle);
-      setLogoUrl(c.logoUrl);
-      setHeroTitle(c.heroTitle);
-      setHeroSubtitle(c.heroSubtitle);
-      setHeroBannerUrl(c.heroBannerUrl);
-      setAboutTitle(c.aboutTitle);
-      setAboutText(c.aboutText);
-      setVillageAddress(c.villageAddress);
-      setContactEmail(c.contactEmail);
-      setContactPhone(c.contactPhone);
-      setFooterText(c.footerText);
+      if (c) {
+        setSiteName(c.siteName || '');
+        setHeaderTitle(c.headerTitle || '');
+        setHeaderSubtitle(c.headerSubtitle || '');
+        setLogoUrl(c.logoUrl || '');
+        setHeroTitle(c.heroTitle || '');
+        setHeroSubtitle(c.heroSubtitle || '');
+        setHeroBannerUrl(c.heroBannerUrl || '');
+        setAboutTitle(c.aboutTitle || '');
+        setAboutText(c.aboutText || '');
+        setVillageAddress(c.villageAddress || '');
+        setContactEmail(c.contactEmail || '');
+        setContactPhone(c.contactPhone || '');
+        setFooterText(c.footerText || '');
+      }
     });
   }, []);
 
