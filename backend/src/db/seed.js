@@ -12,18 +12,28 @@ async function seed() {
 
   try {
     // 1. Seed Users
-    console.log('Inserting default admin users with Argon2 hashes...');
+    console.log('Inserting default admin users with Bcrypt hashes...');
     for (const user of mockData.users) {
       const hashedPassword = await hashPassword(user.password);
       await db.insert(schema.users).values({
         name: user.name,
-        email: user.email,
+        email: user.email.toLowerCase(),
         password: hashedPassword,
         role: user.role,
         phone: user.phone,
         avatar: user.avatar,
         bio: user.bio,
-      }).onConflictDoNothing();
+      }).onConflictDoUpdate({
+        target: schema.users.email,
+        set: {
+          name: user.name,
+          password: hashedPassword,
+          role: user.role,
+          phone: user.phone,
+          avatar: user.avatar,
+          bio: user.bio,
+        },
+      });
     }
 
     // 2. Seed UMKMs

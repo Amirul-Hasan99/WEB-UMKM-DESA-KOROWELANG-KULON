@@ -7,20 +7,13 @@ try {
 const bcrypt = require("bcryptjs");
 
 /**
- * Hashes a plaintext password using Argon2 (or bcrypt fallback)
+ * Hashes a plaintext password using bcryptjs (100% serverless and cross-platform safe)
  * @param {string} password 
  * @returns {Promise<string>}
  */
 async function hashPassword(password) {
   if (!password) {
     throw new Error("Password wajib diisi untuk melakukan hashing.");
-  }
-  if (argon2) {
-    try {
-      return await argon2.hash(password, { type: argon2.argon2id });
-    } catch (err) {
-      console.warn("Argon2 hash failed, using bcrypt fallback:", err.message);
-    }
   }
   return await bcrypt.hash(password, 10);
 }
