@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Store, ArrowRight, Star, ShieldCheck, MapPin, Award, PhoneCall, Sparkles, ShoppingBag } from '@/components/Icons';
+import { Store, ArrowRight, ShieldCheck, MapPin, Award, PhoneCall, Sparkles, ShoppingBag } from '@/components/Icons';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import SoftCard from '@/components/SoftCard';
@@ -148,10 +148,6 @@ export default function LandingPage() {
                     alt={umkm.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
-                  <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-md px-2.5 py-1 rounded-xl text-xs font-bold text-gray-800 flex items-center gap-1 shadow-sm">
-                    <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-                    <span>{umkm.rating}</span>
-                  </div>
                   {umkm.isHalal && (
                     <HalalCornerBadge className="absolute top-3 right-3 z-10 shadow-md" size="sm" />
                   )}

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Store, Search, Filter, Star, MapPin, ShieldCheck, ShoppingBag, PhoneCall } from '@/components/Icons';
+import { Store, Search, Filter, MapPin, ShieldCheck, ShoppingBag, PhoneCall } from '@/components/Icons';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import SoftCard from '@/components/SoftCard';
@@ -103,10 +103,6 @@ export default function UmkmCatalogPage() {
                     alt={umkm.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
-                  <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-md px-2.5 py-1 rounded-xl text-xs font-bold text-gray-800 flex items-center gap-1 shadow-sm">
-                    <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-                    <span>{umkm.rating}</span>
-                  </div>
                   {umkm.isHalal && (
                     <HalalCornerBadge className="absolute top-3 right-3 z-10 shadow-md" size="sm" />
                   )}
@@ -139,10 +135,15 @@ export default function UmkmCatalogPage() {
                     href={`https://wa.me/${umkm.whatsapp}?text=Halo%20${encodeURIComponent(umkm.name)},%20saya%20tertarik%20dengan%20produk%20Anda.`}
                     target="_blank"
                     rel="noreferrer"
+                    className="shrink-0"
                   >
-                    <SoftButton variant="default" size="sm" className="bg-emerald-500 text-white hover:bg-emerald-600 border-none shadow-sm" icon={<PhoneCall className="w-4 h-4" />}>
-                      WA
-                    </SoftButton>
+                    <button
+                      type="button"
+                      className="px-3.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-emerald-600/25 transition-all cursor-pointer border-none"
+                    >
+                      <PhoneCall className="w-4 h-4 text-white fill-white" />
+                      <span className="text-white font-bold">WA</span>
+                    </button>
                   </a>
                 </div>
               </SoftCard>

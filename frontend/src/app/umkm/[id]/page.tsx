@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Store, MapPin, PhoneCall, Star, ArrowLeft, ShieldCheck, ShoppingBag, MessageSquare, Award, Package, ExternalLink } from '@/components/Icons';
+import { Store, MapPin, PhoneCall, ArrowLeft, ShieldCheck, ShoppingBag, MessageSquare, Award, Package, ExternalLink } from '@/components/Icons';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import SoftCard from '@/components/SoftCard';
@@ -116,19 +116,19 @@ export default function UmkmDetailPage() {
             </div>
 
             <div className="flex flex-col gap-1">
-              <span className="text-xs font-bold text-gray-400 uppercase">Rating & Legalitas</span>
-              <p className="text-sm font-bold text-gray-800 flex items-center gap-1.5">
-                <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
-                {umkm.rating} <span className="text-xs text-gray-500 font-normal">({umkm.reviewCount} ulasan)</span>
-              </p>
-              {umkm.isHalal && (
-                <div className="flex items-center gap-1 mt-0.5">
-                  <HalalIndonesiaLogo className="w-3 h-3.5 text-[#672982]" />
-                  <span className="text-xs font-bold text-[#672982]">
-                    {umkm.halalNumber ? `No. Halal: ${umkm.halalNumber}` : 'Halal Terverifikasi'}
-                  </span>
+              <span className="text-xs font-bold text-gray-400 uppercase">Status & Verifikasi</span>
+              {umkm.isHalal ? (
+                <div className="flex items-center gap-1.5 text-sm font-extrabold text-[#672982]">
+                  <HalalIndonesiaLogo className="w-4 h-5 text-[#672982] shrink-0" />
+                  <span>{umkm.halalNumber ? `No. Halal: ${umkm.halalNumber}` : 'Bersertifikat Halal Resmi'}</span>
                 </div>
+              ) : (
+                <p className="text-sm font-bold text-emerald-800 flex items-center gap-1.5">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                  UMKM Terverifikasi Desa
+                </p>
               )}
+              <span className="text-xs text-gray-500 font-medium">Binaan Resmi Balai Desa Kutoharjo</span>
             </div>
 
             <div className="flex justify-start md:justify-end">
@@ -136,16 +136,15 @@ export default function UmkmDetailPage() {
                 href={`https://wa.me/${umkm.whatsapp}?text=Halo%20${encodeURIComponent(umkm.name)},%20saya%20tertarik%20dengan%20produk%20Anda.`}
                 target="_blank"
                 rel="noreferrer"
-                className="w-full md:w-auto"
+                className="w-full md:w-auto block"
               >
-                <SoftButton
-                  variant="primary"
-                  size="lg"
-                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20"
-                  icon={<PhoneCall className="w-5 h-5" />}
+                <button
+                  type="button"
+                  className="w-full md:w-auto px-6 py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-extrabold text-sm flex items-center justify-center gap-2.5 shadow-lg shadow-emerald-600/30 transition-all cursor-pointer border-none"
                 >
-                  Hubungi via WhatsApp
-                </SoftButton>
+                  <PhoneCall className="w-5 h-5 text-white fill-white" />
+                  <span className="text-white font-bold tracking-wide">Hubungi via WhatsApp</span>
+                </button>
               </a>
             </div>
           </div>
@@ -237,10 +236,15 @@ export default function UmkmDetailPage() {
                       href={`https://wa.me/${umkm.whatsapp}?text=Halo%20${encodeURIComponent(umkm.name)},%20saya%20ingin%20memesan%20produk:%20${encodeURIComponent(product.name)}`}
                       target="_blank"
                       rel="noreferrer"
+                      className="block"
                     >
-                      <SoftButton variant="primary" size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white" icon={<PhoneCall className="w-4 h-4" />}>
-                        Pesan
-                      </SoftButton>
+                      <button
+                        type="button"
+                        className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-emerald-600/25 transition-all cursor-pointer border-none"
+                      >
+                        <PhoneCall className="w-4 h-4 text-white fill-white" />
+                        <span className="text-white font-bold">Pesan WA</span>
+                      </button>
                     </a>
                   </div>
                 </SoftCard>
