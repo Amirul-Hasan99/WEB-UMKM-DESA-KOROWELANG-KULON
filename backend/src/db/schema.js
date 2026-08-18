@@ -64,7 +64,7 @@ const feedbacks = pgTable('feedbacks', {
 // Dynamic Content Table (Single row configuration)
 const dynamicContent = pgTable('dynamic_content', {
   id: serial('id').primaryKey(),
-  siteName: varchar('site_name', { length: 255 }).default('UMKM Kutoharjo'),
+  siteName: varchar('site_name', { length: 255 }).default('UMKM Korowelang Kulon'),
   headerTitle: text('header_title'),
   headerSubtitle: text('header_subtitle'),
   logoUrl: text('logo_url'),

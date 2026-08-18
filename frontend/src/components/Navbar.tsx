@@ -51,15 +51,15 @@ export const Navbar: React.FC = () => {
             {content?.logoUrl ? (
               <img src={content.logoUrl} alt="Logo Desa" className="w-full h-full object-cover rounded-xl" />
             ) : (
-              <Store className="w-6 h-6 text-red-600" />
+              <Store className="w-6 h-6 text-blue-600" />
             )}
           </div>
           <div className="flex flex-col">
-            <span className="font-extrabold text-lg text-gray-800 tracking-tight leading-none group-hover:text-red-600 transition-colors">
-              {content?.siteName || 'UMKM Kutoharjo'}
+            <span className="font-extrabold text-lg text-gray-800 tracking-tight leading-none group-hover:text-blue-600 transition-colors">
+              {content?.siteName || 'UMKM Korowelang Kulon'}
             </span>
             <span className="text-[11px] font-semibold text-gray-500 tracking-wide mt-1">
-              Desa Kutoharjo • Kendal
+              Desa Korowelang Kulon • Kendal
             </span>
           </div>
         </Link>
@@ -75,7 +75,7 @@ export const Navbar: React.FC = () => {
                 className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-2xl transition-all ${
                   isActive
                     ? 'soft-button-primary'
-                    : 'text-gray-600 hover:text-red-600 hover:bg-white/40'
+                    : 'text-gray-600 hover:text-blue-600 hover:bg-white/40'
                 }`}
               >
                 {link.icon}

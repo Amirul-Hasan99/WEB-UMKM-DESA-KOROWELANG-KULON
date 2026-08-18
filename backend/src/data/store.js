@@ -1,52 +1,52 @@
-// Stateful Mock Database for UMKM Desa Kutoharjo
+// Stateful Mock Database for UMKM Desa Korowelang Kulon
 
 const mockData = {
   users: [
     {
       id: 1,
-      name: "Super Admin Kelurahan",
-      email: "superadmin@kutoharjo.desa.id",
-      password: "superadmin123", // In real DB this is hashed with bcryptjs
+      name: "Super Admin Desa Korowelang Kulon",
+      email: "superadmin@korowelangkulon.desa.id",
+      password: "superadmin123", // In real DB this is hashed with bcryptjs / argon2
       role: "superadmin",
       phone: "081234567890",
       avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
-      bio: "Kepala Seksi Pemberdayaan Ekonomi Masyarakat Kelurahan Kutoharjo."
+      bio: "Kepala Seksi Pemberdayaan Ekonomi Masyarakat Desa Korowelang Kulon."
     },
     {
       id: 2,
       name: "Budi Santoso (Admin Staff)",
-      email: "admin@kutoharjo.desa.id",
+      email: "admin@korowelangkulon.desa.id",
       password: "admin123",
       role: "admin",
       phone: "081987654321",
       avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80",
-      bio: "Staff Pendamping UMKM Kelurahan Kutoharjo."
+      bio: "Staff Pendamping UMKM Desa Korowelang Kulon."
     },
     {
       id: 3,
       name: "Siti Rahma (Admin Staff)",
-      email: "siti@kutoharjo.desa.id",
+      email: "siti@korowelangkulon.desa.id",
       password: "admin123",
       role: "admin",
       phone: "085712345678",
       avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80",
-      bio: "Staff Administrasi & Publikasi UMKM Desa."
+      bio: "Staff Administrasi & Publikasi UMKM Desa Korowelang Kulon."
     }
   ],
 
   umkms: [
     {
       id: 1,
-      name: "Bandeng Presto Khas Kutoharjo",
+      name: "Bandeng Presto Khas Korowelang Kulon",
       owner: "H. Ahmad Subechi",
       category: "Kuliner",
-      address: "RT 02 / RW 01, Dusun Karanganyar, Desa Kutoharjo",
+      address: "RT 02 / RW 01, Dusun Karanganyar, Desa Korowelang Kulon",
       phone: "6281229988771",
       whatsapp: "6281229988771",
-      gmapsUrl: "https://maps.google.com/?q=-6.912345,110.123456",
+      gmapsUrl: "https://maps.google.com/?q=-6.890000,110.145000",
       gmapsEmbed: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15842.695724128522!2d110.145000!3d-6.890000!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNsKwNTMnMjQuMCJTIDExMMKwMDgnNDI0LjAiRQ!5e0!3m2!1sid!2sid!4v1650000000000!5m2!1sid!2sid",
-      description: "Produsen olahan bandeng presto duri lunak resep warisan keluarga Kutoharjo sejak 1998. Diolah higienis dengan bumbu rempah alami pilihan.",
-      landingText: "Cita rasa bandeng presto gurih, lezat, dan tanpa pengawet asli Kutoharjo.",
+      description: "Produsen olahan bandeng presto duri lunak resep warisan keluarga Korowelang Kulon sejak 1998. Diolah higienis dengan bumbu rempah alami pilihan.",
+      landingText: "Cita rasa bandeng presto gurih, lezat, dan tanpa pengawet asli Korowelang Kulon.",
       profileImage: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=600&q=80",
       bannerImage: "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=1200&q=80",
       rating: 4.9,
@@ -55,16 +55,16 @@ const mockData = {
     },
     {
       id: 2,
-      name: "Batik Tulis Kutoharjo",
+      name: "Batik Tulis Korowelang Kulon",
       owner: "Ibu Hj. Maryam",
       category: "Kerajinan & Fashion",
-      address: "RT 04 / RW 02, Jalan Utama Kutoharjo No. 45",
+      address: "RT 04 / RW 02, Jalan Utama Korowelang Kulon No. 45",
       phone: "6285640112233",
       whatsapp: "6285640112233",
-      gmapsUrl: "https://maps.google.com/?q=-6.914444,110.125555",
+      gmapsUrl: "https://maps.google.com/?q=-6.891000,110.146000",
       gmapsEmbed: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15842.695724128522!2d110.145000!3d-6.890000!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNsKwNTMnMjQuMCJTIDExMMKwMDgnNDI0LjAiRQ!5e0!3m2!1sid!2sid!4v1650000000000!5m2!1sid!2sid",
-      description: "Pengrajin batik motif khas Kutoharjo dengan perpaduan warna cerah motif alami dan floramorfis.",
-      landingText: "Batik tulis eksklusif karya tangan ibu-ibu pengrajin lokal Kutoharjo.",
+      description: "Pengrajin batik motif khas Korowelang Kulon dengan perpaduan warna cerah motif alami pesisir dan flora.",
+      landingText: "Batik tulis eksklusif karya tangan ibu-ibu pengrajin lokal Korowelang Kulon.",
       profileImage: "https://images.unsplash.com/photo-1606744824163-985d376605aa?auto=format&fit=crop&w=600&q=80",
       bannerImage: "https://images.unsplash.com/photo-1528459801416-a9e53bbf4e17?auto=format&fit=crop&w=1200&q=80",
       rating: 4.8,
@@ -73,13 +73,13 @@ const mockData = {
     },
     {
       id: 3,
-      name: "Emping Melinjo Super Kutoharjo",
+      name: "Emping Melinjo Super Korowelang Kulon",
       owner: "Pak Suparno",
       category: "Makanan Ringan",
-      address: "RT 01 / RW 03, Dusun Dukuh Kulon, Kutoharjo",
+      address: "RT 01 / RW 03, Dusun Krajan, Korowelang Kulon",
       phone: "6281390114455",
       whatsapp: "6281390114455",
-      gmapsUrl: "https://maps.google.com/?q=-6.916666,110.127777",
+      gmapsUrl: "https://maps.google.com/?q=-6.892000,110.147000",
       gmapsEmbed: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15842.695724128522!2d110.145000!3d-6.890000!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNsKwNTMnMjQuMCJTIDExMMKwMDgnNDI0LjAiRQ!5e0!3m2!1sid!2sid!4v1650000000000!5m2!1sid!2sid",
       description: "Emping melinjo kualitas ekspor diproduksi dari buah melinjo pilihan tanpa campuran tepung. Renyah, gurih, dan tahan lama.",
       landingText: "Olahan melinjo murni tanpa campuran, renyah dan gurih alami.",
@@ -91,13 +91,13 @@ const mockData = {
     },
     {
       id: 4,
-      name: "Anyaman Bambu & Craft Kutoharjo",
+      name: "Anyaman Bambu & Craft Korowelang Kulon",
       owner: "Kang Tarjo",
       category: "Kerajinan & Fashion",
-      address: "RT 03 / RW 01, Dusun Bambu Asri, Kutoharjo",
+      address: "RT 03 / RW 01, Dusun Bambu Asri, Korowelang Kulon",
       phone: "6287733445566",
       whatsapp: "6287733445566",
-      gmapsUrl: "https://maps.google.com/?q=-6.918888,110.129999",
+      gmapsUrl: "https://maps.google.com/?q=-6.893000,110.148000",
       gmapsEmbed: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15842.695724128522!2d110.145000!3d-6.890000!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNsKwNTMnMjQuMCJTIDExMMKwMDgnNDI0LjAiRQ!5e0!3m2!1sid!2sid!4v1650000000000!5m2!1sid!2sid",
       description: "Aneka kerajinan tempat makanan, hampers, tas etnik, dan perabot ramah lingkungan berbahan dasar bambu lokal.",
       landingText: "Kerajinan tangan seni anyaman bambu bernilai estetika tinggi.",
@@ -116,7 +116,7 @@ const mockData = {
       name: "Bandeng Presto Kemasan Vakum (Isi 2 Ekor)",
       price: 35000,
       unit: "pack",
-      description: "Bandeng duri lunak plus sambal terasi pedas manis khas Kutoharjo. Tahan hingga 14 hari di suhu ruangan.",
+      description: "Bandeng duri lunak plus sambal terasi pedas manis khas Korowelang Kulon. Tahan hingga 14 hari di suhu ruangan.",
       image: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=500&q=80"
     },
     {
@@ -131,10 +131,10 @@ const mockData = {
     {
       id: 3,
       umkmId: 2,
-      name: "Kain Batik Tulis Motif Kutoharjo (2x1.15m)",
+      name: "Kain Batik Tulis Motif Korowelang Kulon (2x1.15m)",
       price: 350000,
       unit: "pcs",
-      description: "Kain katun prima halus berpewarna sintesis tahan pudar dengan cetakan motif khas Kutoharjo.",
+      description: "Kain katun prima halus berpewarna sintesis tahan pudar dengan cetakan motif khas Korowelang Kulon.",
       image: "https://images.unsplash.com/photo-1606744824163-985d376605aa?auto=format&fit=crop&w=500&q=80"
     },
     {
@@ -180,32 +180,32 @@ const mockData = {
       id: 1,
       name: "Ahmad Wijaya",
       email: "ahmad.w@gmail.com",
-      message: "Bandeng presto khas Kutoharjo rasanya juara sekali! Sambalnya pas dan durinya benar-benar lunak.",
+      message: "Bandeng presto khas Korowelang Kulon rasanya juara sekali! Sambalnya pas dan durinya benar-benar lunak.",
       createdAt: "2024-06-10T10:00:00.000Z"
     },
     {
       id: 2,
       name: "Dini Lestari",
       email: "dini.l@yahoo.com",
-      message: "Website portal ini sangat membantu saya mencari batik tulis asli Kutoharjo langsung dari pengrajinnya.",
+      message: "Website portal ini sangat membantu saya mencari batik tulis asli Korowelang Kulon langsung dari pengrajinnya.",
       createdAt: "2024-06-12T14:30:00.000Z"
     }
   ],
 
   dynamicContent: {
-    siteName: "UMKM Kutoharjo",
-    headerTitle: "Portal Pemberdayaan UMKM Desa Kutoharjo",
+    siteName: "UMKM Korowelang Kulon",
+    headerTitle: "Portal Pemberdayaan UMKM Desa Korowelang Kulon",
     headerSubtitle: "Mendukung Ekonomi Kreatif & Usaha Lokal Desa Mandiri",
     logoUrl: "/logo-kendal.png",
-    heroTitle: "Jelajahi Produk Unggulan Karya Warga Kutoharjo",
+    heroTitle: "Jelajahi Produk Unggulan Karya Warga Korowelang Kulon",
     heroSubtitle: "Dari Kuliner khas hingga Kerajinan Tradisional. Dapatkan produk berkualitas langsung dari pelaku usaha desa kami.",
     heroBannerUrl: "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=80",
-    aboutTitle: "Tentang Program UMKM Desa Kutoharjo",
-    aboutText: "Desa Kutoharjo merupakan desa yang kaya akan potensi produk olahan, industri makanan ringan, hingga kerajinan seni khas desa. Portal ini hadir sebagai wadah digitalisasi resmi yang dikelola oleh Pemerintah Kelurahan Kutoharjo untuk memasarkan dan memperkenalkan potensi lokal secara luas ke seluruh Indonesia.",
-    villageAddress: "Jl. Raya Kutoharjo No. 01, Kec. Kaliwungu, Kabupaten Kendal, Jawa Tengah",
-    contactEmail: "info@kutoharjo.desa.id",
+    aboutTitle: "Tentang Program UMKM Desa Korowelang Kulon",
+    aboutText: "Desa Korowelang Kulon merupakan desa yang kaya akan potensi produk olahan, industri makanan ringan, hasil tambak & pertanian, hingga kerajinan seni khas desa. Portal ini hadir sebagai wadah digitalisasi resmi yang dikelola oleh Pemerintah Desa Korowelang Kulon untuk memasarkan dan memperkenalkan potensi lokal secara luas ke seluruh Indonesia.",
+    villageAddress: "Jl. Raya Korowelang Kulon, Kec. Cepiring, Kabupaten Kendal, Jawa Tengah",
+    contactEmail: "info@korowelangkulon.desa.id",
     contactPhone: "(0294) 381000 / 0812-3456-7890",
-    footerText: "© 2026 Pemerintah Desa Kutoharjo. Hak Cipta Dilindungi Undang-Undang."
+    footerText: "© 2026 Pemerintah Desa Korowelang Kulon. Hak Cipta Dilindungi Undang-Undang."
   }
 };
 

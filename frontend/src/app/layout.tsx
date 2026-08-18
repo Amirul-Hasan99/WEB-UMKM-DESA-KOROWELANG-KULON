@@ -2,35 +2,35 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://umkm-kutoharjo.vercel.app'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://umkm-desa-korowelang-kulon.vercel.app'),
   title: {
-    default: 'UMKM Desa Kutoharjo | Portal Resmi Usaha Desa',
-    template: '%s | UMKM Kutoharjo',
+    default: 'UMKM Desa Korowelang Kulon | Portal Resmi Usaha Desa',
+    template: '%s | UMKM Korowelang Kulon',
   },
-  description: 'Portal pemberdayaan digital dan katalog produk resmi UMKM Desa Kutoharjo, Kecamatan Kaliwungu, Kabupaten Kendal, Jawa Tengah.',
+  description: 'Portal pemberdayaan digital dan katalog produk resmi UMKM Desa Korowelang Kulon, Kecamatan Cepiring, Kabupaten Kendal, Jawa Tengah.',
   keywords: [
-    'UMKM Kutoharjo',
-    'Kuliner Kutoharjo',
-    'Bandeng Cabut Duri',
-    'Desa Kutoharjo',
+    'UMKM Korowelang Kulon',
+    'Kuliner Korowelang Kulon',
+    'Bandeng Presto Kendal',
+    'Desa Korowelang Kulon',
     'Kendal',
     'Pemberdayaan Ekonomi Desa',
     'Katalog UMKM Kendal'
   ],
-  authors: [{ name: 'Pemerintah Desa Kutoharjo' }],
-  creator: 'Pemerintah Desa Kutoharjo',
+  authors: [{ name: 'Pemerintah Desa Korowelang Kulon' }],
+  creator: 'Pemerintah Desa Korowelang Kulon',
   openGraph: {
     type: 'website',
     locale: 'id_ID',
-    url: 'https://umkm-kutoharjo.vercel.app',
-    title: 'UMKM Desa Kutoharjo | Portal Resmi Usaha Desa',
-    description: 'Jelajahi produk lokal berkualitas, kuliner unggulan, dan usaha masyarakat Desa Kutoharjo.',
-    siteName: 'Portal UMKM Desa Kutoharjo',
+    url: 'https://umkm-desa-korowelang-kulon.vercel.app',
+    title: 'UMKM Desa Korowelang Kulon | Portal Resmi Usaha Desa',
+    description: 'Jelajahi produk lokal berkualitas, kuliner unggulan, dan usaha masyarakat Desa Korowelang Kulon.',
+    siteName: 'Portal UMKM Desa Korowelang Kulon',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'UMKM Desa Kutoharjo',
-    description: 'Portal Resmi Produk & Usaha Desa Kutoharjo, Kendal.',
+    title: 'UMKM Desa Korowelang Kulon',
+    description: 'Portal Resmi Produk & Usaha Desa Korowelang Kulon, Kendal.',
   },
   icons: {
     icon: [
@@ -48,15 +48,15 @@ export const metadata: Metadata = {
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'GovernmentOrganization',
-  name: 'Portal UMKM Desa Kutoharjo',
-  url: 'https://umkm-kutoharjo.vercel.app',
+  name: 'Portal UMKM Desa Korowelang Kulon',
+  url: 'https://umkm-desa-korowelang-kulon.vercel.app',
   address: {
     '@type': 'PostalAddress',
     addressLocality: 'Kendal',
     addressRegion: 'Jawa Tengah',
     addressCountry: 'ID',
   },
-  description: 'Wadah digitalisasi resmi dan portal UMKM Desa Kutoharjo, Kendal, Jawa Tengah.',
+  description: 'Wadah digitalisasi resmi dan portal UMKM Desa Korowelang Kulon, Kendal, Jawa Tengah.',
 };
 
 export default function RootLayout({
@@ -75,7 +75,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className="bg-[#eef2f6] text-gray-800 antialiased selection:bg-red-500 selection:text-white">
+      <body className="bg-[#eef2f6] text-gray-800 antialiased selection:bg-blue-600 selection:text-white">
         {children}
       </body>
     </html>

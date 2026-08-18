@@ -34,7 +34,7 @@ const createAdmin = async (req, res) => {
       role: role || 'admin',
       phone: phone || '',
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
-      bio: bio || 'Staff Kelurahan Kutoharjo.'
+      bio: bio || 'Staff Desa Korowelang Kulon.'
     };
 
     const inserted = await db.insert(schema.users).values(payload).returning();

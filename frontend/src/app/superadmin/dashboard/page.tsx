@@ -16,15 +16,15 @@ export default function SuperAdminDashboardPage() {
         
         {/* Welcome Super Admin Banner */}
         <SoftCard className="p-6 md:p-8 flex flex-col gap-2">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-red-100 text-red-700 text-xs font-extrabold self-start">
-            <ShieldCheck className="w-4 h-4 text-red-600" />
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-blue-100 text-blue-700 text-xs font-extrabold self-start">
+            <ShieldCheck className="w-4 h-4 text-blue-600" />
             <span>Hak Akses Master Super Admin</span>
           </div>
           <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">
-            Dashboard Utama Kelurahan Kutoharjo
+            Dashboard Utama Desa Korowelang Kulon
           </h1>
           <p className="text-sm text-gray-600 max-w-2xl font-medium leading-relaxed">
-            Anda memiliki kendali penuh atas manajemen akun staff kelurahan, pengaturan konten dinamis website, dan pendaftaran UMKM desa.
+            Anda memiliki kendali penuh atas manajemen akun staff desa, pengaturan konten dinamis website, dan pendaftaran UMKM desa.
           </p>
         </SoftCard>
 
@@ -32,12 +32,12 @@ export default function SuperAdminDashboardPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           
           <SoftCard className="p-6 flex flex-col gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center font-bold">
+            <div className="w-12 h-12 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold">
               <UserCheck className="w-6 h-6" />
             </div>
             <div className="flex flex-col gap-1">
               <h3 className="font-extrabold text-lg text-gray-900">Kelola Akun Admin Staff</h3>
-              <p className="text-xs text-gray-600">Tambah staff kelurahan baru, atur perizinan, atau perbarui kredensial login admin.</p>
+              <p className="text-xs text-gray-600">Tambah staff desa baru, atur perizinan, atau perbarui kredensial login admin.</p>
             </div>
             <Link href="/superadmin/admins">
               <SoftButton variant="primary" className="w-full mt-2" icon={<ArrowRight className="w-4 h-4" />}>
@@ -47,7 +47,7 @@ export default function SuperAdminDashboardPage() {
           </SoftCard>
 
           <SoftCard className="p-6 flex flex-col gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center font-bold">
+            <div className="w-12 h-12 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold">
               <Globe className="w-6 h-6" />
             </div>
             <div className="flex flex-col gap-1">

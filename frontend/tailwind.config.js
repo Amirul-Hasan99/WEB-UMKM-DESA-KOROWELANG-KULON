@@ -12,20 +12,21 @@ module.exports = {
         softBgDark: '#e2e8f0',
         softTextPrimary: '#2d3748',
         softTextSecondary: '#718096',
-        primaryRed: {
-          50: '#fef2f2',
-          100: '#fee2e2',
-          500: '#ef4444',
-          600: '#dc2626',
-          700: '#b91c1c',
+        primaryBlue: {
+          50: '#eff6ff',
+          100: '#dbeafe',
+          500: '#3b82f6',
+          600: '#2563eb',
+          700: '#1d4ed8',
         }
       },
       boxShadow: {
         'soft-out': '6px 6px 16px #cbd5e1, -6px -6px 16px #ffffff',
         'soft-out-lg': '10px 10px 24px #cbd5e1, -10px -10px 24px #ffffff',
         'soft-in': 'inset 4px 4px 8px #cbd5e1, inset -4px -4px 8px #ffffff',
-        'soft-btn': '4px 4px 10px #fca5a5, -4px -4px 10px #ffffff',
-        'soft-red-glow': '0 10px 20px -5px rgba(220, 38, 38, 0.4)',
+        'soft-btn': '4px 4px 10px #93c5fd, -4px -4px 10px #ffffff',
+        'soft-blue-glow': '0 10px 20px -5px rgba(37, 99, 235, 0.4)',
+        'soft-red-glow': '0 10px 20px -5px rgba(37, 99, 235, 0.4)',
       },
       borderRadius: {
         '2xl': '1rem',

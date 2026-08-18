@@ -81,17 +81,17 @@ async function seedInitialDataIfNeeded() {
 
       await User.insertMany([
         {
-          id: "usr-superadmin-kutoharjo",
-          name: "Super Admin Desa Kutoharjo",
-          email: "superadmin@kutoharjo.desa.id",
+          id: "usr-superadmin-korowelangkulon",
+          name: "Super Admin Desa Korowelang Kulon",
+          email: "superadmin@korowelangkulon.desa.id",
           password_hash: superAdminPassword,
           role: "SUPERADMIN",
           created_at: new Date(),
         },
         {
-          id: "usr-admin-kutoharjo",
-          name: "Admin Kutoharjo",
-          email: "admin@kutoharjo.desa.id",
+          id: "usr-admin-korowelangkulon",
+          name: "Admin Korowelang Kulon",
+          email: "admin@korowelangkulon.desa.id",
           password_hash: adminPassword,
           role: "ADMIN",
           created_at: new Date(),
@@ -104,9 +104,9 @@ async function seedInitialDataIfNeeded() {
     if (settingCount === 0) {
       console.log("🌱 Seeding initial site settings into MongoDB Atlas...");
       await SiteSetting.insertMany([
-        { id: "st-1", key: "site_name", value: "Kutoharjo UMKM Hub" },
-        { id: "st-2", key: "hero_title", value: "Temukan & Dukung UMKM Lokal Desa Kutoharjo" },
-        { id: "st-3", key: "hero_subtitle", value: "Direktori digital yang menghubungkan Anda langsung dengan pelaku usaha mikro, kecil, dan menengah di Desa Kutoharjo. Beli lokal, tumbuh bersama." },
+        { id: "st-1", key: "site_name", value: "Korowelang Kulon UMKM Hub" },
+        { id: "st-2", key: "hero_title", value: "Temukan & Dukung UMKM Lokal Desa Korowelang Kulon" },
+        { id: "st-3", key: "hero_subtitle", value: "Direktori digital yang menghubungkan Anda langsung dengan pelaku usaha mikro, kecil, dan menengah di Desa Korowelang Kulon. Beli lokal, tumbuh bersama." },
       ]);
     }
 

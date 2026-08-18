@@ -14,7 +14,7 @@ router.post("/", authenticateToken, upload.single("image"), async (req, res) => 
       });
     }
 
-    const imageUrl = await uploadToCloudinary(req.file.buffer, "umkm-kutoharjo");
+    const imageUrl = await uploadToCloudinary(req.file.buffer, "umkm-korowelang-kulon");
 
     return res.status(200).json({
       success: true,

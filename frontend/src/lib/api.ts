@@ -83,7 +83,7 @@ export const normalizeUmkm = (raw: any): UMKM => {
   const gmapsRaw = raw.gmapsEmbed || '';
   const gmapsEmbedParsed = parseGmapsEmbedUrl(
     gmapsRaw,
-    `${raw.name || ''} ${raw.address || ''} Kutoharjo Kendal`
+    `${raw.name || ''} ${raw.address || ''} Korowelang Kulon Kendal`
   );
 
   return {

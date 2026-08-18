@@ -192,7 +192,7 @@ const createUmkm = async (req, res) => {
       name,
       owner: owner || '',
       category: category || 'Kuliner',
-      address: address || 'Desa Kutoharjo',
+      address: address || 'Desa Korowelang Kulon',
       phone: phone || '',
       whatsapp: whatsapp || whatsappNumber || phone || '',
       gmapsUrl: gmapsUrl || mapsUrl || '',

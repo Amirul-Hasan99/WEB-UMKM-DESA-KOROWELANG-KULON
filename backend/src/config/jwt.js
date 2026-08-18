@@ -14,7 +14,7 @@ if (!JWT_SECRET) {
   }
 }
 
-const EFFECTIVE_SECRET = JWT_SECRET || 'dev-fallback-jwt-secret-kutoharjo-2026-CHANGE-IN-PROD';
+const EFFECTIVE_SECRET = JWT_SECRET || 'dev-fallback-jwt-secret-korowelang-kulon-2026-CHANGE-IN-PROD';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1d';
 
 /**

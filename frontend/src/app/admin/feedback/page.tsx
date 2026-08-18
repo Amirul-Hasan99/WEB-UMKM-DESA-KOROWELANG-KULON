@@ -84,7 +84,7 @@ export default function AdminFeedbackPage() {
               <SoftCard key={f.id} className="p-6 flex flex-col gap-3">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-200/80 pb-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center font-bold shrink-0">
+                    <div className="w-10 h-10 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold shrink-0">
                       <User className="w-5 h-5" />
                     </div>
                     <div className="flex flex-col">
@@ -92,9 +92,9 @@ export default function AdminFeedbackPage() {
                       {f.email ? (
                         <a
                           href={`mailto:${f.email}`}
-                          className="text-xs text-gray-500 hover:text-red-600 flex items-center gap-1 transition-colors"
+                          className="text-xs text-gray-500 hover:text-blue-600 flex items-center gap-1 transition-colors"
                         >
-                          <Mail className="w-3 h-3 text-red-500" />
+                          <Mail className="w-3 h-3 text-blue-500" />
                           {f.email}
                         </a>
                       ) : (

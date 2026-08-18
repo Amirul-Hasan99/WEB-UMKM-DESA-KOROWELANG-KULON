@@ -21,9 +21,9 @@ Gunakan akun dummy berikut untuk masuk ke dashboard Admin dan Super Admin:
 
 | Role | Email | Password | Hak Akses |
 |---|---|---|---|
-| **Super Admin** | `superadmin@kutoharjo.desa.id` | `superadmin123` | Akses Penuh (Kelola Admin, Kelola UMKM, Kelola Produk, Edit Konten Website Dinamis) |
-| **Admin Staff** | `admin@kutoharjo.desa.id` | `admin123` | Kelola UMKM, Kelola Produk, Edit Profil Admin, Lihat Feedback |
-| **Admin Staff** | `siti@kutoharjo.desa.id` | `admin123` | Kelola UMKM, Kelola Produk, Edit Profil Admin, Lihat Feedback |
+| **Super Admin** | `superadmin@korowelangkulon.desa.id` | `superadmin123` | Akses Penuh (Kelola Admin, Kelola UMKM, Kelola Produk, Edit Konten Website Dinamis) |
+| **Admin Staff** | `admin@korowelangkulon.desa.id` | `admin123` | Kelola UMKM, Kelola Produk, Edit Profil Admin, Lihat Feedback |
+| **Admin Staff** | `siti@korowelangkulon.desa.id` | `admin123` | Kelola UMKM, Kelola Produk, Edit Profil Admin, Lihat Feedback |
 
 ---
 

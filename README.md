@@ -1,6 +1,6 @@
-# 🏪 UMKM Desa Kutoharjo - Full-Stack Web Portal
+# 🏪 UMKM Desa Korowelang Kulon - Full-Stack Web Portal
 
-Wadah digitalisasi resmi dan portal UMKM Desa Kutoharjo, Kecamatan Kaliwungu, Kabupaten Kendal, Jawa Tengah.
+Wadah digitalisasi resmi dan portal UMKM Desa Korowelang Kulon, Kecamatan Cepiring, Kabupaten Kendal, Jawa Tengah.
 
 Aplikasi ini mengusung desain **Modern Neumorphism / Soft UI Clean Aesthetic** yang terinspirasi dari antarmuka modern (skema warna soft grey-blue, dual drop shadow, tombol gradien biru royal, dan layout card presisi).
 

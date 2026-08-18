@@ -6,7 +6,7 @@ describe('Authentication & Admin API Endpoints (/api/admin)', () => {
 
   it('POST /api/admin/login - should authenticate valid staff admin credentials', async () => {
     const loginPayload = {
-      email: 'admin@kutoharjo.desa.id',
+      email: 'admin@korowelangkulon.desa.id',
       password: 'admin123',
     };
 
@@ -24,7 +24,7 @@ describe('Authentication & Admin API Endpoints (/api/admin)', () => {
 
   it('POST /api/admin/login - should reject invalid credentials (401 Unauthorized)', async () => {
     const invalidPayload = {
-      email: 'admin@kutoharjo.desa.id',
+      email: 'admin@korowelangkulon.desa.id',
       password: 'wrongpassword',
     };
 
@@ -52,6 +52,6 @@ describe('Authentication & Admin API Endpoints (/api/admin)', () => {
 
     expect(response.status).toBe(200);
     expect(response.body.success).toBe(true);
-    expect(response.body.data).toHaveProperty('email', 'admin@kutoharjo.desa.id');
+    expect(response.body.data).toHaveProperty('email', 'admin@korowelangkulon.desa.id');
   });
 });

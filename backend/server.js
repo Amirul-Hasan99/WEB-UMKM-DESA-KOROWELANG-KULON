@@ -57,7 +57,7 @@ app.use(generalLimiter);
 const allowedOrigins = [
   "http://localhost:3000",
   "http://127.0.0.1:3000",
-  "https://umkm-desa-kutoharjo.vercel.app",
+  "https://umkm-desa-korowelang-kulon.vercel.app",
   ...(process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',').map((s) => s.trim()) : []),
 ].filter(Boolean);
 
@@ -129,7 +129,7 @@ app.get(["/", "/health", "/api", "/api/health"], async (req, res) => {
 
   res.json({
     status: "online",
-    message: "Portal UMKM Kutoharjo API Server",
+    message: "Portal UMKM Desa Korowelang Kulon API Server",
     version: "2.2.0",
     environment: process.env.NODE_ENV || "development",
     database: dbStatus,
@@ -219,7 +219,7 @@ if (!process.env.VERCEL && process.env.NODE_ENV !== "test") {
   const server = http.createServer(app);
   server.listen(PORT, () => {
     console.log(`=============================================`);
-    console.log(`🚀 Backend UMKM Kutoharjo running on http://localhost:${PORT}`);
+    console.log(`🚀 Backend UMKM Korowelang Kulon running on http://localhost:${PORT}`);
     console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
     console.log(`🔐 Auth: POST http://localhost:${PORT}/api/auth/login`);
     console.log(`📦 Admin UMKM: GET http://localhost:${PORT}/api/admin/umkm`);

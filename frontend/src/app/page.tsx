@@ -31,8 +31,8 @@ export default function LandingPage() {
           <SoftCard className="relative overflow-hidden p-8 md:p-14 bg-gradient-to-br from-[#eef2f6] to-[#e2e8f0]">
             
             {/* Background Decorative Pill Glow */}
-            <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-red-500/10 blur-3xl pointer-events-none" />
-            <div className="absolute -bottom-24 -left-24 w-96 h-96 rounded-full bg-red-400/10 blur-3xl pointer-events-none" />
+            <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-24 -left-24 w-96 h-96 rounded-full bg-blue-400/10 blur-3xl pointer-events-none" />
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center relative z-10">
               
@@ -40,7 +40,7 @@ export default function LandingPage() {
               <div className="lg:col-span-7 flex flex-col gap-6">
 
                 <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 tracking-tight leading-tight">
-                  {content?.heroTitle || 'Jelajahi Produk Unggulan Karya Warga Kutoharjo'}
+                  {content?.heroTitle || 'Jelajahi Produk Unggulan Karya Warga Korowelang Kulon'}
                 </h1>
 
                 <p className="text-base sm:text-lg text-gray-600 leading-relaxed max-w-2xl font-medium">
@@ -63,16 +63,16 @@ export default function LandingPage() {
                 {/* Trust Badges */}
                 <div className="grid grid-cols-3 gap-4 pt-6 border-t border-gray-300/60">
                   <div className="flex flex-col">
-                    <span className="text-2xl font-extrabold text-red-600">100%</span>
+                    <span className="text-2xl font-extrabold text-blue-600">100%</span>
                     <span className="text-xs font-semibold text-gray-500">Asli Produk Desa</span>
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-2xl font-extrabold text-red-600">Kontak</span>
+                    <span className="text-2xl font-extrabold text-blue-600">Kontak</span>
                     <span className="text-xs font-semibold text-gray-500">Hubungi via WA</span>
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-2xl font-extrabold text-red-600">Binaan</span>
-                    <span className="text-xs font-semibold text-gray-500">Balai Desa Kutoharjo</span>
+                    <span className="text-2xl font-extrabold text-blue-600">Binaan</span>
+                    <span className="text-xs font-semibold text-gray-500">Balai Desa Korowelang Kulon</span>
                   </div>
                 </div>
 
@@ -89,7 +89,7 @@ export default function LandingPage() {
                         className="w-full h-full object-cover"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-4">
-                        <span className="text-white text-xs font-bold bg-red-600/90 backdrop-blur-md px-3 py-1.5 rounded-xl flex items-center gap-1.5">
+                        <span className="text-white text-xs font-bold bg-blue-600/90 backdrop-blur-md px-3 py-1.5 rounded-xl flex items-center gap-1.5">
                           <Award className="w-3.5 h-3.5" />
                           Potensi Ekonomi Desa
                         </span>
@@ -98,7 +98,7 @@ export default function LandingPage() {
 
                     <div className="p-2 flex flex-col gap-2">
                       <h3 className="font-extrabold text-gray-800 text-base">Produk Olahan & Kerajinan Tangan</h3>
-                      <p className="text-xs text-gray-500 font-medium">Mendorong kemandirian ekonomi masyarakat Kutoharjo.</p>
+                      <p className="text-xs text-gray-500 font-medium">Mendorong kemandirian ekonomi masyarakat Korowelang Kulon.</p>
                     </div>
                   </div>
                 </div>
@@ -111,12 +111,12 @@ export default function LandingPage() {
         {/* ABOUT DESA SNIPPET */}
         <section className="flex flex-col gap-6">
           <div className="text-center max-w-3xl mx-auto flex flex-col gap-3">
-            <span className="text-xs font-extrabold uppercase tracking-widest text-red-600">Sekilas Tentang Desa</span>
+            <span className="text-xs font-extrabold uppercase tracking-widest text-blue-600">Sekilas Tentang Desa</span>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
-              {content?.aboutTitle || 'Tentang Program UMKM Kutoharjo'}
+              {content?.aboutTitle || 'Tentang Program UMKM Korowelang Kulon'}
             </h2>
             <p className="text-sm sm:text-base text-gray-600 font-medium leading-relaxed">
-              {content?.aboutText || 'Desa Kutoharjo merupakan desa yang kaya akan potensi produk olahan, industri makanan ringan, hingga kerajinan seni khas desa.'}
+              {content?.aboutText || 'Desa Korowelang Kulon merupakan desa yang kaya akan potensi produk olahan, industri makanan ringan, hasil tambak & pertanian, hingga kerajinan seni khas desa.'}
             </p>
           </div>
         </section>
@@ -125,7 +125,7 @@ export default function LandingPage() {
         <section className="flex flex-col gap-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4">
             <div className="flex flex-col gap-1">
-              <span className="text-xs font-extrabold uppercase tracking-widest text-red-600">Unggulan Local Hero</span>
+              <span className="text-xs font-extrabold uppercase tracking-widest text-blue-600">Unggulan Local Hero</span>
               <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
                 UMKM Pilihan Desa
               </h2>
@@ -151,25 +151,25 @@ export default function LandingPage() {
                   {umkm.isHalal && (
                     <HalalCornerBadge className="absolute top-3 right-3 z-10 shadow-md" size="sm" />
                   )}
-                  <div className="absolute bottom-3 left-3 bg-red-600 text-white text-[11px] font-bold px-3 py-1 rounded-xl uppercase tracking-wider shadow-sm">
+                  <div className="absolute bottom-3 left-3 bg-blue-600 text-white text-[11px] font-bold px-3 py-1 rounded-xl uppercase tracking-wider shadow-sm">
                     {umkm.category}
                   </div>
                 </div>
 
                 {/* Info Content */}
                 <div className="flex flex-col gap-2 flex-1">
-                  <h3 className="font-extrabold text-lg text-gray-900 group-hover:text-red-600 transition-colors line-clamp-1">
+                  <h3 className="font-extrabold text-lg text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-1">
                     {umkm.name}
                   </h3>
                   <p className="text-xs font-bold text-gray-500 flex items-center gap-1">
-                    <ShieldCheck className="w-3.5 h-3.5 text-red-600" />
+                    <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
                     Pemilik: {umkm.owner}
                   </p>
                   <p className="text-xs text-gray-600 line-clamp-2 mt-1 leading-relaxed">
                     {umkm.landingText || umkm.description}
                   </p>
                   <div className="flex items-center gap-1 text-[11px] font-medium text-gray-500 mt-2">
-                    <MapPin className="w-3.5 h-3.5 text-red-500 shrink-0" />
+                    <MapPin className="w-3.5 h-3.5 text-blue-500 shrink-0" />
                     <span className="truncate">{umkm.address}</span>
                   </div>
                 </div>
@@ -192,13 +192,13 @@ export default function LandingPage() {
         <section className="pt-4">
           <SoftCard className="p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex flex-col gap-2 text-center md:text-left">
-              <span className="text-xs font-extrabold uppercase tracking-wider text-red-600 flex items-center justify-center md:justify-start gap-1.5">
-                <Sparkles className="w-4 h-4 text-red-600" />
+              <span className="text-xs font-extrabold uppercase tracking-wider text-blue-600 flex items-center justify-center md:justify-start gap-1.5">
+                <Sparkles className="w-4 h-4 text-blue-600" />
                 Layanan Suara Warga
               </span>
               <h3 className="text-2xl font-extrabold text-gray-900 tracking-tight">Aspirasi & Feedback Masyarakat</h3>
               <p className="text-sm text-gray-600 max-w-xl font-medium leading-relaxed">
-                Punya saran atau pertanyaan mengenai pengembangan UMKM di Desa Kutoharjo? Sampaikan langsung ke staff kami.
+                Punya saran atau pertanyaan mengenai pengembangan UMKM di Desa Korowelang Kulon? Sampaikan langsung ke staff kami.
               </p>
             </div>
             <Link href="/feedback" className="shrink-0">

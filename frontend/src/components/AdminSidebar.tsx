@@ -116,7 +116,7 @@ export const AdminSidebar: React.FC = () => {
       {/* Top Header Row (User info & Mobile Toggle) */}
       <div className="flex items-center justify-between gap-3 p-3 rounded-2xl soft-card-inset">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 md:w-11 md:h-11 rounded-2xl bg-red-600 text-white flex items-center justify-center font-bold text-base md:text-lg shadow-md shrink-0 overflow-hidden">
+          <div className="w-10 h-10 md:w-11 md:h-11 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-bold text-base md:text-lg shadow-md shrink-0 overflow-hidden">
             {user?.avatar ? (
               <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" />
             ) : user?.name ? (
@@ -127,9 +127,9 @@ export const AdminSidebar: React.FC = () => {
           </div>
           <div className="flex flex-col min-w-0">
             <span className="font-bold text-xs md:text-sm text-gray-800 truncate">
-              {user?.name || 'Staff Kelurahan'}
+              {user?.name || 'Staff Desa'}
             </span>
-            <span className="text-[10px] md:text-[11px] font-extrabold text-red-600 uppercase tracking-wider flex items-center gap-1">
+            <span className="text-[10px] md:text-[11px] font-extrabold text-blue-600 uppercase tracking-wider flex items-center gap-1">
               <ShieldCheck className="w-3 h-3" />
               {isSuperAdmin ? 'Super Admin' : 'Admin Staff'}
             </span>
@@ -143,7 +143,7 @@ export const AdminSidebar: React.FC = () => {
           className="md:hidden flex items-center gap-1.5 px-3 py-2 rounded-xl soft-button text-xs font-bold text-gray-700 active:scale-95 shrink-0"
           aria-label="Toggle navigation menu"
         >
-          {mobileOpen ? <X className="w-4 h-4 text-red-600" /> : <Menu className="w-4 h-4 text-gray-700" />}
+          {mobileOpen ? <X className="w-4 h-4 text-blue-600" /> : <Menu className="w-4 h-4 text-gray-700" />}
           <span className="text-[11px]">{mobileOpen ? 'Tutup' : 'Menu'}</span>
         </button>
       </div>
@@ -167,7 +167,7 @@ export const AdminSidebar: React.FC = () => {
                       className={`flex items-center justify-between px-3.5 py-2.5 text-xs font-bold rounded-2xl transition-all ${
                         isActive
                           ? 'soft-button-primary'
-                          : 'text-gray-600 hover:text-red-600 hover:bg-white/60'
+                          : 'text-gray-600 hover:text-blue-600 hover:bg-white/60'
                       }`}
                     >
                       <div className="flex items-center gap-2.5">

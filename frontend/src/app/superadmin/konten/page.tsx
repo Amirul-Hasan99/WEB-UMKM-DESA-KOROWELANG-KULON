@@ -99,7 +99,7 @@ export default function SuperAdminKontenPage() {
           {/* SECTION 1: HEADER & LOGO */}
           <SoftCard className="p-6 md:p-8 flex flex-col gap-5">
             <div className="flex items-center gap-2 border-b border-gray-200 pb-3">
-              <Layout className="w-5 h-5 text-red-600" />
+              <Layout className="w-5 h-5 text-blue-600" />
               <h2 className="text-lg font-bold text-gray-800">1. Identitas Website & Navbar Logo</h2>
             </div>
 
@@ -115,7 +115,7 @@ export default function SuperAdminKontenPage() {
           {/* SECTION 2: LANDING PAGE HERO */}
           <SoftCard className="p-6 md:p-8 flex flex-col gap-5">
             <div className="flex items-center gap-2 border-b border-gray-200 pb-3">
-              <Globe className="w-5 h-5 text-red-600" />
+              <Globe className="w-5 h-5 text-blue-600" />
               <h2 className="text-lg font-bold text-gray-800">2. Konten Hero Section Landing Page</h2>
             </div>
 
@@ -157,15 +157,15 @@ export default function SuperAdminKontenPage() {
           {/* SECTION 4: FOOTER & CONTACT INFO */}
           <SoftCard className="p-6 md:p-8 flex flex-col gap-5">
             <div className="flex items-center gap-2 border-b border-gray-200 pb-3">
-              <MapPin className="w-5 h-5 text-red-500" />
+              <MapPin className="w-5 h-5 text-blue-500" />
               <h2 className="text-lg font-bold text-gray-800">4. Kontak Balai Desa & Teks Footer</h2>
             </div>
 
-            <SoftInput label="Alamat Balai Kelurahan" value={villageAddress} onChange={e => setVillageAddress(e.target.value)} />
+            <SoftInput label="Alamat Balai Desa" value={villageAddress} onChange={e => setVillageAddress(e.target.value)} />
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <SoftInput label="Email Kontak Kelurahan" value={contactEmail} onChange={e => setContactEmail(e.target.value)} />
-              <SoftInput label="Telepon / WA Kontak Kelurahan" value={contactPhone} onChange={e => setContactPhone(e.target.value)} />
+              <SoftInput label="Email Kontak Desa" value={contactEmail} onChange={e => setContactEmail(e.target.value)} />
+              <SoftInput label="Telepon / WA Kontak Desa" value={contactPhone} onChange={e => setContactPhone(e.target.value)} />
             </div>
 
             <SoftInput label="Teks Copyright Footer" value={footerText} onChange={e => setFooterText(e.target.value)} />

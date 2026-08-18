@@ -88,10 +88,10 @@ function LoginForm() {
           </Link>
           <div className="flex flex-col gap-0.5">
             <h1 className="text-xl font-extrabold text-gray-900 tracking-tight leading-none">
-              Portal Admin Kelurahan
+              Portal Admin Desa
             </h1>
             <p className="text-[11px] text-gray-500 font-semibold mt-1">
-              Desa Kutoharjo • Kabupaten Kendal
+              Desa Korowelang Kulon • Kabupaten Kendal
             </p>
           </div>
         </div>
@@ -101,10 +101,10 @@ function LoginForm() {
 
           <div className="flex flex-col gap-0.5 border-b border-gray-200 pb-3">
             <h2 className="text-base font-bold text-gray-800 flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-red-600 shrink-0" />
+              <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0" />
               Masuk Akun Staff / Admin
             </h2>
-            <p className="text-[11px] text-gray-500">Masukkan kredensial login staff kelurahan.</p>
+            <p className="text-[11px] text-gray-500">Masukkan kredensial login staff desa.</p>
           </div>
 
           {/* Session expired notice */}
@@ -127,7 +127,7 @@ function LoginForm() {
             <SoftInput
               label="Email Staff / Admin"
               type="email"
-              placeholder="admin@kutoharjo.desa.id"
+              placeholder="admin@korowelangkulon.desa.id"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               icon={<Mail className="w-4 h-4" />}
@@ -160,7 +160,7 @@ function LoginForm() {
         </SoftCard>
 
         <div className="text-center">
-          <Link href="/" className="text-[11px] font-bold text-gray-500 hover:text-red-600 transition-colors">
+          <Link href="/" className="text-[11px] font-bold text-gray-500 hover:text-blue-600 transition-colors">
             ← Kembali ke Halaman Utama (Public)
           </Link>
         </div>

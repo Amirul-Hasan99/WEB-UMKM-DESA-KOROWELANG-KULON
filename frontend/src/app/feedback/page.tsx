@@ -48,7 +48,7 @@ export default function FeedbackPage() {
         
         {/* Header */}
         <div className="text-center flex flex-col items-center gap-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full soft-card-sm text-xs font-bold text-red-600">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full soft-card-sm text-xs font-bold text-blue-600">
             <MessageSquare className="w-4 h-4" />
             Layanan Feedback Masyarakat
           </div>
@@ -56,7 +56,7 @@ export default function FeedbackPage() {
             Kirim Saran & Feedback Anda
           </h1>
           <p className="text-sm text-gray-600 font-medium max-w-lg">
-            Sampaikan masukan, apresiasi, atau usulan pengembangan portal UMKM Kutoharjo secara langsung kepada pengelola desa.
+            Sampaikan masukan, apresiasi, atau usulan pengembangan portal UMKM Korowelang Kulon secara langsung kepada pengelola desa.
           </p>
         </div>
 
@@ -69,7 +69,7 @@ export default function FeedbackPage() {
               </div>
               <h3 className="text-xl font-extrabold text-gray-800">Feedback Berhasil Terkirim!</h3>
               <p className="text-sm text-gray-600 max-w-md">
-                Terima kasih atas partisipasi dan saran yang Anda berikan. Masukan Anda sangat berharga bagi kemajuan UMKM Desa Kutoharjo.
+                Terima kasih atas partisipasi dan saran yang Anda berikan. Masukan Anda sangat berharga bagi kemajuan UMKM Desa Korowelang Kulon.
               </p>
               <SoftButton variant="primary" className="mt-2" onClick={() => setSubmitted(false)}>
                 Kirim Feedback Lainnya

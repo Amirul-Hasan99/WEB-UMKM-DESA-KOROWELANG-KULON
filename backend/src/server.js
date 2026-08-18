@@ -32,7 +32,7 @@ app.use('/api', apiLimiter);
 const allowedOrigins = [
   'http://localhost:3000',
   'http://127.0.0.1:3000',
-  'https://umkm-desa-kutoharjo.vercel.app',
+  'https://umkm-desa-korowelang-kulon.vercel.app',
   ...(env.FRONTEND_URL ? env.FRONTEND_URL.split(',').map((s) => s.trim()) : []),
 ].filter(Boolean);
 
@@ -74,12 +74,12 @@ app.get(['/api', '/api/health'], async (req, res) => {
   if (db) {
     dbStatus = env.DATABASE_URL?.includes('.neon.tech') 
       ? 'Neon PostgreSQL Connected' 
-      : 'Local PostgreSQL Connected';
+      : 'PostgreSQL Connected';
   }
 
   res.json({
     status: 'online',
-    message: 'API Portal UMKM Desa Kutoharjo berjalan dengan lancar.',
+    message: 'API Portal UMKM Desa Korowelang Kulon berjalan dengan lancar.',
     version: '2.1.0',
     environment: env.NODE_ENV,
     database: dbStatus,

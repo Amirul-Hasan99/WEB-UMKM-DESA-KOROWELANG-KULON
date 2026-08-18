@@ -86,7 +86,7 @@ export default function UmkmDetailPage() {
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex items-end p-6">
               <div className="flex flex-col gap-2 text-white">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="bg-red-600/90 backdrop-blur-md px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider">
+                  <span className="bg-blue-600/90 backdrop-blur-md px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider">
                     {umkm.category}
                   </span>
                   {umkm.isHalal && (
@@ -98,7 +98,7 @@ export default function UmkmDetailPage() {
                 </div>
                 <h1 className="text-2xl md:text-4xl font-extrabold">{umkm.name}</h1>
                 <p className="text-xs md:text-sm text-gray-200 flex items-center gap-2 font-medium">
-                  <ShieldCheck className="w-4 h-4 text-red-400" />
+                  <ShieldCheck className="w-4 h-4 text-blue-400" />
                   Pemilik: <span className="font-bold text-white">{umkm.owner}</span>
                 </p>
               </div>
@@ -110,7 +110,7 @@ export default function UmkmDetailPage() {
             <div className="flex flex-col gap-1">
               <span className="text-xs font-bold text-gray-400 uppercase">Alamat Usaha</span>
               <p className="text-sm font-semibold text-gray-800 flex items-start gap-1.5">
-                <MapPin className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+                <MapPin className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
                 {umkm.address}
               </p>
             </div>
@@ -128,7 +128,7 @@ export default function UmkmDetailPage() {
                   UMKM Terverifikasi Desa
                 </p>
               )}
-              <span className="text-xs text-gray-500 font-medium">Binaan Resmi Balai Desa Kutoharjo</span>
+              <span className="text-xs text-gray-500 font-medium">Binaan Resmi Balai Desa Korowelang Kulon</span>
             </div>
 
             <div className="flex justify-start md:justify-end">
@@ -188,7 +188,7 @@ export default function UmkmDetailPage() {
         {/* PRODUCTS CATALOG SECTION */}
         <section className="flex flex-col gap-6">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl soft-card-sm text-red-600">
+            <div className="p-2 rounded-xl soft-card-sm text-blue-600">
               <Package className="w-5 h-5" />
             </div>
             <h2 className="text-2xl font-extrabold text-gray-900">Daftar Produk Unggulan</h2>
@@ -226,7 +226,7 @@ export default function UmkmDetailPage() {
                   <div className="pt-3 border-t border-gray-200 flex items-center justify-between">
                     <div className="flex flex-col">
                       <span className="text-[10px] uppercase font-bold text-gray-400">Harga</span>
-                      <span className="text-lg font-extrabold text-red-600">
+                      <span className="text-lg font-extrabold text-blue-600">
                         Rp {product.price.toLocaleString('id-ID')}
                         <span className="text-xs font-normal text-gray-500"> / {product.unit}</span>
                       </span>
@@ -257,13 +257,13 @@ export default function UmkmDetailPage() {
         <section className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl soft-card-sm text-red-500">
+              <div className="p-2 rounded-xl soft-card-sm text-blue-500">
                 <MapPin className="w-5 h-5" />
               </div>
               <h2 className="text-2xl font-extrabold text-gray-900">Lokasi Google Maps</h2>
             </div>
             {umkm.gmapsUrl && (
-              <a href={umkm.gmapsUrl} target="_blank" rel="noreferrer" className="text-xs font-bold text-red-600 flex items-center gap-1 hover:underline">
+              <a href={umkm.gmapsUrl} target="_blank" rel="noreferrer" className="text-xs font-bold text-blue-600 flex items-center gap-1 hover:underline">
                 Buka di App Maps <ExternalLink className="w-3.5 h-3.5" />
               </a>
             )}
@@ -273,7 +273,7 @@ export default function UmkmDetailPage() {
             {(() => {
               const gmapsEmbedSrc = parseGmapsEmbedUrl(
                 umkm.gmapsEmbed || umkm.gmapsUrl,
-                `${umkm.name} ${umkm.address} Kutoharjo Kendal`
+                `${umkm.name} ${umkm.address} Korowelang Kulon Kendal`
               );
 
               if (gmapsEmbedSrc) {

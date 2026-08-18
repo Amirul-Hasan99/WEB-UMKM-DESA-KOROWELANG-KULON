@@ -9,7 +9,7 @@ describe('Admin CRUD Operations (UMKM, Products, Feedback)', () => {
   beforeAll(async () => {
     // Login to get token
     const loginPayload = {
-      email: 'admin@kutoharjo.desa.id',
+      email: 'admin@korowelangkulon.desa.id',
       password: 'admin123',
     };
     const res = await request(app).post('/api/admin/login').send(loginPayload);

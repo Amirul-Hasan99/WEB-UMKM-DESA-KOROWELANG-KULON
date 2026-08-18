@@ -138,13 +138,13 @@ export default function AdminUmkmPage() {
     e.preventDefault();
     setSubmitting(true);
 
-    const cleanEmbed = parseGmapsEmbedUrl(gmapsEmbed, `${name} ${address} Kutoharjo Kendal`);
+    const cleanEmbed = parseGmapsEmbedUrl(gmapsEmbed, `${name} ${address} Korowelang Kulon Kendal`);
 
     const payload: Partial<UMKM> = {
       name,
       owner,
       category,
-      address: address || 'Desa Kutoharjo',
+      address: address || 'Desa Korowelang Kulon',
       phone,
       whatsapp: whatsapp || phone,
       gmapsUrl,
@@ -373,7 +373,7 @@ export default function AdminUmkmPage() {
                   <div className="flex flex-col gap-1 min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="text-[10px] font-bold text-red-600 uppercase tracking-wider">
+                        <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wider">
                           {umkm.category}
                         </span>
                         {umkm.isHalal && (
@@ -396,7 +396,7 @@ export default function AdminUmkmPage() {
                       </p>
                     )}
                     <p className="text-xs text-gray-500 truncate flex items-center gap-1 mt-0.5">
-                      <MapPin className="w-3 h-3 text-red-500 shrink-0" />
+                      <MapPin className="w-3 h-3 text-blue-500 shrink-0" />
                       {umkm.address}
                     </p>
                     {umkm.certifications && umkm.certifications.length > 0 && (
@@ -521,7 +521,7 @@ export default function AdminUmkmPage() {
                         <div className="flex items-center gap-2">
                           <h4 className="text-xs font-extrabold text-gray-900">Sertifikasi Halal Indonesia (BPJPH / MUI)</h4>
                           {(category === 'Kuliner' || category === 'Makanan Ringan') && (
-                            <span className="text-[9px] font-extrabold px-1.5 py-0.5 bg-red-100 text-red-600 rounded">
+                            <span className="text-[9px] font-extrabold px-1.5 py-0.5 bg-blue-100 text-blue-600 rounded">
                               Disarankan untuk Kuliner
                             </span>
                           )}
@@ -664,7 +664,7 @@ export default function AdminUmkmPage() {
               {/* Header Modal Produk */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-200">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-red-100 text-red-600 flex items-center justify-center font-bold shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold shrink-0">
                     <Package className="w-5 h-5" />
                   </div>
                   <div className="flex flex-col">
@@ -704,7 +704,7 @@ export default function AdminUmkmPage() {
                   className="p-5 rounded-2xl soft-card-inset flex flex-col gap-4"
                 >
                   <div className="flex items-center justify-between pb-2 border-b border-gray-300/60">
-                    <span className="text-xs font-extrabold uppercase text-red-600 tracking-wider">
+                    <span className="text-xs font-extrabold uppercase text-blue-600 tracking-wider">
                       {editingProduct ? 'Edit Data Produk' : 'Tambah Produk Baru'}
                     </span>
                     <button
@@ -857,7 +857,7 @@ export default function AdminUmkmPage() {
                                   </span>
                                 )}
                               </div>
-                              <span className="text-xs font-extrabold text-red-600 mt-0.5">
+                              <span className="text-xs font-extrabold text-blue-600 mt-0.5">
                                 Rp {prod.price.toLocaleString('id-ID')} / {prod.unit}
                               </span>
                               {prod.isHalal && prod.halalNumber && (
