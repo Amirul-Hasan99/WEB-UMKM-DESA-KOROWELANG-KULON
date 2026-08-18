@@ -19,6 +19,7 @@ const { db } = require("./src/db");
 app.use(
   helmet({
     crossOriginResourcePolicy: { policy: "cross-origin" },
+    contentSecurityPolicy: false,
   })
 );
 
@@ -27,10 +28,10 @@ app.use(
 // ============================================
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 200,
+  max: 300,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: "Terlalu banyak permintaan. Silakan coba lagi nanti." },
+  message: { success: false, message: "Terlalu banyak permintaan. Silakan coba lagi nanti." },
 });
 
 const authLimiter = rateLimit({
@@ -38,7 +39,7 @@ const authLimiter = rateLimit({
   max: 20,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: "Terlalu banyak percobaan login. Silakan coba lagi dalam 15 menit." },
+  message: { success: false, message: "Terlalu banyak percobaan login. Silakan coba lagi dalam 15 menit." },
 });
 
 app.use(generalLimiter);
@@ -55,8 +56,12 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow all origins temporarily to prevent CORS issues in Vercel
-      callback(null, true);
+      // Allow requests with no origin (mobile apps, curl, Postman)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      // In development, allow all
+      if (process.env.NODE_ENV !== "production") return callback(null, true);
+      return callback(new Error(`CORS: Origin ${origin} tidak diizinkan.`));
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
@@ -64,105 +69,133 @@ app.use(
   })
 );
 
-// Body Parsing (5MB limit)
-app.use(express.json({ limit: "5mb" }));
-app.use(express.urlencoded({ extended: true, limit: "5mb" }));
+// Handle preflight OPTIONS globally
+app.options("*", cors());
 
-// Static files for uploads
+// Body Parsing (10MB limit)
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+
+// Static files for uploads (local dev fallback)
 app.use("/uploads", express.static(path.join(__dirname, "public", "uploads")));
 
 // ============================================
 // Health Check (for Vercel & Monitoring)
 // ============================================
-app.get("/health", async (req, res) => {
+app.get(["/", "/health", "/api", "/api/health"], async (req, res) => {
   let dbStatus = "disconnected";
   try {
     if (db) {
-      // Simple query to check connection
-      await db.execute('SELECT 1');
-      dbStatus = "connected";
+      await db.execute("SELECT 1");
+      dbStatus = process.env.DATABASE_URL?.includes(".neon.tech")
+        ? "Neon PostgreSQL Connected"
+        : process.env.DATABASE_URL?.includes("supabase")
+        ? "Supabase PostgreSQL Connected"
+        : "PostgreSQL Connected";
     } else {
-      dbStatus = "fallback (mockData)";
+      dbStatus = "ERROR: DATABASE_URL tidak dikonfigurasi!";
     }
   } catch (e) {
-    dbStatus = "error";
+    dbStatus = `error: ${e.message}`;
   }
 
   res.json({
-    status: "healthy",
-    database: dbStatus,
-    uptime: process.uptime(),
-    timestamp: new Date().toISOString(),
-  });
-});
-
-// Root endpoint
-app.get("/", (req, res) => {
-  res.json({
     status: "online",
-    message: "Portal UMKM Kutoharjo API Server (PostgreSQL + Vercel)",
+    message: "Portal UMKM Kutoharjo API Server",
+    version: "2.2.0",
+    environment: process.env.NODE_ENV || "development",
+    database: dbStatus,
+    uptime: `${Math.floor(process.uptime())} seconds`,
+    endpoints: {
+      health: "/api/health",
+      auth: "/api/auth/login",
+      public: "/api/public",
+      admin: "/api/admin",
+      superadmin: "/api/superadmin",
+      upload: "/api/admin/upload",
+    },
   });
 });
 
 // ============================================
-// API Routers
+// API Routers — Correct Mounting Order
 // ============================================
 const authRoutes = require("./src/routes/authRoutes");
 const adminRoutes = require("./src/routes/adminRoutes");
 const superadminRoutes = require("./src/routes/superadminRoutes");
-const uploadRoutes = require("./src/routes/uploadRoutes");
-const exportRoutes = require("./src/routes/exportRoutes");
 const publicRoutes = require("./src/routes/publicRoutes");
 
+// Auth (with rate limiter)
 app.use("/api/auth", authLimiter, authRoutes);
+
+// Public (no auth required)
 app.use("/api/public", publicRoutes);
 
-// Admin / SuperAdmin paths 
-// (Wait, frontend calls /api/umkm for admin creation, let's mount adminRoutes at /api instead of /api/admin so it maps perfectly to what frontend expects if it calls /api/umkm and /api/products)
-app.use("/api", adminRoutes); 
+// Admin (auth + role middleware inside adminRoutes)
+// adminRoutes already includes /upload and /export sub-routes
+app.use("/api/admin", adminRoutes);
+
+// SuperAdmin (auth + superadmin role middleware inside superadminRoutes)
 app.use("/api/superadmin", superadminRoutes);
-app.use("/api/upload", uploadRoutes);
-app.use("/api/export", exportRoutes);
 
 // ============================================
 // Global Error Handler
 // ============================================
 app.use((err, req, res, _next) => {
-  console.error("❌ Unhandled error:", err);
+  console.error("❌ Unhandled error:", err.message || err);
 
   if (err.code === "LIMIT_FILE_SIZE") {
-    return res.status(413).json({ error: "Ukuran file terlalu besar. Maksimal 5MB." });
+    return res.status(413).json({ success: false, message: "Ukuran file terlalu besar. Maksimal 10MB." });
   }
 
   if (err.message && err.message.includes("CORS")) {
-    return res.status(403).json({ error: err.message });
+    return res.status(403).json({ success: false, message: err.message });
   }
 
   if (err.name === "ZodError") {
     return res.status(400).json({
-      error: "Validasi data gagal",
-      details: err.errors,
+      success: false,
+      message: "Validasi data gagal",
+      errors: err.errors,
+    });
+  }
+
+  if (err.name === "JsonWebTokenError" || err.name === "TokenExpiredError") {
+    return res.status(401).json({
+      success: false,
+      message: "Token otentikasi tidak valid atau telah kadaluarsa.",
     });
   }
 
   return res.status(500).json({
-    error: process.env.NODE_ENV === "production"
-      ? "Terjadi kesalahan pada server."
-      : err.message || "Internal Server Error",
+    success: false,
+    message:
+      process.env.NODE_ENV === "production"
+        ? "Terjadi kesalahan pada server."
+        : err.message || "Internal Server Error",
   });
 });
 
-// 404 handler
+// 404 handler (must be after all routes)
 app.use((req, res) => {
-  res.status(404).json({ error: "Endpoint tidak ditemukan." });
+  res.status(404).json({
+    success: false,
+    message: `Endpoint tidak ditemukan: ${req.method} ${req.originalUrl}`,
+  });
 });
 
-// Start Server locally (skipped when running on Vercel or Vitest)
-if (process.env.NODE_ENV !== "test" && !process.env.VERCEL) {
+// ============================================
+// Start Server (skipped on Vercel serverless)
+// ============================================
+if (!process.env.VERCEL && process.env.NODE_ENV !== "test") {
   const server = http.createServer(app);
   server.listen(PORT, () => {
-    console.log(`🚀 Backend Server running at http://localhost:${PORT}`);
-    console.log(`📊 Health check: http://localhost:${PORT}/health`);
+    console.log(`=============================================`);
+    console.log(`🚀 Backend UMKM Kutoharjo running on http://localhost:${PORT}`);
+    console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
+    console.log(`🔐 Auth: POST http://localhost:${PORT}/api/auth/login`);
+    console.log(`📦 Admin UMKM: GET http://localhost:${PORT}/api/admin/umkm`);
+    console.log(`=============================================`);
   });
 }
 

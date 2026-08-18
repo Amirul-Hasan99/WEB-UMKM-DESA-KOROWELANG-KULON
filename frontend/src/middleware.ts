@@ -1,42 +1,52 @@
-import { withAuth } from "next-auth/middleware";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from 'next/server';
 
-export default withAuth(
-  function middleware(req) {
-    const token = req.nextauth.token;
-    const pathname = req.nextUrl.pathname;
+// Protected paths that require authentication
+const PROTECTED_PATHS = ['/admin', '/superadmin'];
+const SUPERADMIN_ONLY_PATHS = ['/superadmin'];
 
-    // Jika user mengakses root /dashboard, arahkan sesuai role-nya
-    if (pathname === "/dashboard") {
-      if (token?.role === "SUPERADMIN") {
-        return NextResponse.redirect(new URL("/dashboard/superadmin", req.url));
-      } else {
-        return NextResponse.redirect(new URL("/dashboard/admin", req.url));
-      }
-    }
+export function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
 
-    // Mencegah ADMIN biasa mengakses halaman SUPERADMIN
-    if (pathname.startsWith("/dashboard/superadmin") && token?.role !== "SUPERADMIN") {
-      return NextResponse.redirect(new URL("/dashboard/admin", req.url));
-    }
-
-    // Mencegah ADMIN biasa mengakses halaman superadmin
-    if (pathname.startsWith("/superadmin") && token?.role !== "superadmin" && token?.role !== "SUPERADMIN") {
-      return NextResponse.redirect(new URL("/admin/dashboard", req.url));
-    }
-  },
-  {
-    callbacks: {
-      authorized: ({ token }) => !!token,
-    },
-    pages: {
-      signIn: "/login",
-    },
-    secret: process.env.NEXTAUTH_SECRET,
+  // Check if the path requires protection
+  const isProtected = PROTECTED_PATHS.some((path) => pathname.startsWith(path));
+  if (!isProtected) {
+    return NextResponse.next();
   }
-);
+
+  // Read the auth token from cookie (set by login flow)
+  const token = req.cookies.get('umkm_token')?.value;
+  const userStr = req.cookies.get('umkm_user')?.value;
+
+  // No token — redirect to login
+  if (!token) {
+    const loginUrl = new URL('/login', req.url);
+    loginUrl.searchParams.set('from', pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  // Check role for superadmin-only paths
+  if (SUPERADMIN_ONLY_PATHS.some((path) => pathname.startsWith(path))) {
+    try {
+      const user = userStr ? JSON.parse(userStr) : null;
+      if (!user || user.role !== 'superadmin') {
+        // Regular admin tried to access superadmin area
+        return NextResponse.redirect(new URL('/admin/dashboard', req.url));
+      }
+    } catch {
+      // If we can't parse the user cookie, redirect to login
+      const loginUrl = new URL('/login', req.url);
+      return NextResponse.redirect(loginUrl);
+    }
+  }
+
+  return NextResponse.next();
+}
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/admin/:path*", "/superadmin/:path*"],
+  // Protect admin and superadmin routes
+  // Exclude static files, API routes, and Next.js internals
+  matcher: [
+    '/admin/:path*',
+    '/superadmin/:path*',
+  ],
 };
-

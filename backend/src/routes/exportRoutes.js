@@ -1,11 +1,13 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const { exportUmkm, exportProducts, exportFeedback } = require("../controllers/exportController");
-const { authMiddleware, requireRole } = require("../../middleware/auth");
+const { exportUmkm, exportProducts, exportFeedback } = require('../controllers/exportController');
 
-// All export routes require authentication + ADMIN/SUPERADMIN role
-router.get("/umkm", authMiddleware, requireRole("ADMIN", "SUPERADMIN"), exportUmkm);
-router.get("/produk", authMiddleware, requireRole("ADMIN", "SUPERADMIN"), exportProducts);
-router.get("/feedback", authMiddleware, requireRole("ADMIN", "SUPERADMIN"), exportFeedback);
+// NOTE: Auth is already applied at the router level in adminRoutes.js
+// No need to apply authenticateToken again here.
+// These routes are accessible via: GET /api/admin/export/umkm, etc.
+
+router.get('/umkm', exportUmkm);
+router.get('/produk', exportProducts);
+router.get('/feedback', exportFeedback);
 
 module.exports = router;

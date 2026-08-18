@@ -1,133 +1,34 @@
 import axiosInstance from './axios';
-import { UMKM, UMKMProduct, Feedback, DynamicContent, UserAdmin } from './types';
+import { UMKM, UMKMProduct, Feedback, DynamicContent } from './types';
 
-// Helper to safely extract error message from response objects
+// ============================================================
+// Helper: Extract error message from response
+// ============================================================
 const extractError = (e: any, defaultMsg: string): string => {
   const err = e.response?.data?.error || e.response?.data?.message || e.message;
   if (typeof err === 'string') return err;
-  if (err && typeof err === 'object') {
-    return err.message || JSON.stringify(err);
-  }
+  if (err && typeof err === 'object') return err.message || JSON.stringify(err);
   return defaultMsg;
 };
 
-// Fallback Mock Data for initial client state when backend is booting up
-export const initialDynamicContent: DynamicContent = {
-  siteName: "UMKM Kutoharjo",
-  headerTitle: "Portal Pemberdayaan UMKM Desa Kutoharjo",
-  headerSubtitle: "Mendukung Ekonomi Kreatif & Usaha Lokal Desa Mandiri",
-  logoUrl: "/logo-kendal.png",
-  heroTitle: "Jelajahi Produk Unggulan Karya Warga Kutoharjo",
-  heroSubtitle: "Dari Kuliner khas hingga Kerajinan Tradisional. Dapatkan produk berkualitas langsung dari pelaku usaha desa kami.",
-  heroBannerUrl: "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=80",
-  aboutTitle: "Tentang Program UMKM Desa Kutoharjo",
-  aboutText: "Desa Kutoharjo merupakan desa yang kaya akan potensi produk olahan, industri makanan ringan, hingga kerajinan seni khas desa. Portal ini hadir sebagai wadah digitalisasi resmi yang dikelola oleh Pemerintah Kelurahan Kutoharjo untuk memasarkan dan memperkenalkan potensi lokal secara luas ke seluruh Indonesia.",
-  villageAddress: "Jl. Raya Kutoharjo No. 01, Kec. Kaliwungu, Kabupaten Kendal, Jawa Tengah",
-  contactEmail: "info@kutoharjo.desa.id",
-  contactPhone: "(0294) 381000 / 0812-3456-7890",
-  footerText: "© 2026 Pemerintah Desa Kutoharjo. Hak Cipta Dilindungi Undang-Undang."
+// ============================================================
+// Helper: Set cookie (for middleware auth check)
+// ============================================================
+const setCookie = (name: string, value: string, days = 1) => {
+  if (typeof document === 'undefined') return;
+  const expires = new Date();
+  expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
+  document.cookie = `${name}=${encodeURIComponent(value)};expires=${expires.toUTCString()};path=/;SameSite=Lax`;
 };
 
-export const initialUmkms: UMKM[] = [
-  {
-    id: 1,
-    name: "Bandeng Presto Khas Kutoharjo",
-    owner: "H. Ahmad Subechi",
-    category: "Kuliner",
-    address: "RT 02 / RW 01, Dusun Karanganyar, Desa Kutoharjo",
-    phone: "6281229988771",
-    whatsapp: "6281229988771",
-    gmapsUrl: "https://maps.google.com/?q=-6.912345,110.123456",
-    gmapsEmbed: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15842.695724128522!2d110.145000!3d-6.890000!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNsKwNTMnMjQuMCJTIDExMMKwMDgnNDI0LjAiRQ!5e0!3m2!1sid!2sid!4v1650000000000!5m2!1sid!2sid",
-    description: "Produsen olahan bandeng presto duri lunak resep warisan keluarga Kutoharjo sejak 1998. Diolah higienis dengan bumbu rempah alami pilihan.",
-    landingText: "Cita rasa bandeng presto gurih, lezat, dan tanpa pengawet asli Kutoharjo.",
-    profileImage: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=600&q=80",
-    bannerImage: "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=1200&q=80",
-    rating: 4.9,
-    reviewCount: 48,
-    createdAt: "2024-01-15T08:00:00.000Z",
-    products: [
-      {
-        id: 1,
-        umkmId: 1,
-        name: "Bandeng Presto Kemasan Vakum (Isi 2 Ekor)",
-        price: 35000,
-        unit: "pack",
-        description: "Bandeng duri lunak plus sambal terasi pedas manis khas Kutoharjo. Tahan hingga 14 hari di suhu ruangan.",
-        image: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=500&q=80"
-      },
-      {
-        id: 2,
-        umkmId: 1,
-        name: "Bandeng Otak-Otak Spesial",
-        price: 25000,
-        unit: "ekor",
-        description: "Bandeng dengan isian daging gurih dipadu kelapa sangrai dan rempah-rempah pilihan.",
-        image: "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=500&q=80"
-      }
-    ]
-  },
-  {
-    id: 2,
-    name: "Batik Tulis Kutoharjo",
-    owner: "Ibu Hj. Maryam",
-    category: "Kerajinan & Fashion",
-    address: "RT 04 / RW 02, Jalan Utama Kutoharjo No. 45",
-    phone: "6285640112233",
-    whatsapp: "6285640112233",
-    gmapsUrl: "https://maps.google.com/?q=-6.914444,110.125555",
-    gmapsEmbed: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15842.695724128522!2d110.145000!3d-6.890000!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNsKwNTMnMjQuMCJTIDExMMKwMDgnNDI0LjAiRQ!5e0!3m2!1sid!2sid!4v1650000000000!5m2!1sid!2sid",
-    description: "Pengrajin batik motif khas Kutoharjo dengan perpaduan warna cerah motif alami dan floramorfis.",
-    landingText: "Batik tulis eksklusif karya tangan ibu-ibu pengrajin lokal Kutoharjo.",
-    profileImage: "https://images.unsplash.com/photo-1606744824163-985d376605aa?auto=format&fit=crop&w=600&q=80",
-    bannerImage: "https://images.unsplash.com/photo-1528459801416-a9e53bbf4e17?auto=format&fit=crop&w=1200&q=80",
-    rating: 4.8,
-    reviewCount: 35,
-    createdAt: "2024-02-01T09:30:00.000Z",
-    products: [
-      {
-        id: 3,
-        umkmId: 2,
-        name: "Kain Batik Tulis Motif Kutoharjo (2x1.15m)",
-        price: 350000,
-        unit: "pcs",
-        description: "Kain katun prima halus berpewarna sintesis tahan pudar dengan cetakan motif khas Kutoharjo.",
-        image: "https://images.unsplash.com/photo-1606744824163-985d376605aa?auto=format&fit=crop&w=500&q=80"
-      }
-    ]
-  },
-  {
-    id: 3,
-    name: "Emping Melinjo Super Kutoharjo",
-    owner: "Pak Suparno",
-    category: "Makanan Ringan",
-    address: "RT 01 / RW 03, Dusun Dukuh Kulon, Kutoharjo",
-    phone: "6281390114455",
-    whatsapp: "6281390114455",
-    gmapsUrl: "https://maps.google.com/?q=-6.916666,110.127777",
-    gmapsEmbed: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15842.695724128522!2d110.145000!3d-6.890000!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNsKwNTMnMjQuMCJTIDExMMKwMDgnNDI0LjAiRQ!5e0!3m2!1sid!2sid!4v1650000000000!5m2!1sid!2sid",
-    description: "Emping melinjo kualitas ekspor diproduksi dari buah melinjo pilihan tanpa campuran tepung. Renyah, gurih, dan tahan lama.",
-    landingText: "Olahan melinjo murni tanpa campuran, renyah dan gurih alami.",
-    profileImage: "https://images.unsplash.com/photo-1599490659213-e2b9527bd087?auto=format&fit=crop&w=600&q=80",
-    bannerImage: "https://images.unsplash.com/photo-1621996346565-e3d5d6288344?auto=format&fit=crop&w=1200&q=80",
-    rating: 4.9,
-    reviewCount: 62,
-    createdAt: "2024-02-10T11:15:00.000Z",
-    products: [
-      {
-        id: 5,
-        umkmId: 3,
-        name: "Emping Melinjo Matang Pedas Manis (250g)",
-        price: 28000,
-        unit: "bungkus",
-        description: "Emping melinjo digoreng renyah dibalut bumbu karamel cabai asli.",
-        image: "https://images.unsplash.com/photo-1599490659213-e2b9527bd087?auto=format&fit=crop&w=500&q=80"
-      }
-    ]
-  }
-];
+const deleteCookie = (name: string) => {
+  if (typeof document === 'undefined') return;
+  document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;`;
+};
 
-// Helper: Normalize raw backend data to standard Frontend UMKM interface
+// ============================================================
+// Normalizer: Convert raw backend data to frontend UMKM type
+// ============================================================
 export const normalizeUmkm = (raw: any): UMKM => {
   return {
     id: raw.id,
@@ -141,8 +42,8 @@ export const normalizeUmkm = (raw: any): UMKM => {
     gmapsEmbed: raw.gmapsEmbed || '',
     description: raw.description || '',
     landingText: raw.landingText || raw.description || '',
-    profileImage: raw.profileImage || raw.imageUrl || 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=600&q=80',
-    bannerImage: raw.bannerImage || raw.imageUrl || 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=1200&q=80',
+    profileImage: raw.profileImage || raw.imageUrl || '',
+    bannerImage: raw.bannerImage || raw.imageUrl || '',
     rating: typeof raw.rating === 'number' ? raw.rating : parseFloat(raw.rating || '5.0'),
     reviewCount: raw.reviewCount || 0,
     createdAt: raw.createdAt || new Date().toISOString(),
@@ -158,16 +59,22 @@ export const normalizeUmkm = (raw: any): UMKM => {
   };
 };
 
-// --- PUBLIC & GENERAL API CALLS ---
+// ============================================================
+// PUBLIC API — No authentication required
+// ============================================================
 
 export const fetchUmkms = async (search?: string, category?: string): Promise<UMKM[]> => {
   try {
-    const res = await axiosInstance.get('/public/umkm', { params: { search, category, all: 'true' } });
+    const params: Record<string, string> = {};
+    if (search) params.search = search;
+    if (category && category !== 'Semua') params.category = category;
+
+    const res = await axiosInstance.get('/public/umkm', { params });
     if (res.data && Array.isArray(res.data.data)) {
       return res.data.data.map(normalizeUmkm);
     }
   } catch (e) {
-    console.warn("fetchUmkms error:", e);
+    console.warn('fetchUmkms error:', e);
   }
   return [];
 };
@@ -179,20 +86,19 @@ export const fetchUmkmById = async (id: number | string): Promise<UMKM | null> =
       return normalizeUmkm(res.data.data);
     }
   } catch (e) {
-    console.warn("fetchUmkmById error:", e);
+    console.warn('fetchUmkmById error:', e);
   }
   return null;
 };
 
-export const fetchDynamicContent = async (): Promise<DynamicContent> => {
-  // Selalu ambil dari database — jangan cache di localStorage
+export const fetchDynamicContent = async (): Promise<DynamicContent | null> => {
   try {
     const res = await axiosInstance.get('/public/konten');
     if (res.data && res.data.data) return res.data.data;
   } catch (e) {
-    console.warn('fetchDynamicContent: gagal fetch dari server, pakai fallback.');
+    console.warn('fetchDynamicContent error:', e);
   }
-  return initialDynamicContent;
+  return null;
 };
 
 export const sendFeedback = async (name: string, email: string, message: string) => {
@@ -200,95 +106,159 @@ export const sendFeedback = async (name: string, email: string, message: string)
     const res = await axiosInstance.post('/public/feedback', { name, email, message });
     return res.data;
   } catch (e: any) {
-    return { success: true, message: "Feedback Anda telah berhasil dikirim." };
+    const errMsg = extractError(e, 'Gagal mengirim feedback.');
+    return { success: false, message: errMsg };
   }
 };
 
-// --- AUTH & ADMIN API CALLS ---
-
-export const saveDynamicContent = async (content: DynamicContent): Promise<{ success: boolean; error?: string }> => {
-  try {
-    const res = await axiosInstance.put('/superadmin/konten', content);
-    if (res.data && (res.data.success || res.data.data)) {
-      return { success: true };
-    }
-    const err = res.data?.error || res.data?.message;
-    return { success: false, error: typeof err === 'string' ? err : 'Gagal menyimpan konten.' };
-  } catch (e: any) {
-    console.error('saveDynamicContent error:', e);
-    const err = e.response?.data?.error || e.response?.data?.message;
-    return { success: false, error: typeof err === 'string' ? err : 'Gagal menghubungkan ke server.' };
-  }
-};
+// ============================================================
+// AUTH API
+// ============================================================
 
 export const loginAdmin = async (email: string, password: string) => {
   try {
     const res = await axiosInstance.post('/auth/login', { email, password });
+
     if (res.data && res.data.token) {
-      // Simpan token asli dari backend ke localStorage
-      localStorage.setItem('umkm_token', res.data.token);
-      localStorage.setItem('umkm_user', JSON.stringify(res.data.user));
-      return { success: true, token: res.data.token, user: res.data.user };
+      const { token, user } = res.data;
+
+      // Save to localStorage (for axios interceptor)
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('umkm_token', token);
+        localStorage.setItem('umkm_user', JSON.stringify(user));
+      }
+
+      // CRITICAL: Also save to cookie so Next.js middleware can read it
+      setCookie('umkm_token', token, 1); // 1 day
+      setCookie('umkm_user', JSON.stringify(user), 1);
+
+      return { success: true, token, user };
     }
-    return { success: false, message: res.data?.error || 'Login gagal.' };
+
+    return {
+      success: false,
+      message: res.data?.message || res.data?.error || 'Login gagal.',
+    };
   } catch (e: any) {
-    // Tidak ada fallback mock — backend harus bisa diakses
-    const errMsg = e.response?.data?.error || e.response?.data?.message;
-    if (e.code === 'ECONNREFUSED' || e.message?.includes('Network')) {
-      return { success: false, message: 'Tidak dapat terhubung ke server. Pastikan backend berjalan.' };
+    if (e.code === 'ERR_NETWORK' || e.code === 'ECONNREFUSED' || e.message?.includes('Network')) {
+      return {
+        success: false,
+        message: 'Tidak dapat terhubung ke server backend. Pastikan backend berjalan.',
+      };
     }
-    return { success: false, message: typeof errMsg === 'string' ? errMsg : 'Login gagal. Periksa email & password Anda.' };
+    const errMsg = e.response?.data?.message || e.response?.data?.error;
+    return {
+      success: false,
+      message: typeof errMsg === 'string' ? errMsg : 'Login gagal. Periksa email & password.',
+    };
   }
 };
 
-// --- ADMIN CRUD API METHODS ---
+export const logoutAdmin = () => {
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('umkm_token');
+    localStorage.removeItem('umkm_user');
+  }
+  deleteCookie('umkm_token');
+  deleteCookie('umkm_user');
+};
 
-export const createUmkm = async (data: Partial<UMKM>): Promise<{ success: boolean; data?: UMKM; error?: string }> => {
+// ============================================================
+// ADMIN UMKM API — Requires JWT auth
+// ============================================================
+
+/**
+ * Fetch all UMKM from the ADMIN endpoint (includes all data, requires auth)
+ */
+export const fetchAdminUmkms = async (): Promise<UMKM[]> => {
+  try {
+    const res = await axiosInstance.get('/admin/umkm');
+    if (res.data && Array.isArray(res.data.data)) {
+      return res.data.data.map(normalizeUmkm);
+    }
+  } catch (e) {
+    console.error('fetchAdminUmkms error:', e);
+  }
+  return [];
+};
+
+export const createUmkm = async (
+  data: Partial<UMKM>
+): Promise<{ success: boolean; data?: UMKM; error?: string }> => {
   try {
     const res = await axiosInstance.post('/admin/umkm', data);
     if (res.data && res.data.data) {
       return { success: true, data: normalizeUmkm(res.data.data) };
     }
     const err = res.data?.error || res.data?.message;
-    return { success: false, error: typeof err === 'string' ? err : (err?.message || "Gagal mendaftarkan UMKM.") };
+    return { success: false, error: typeof err === 'string' ? err : 'Gagal mendaftarkan UMKM.' };
   } catch (e: any) {
-    console.error("createUmkm error:", e);
-    const err = e.response?.data?.error || e.response?.data?.message;
-    return { success: false, error: typeof err === 'string' ? err : (err?.message || "Gagal menghubungkan ke server.") };
+    console.error('createUmkm error:', e);
+    return { success: false, error: extractError(e, 'Gagal menghubungkan ke server.') };
   }
 };
 
-export const updateUmkm = async (id: number | string, data: Partial<UMKM>): Promise<{ success: boolean; data?: UMKM; error?: string }> => {
+export const updateUmkm = async (
+  id: number | string,
+  data: Partial<UMKM>
+): Promise<{ success: boolean; data?: UMKM; error?: string }> => {
   try {
     const res = await axiosInstance.put(`/admin/umkm/${id}`, data);
     if (res.data && res.data.data) {
       return { success: true, data: normalizeUmkm(res.data.data) };
     }
     const err = res.data?.error || res.data?.message;
-    return { success: false, error: typeof err === 'string' ? err : (err?.message || "Gagal meng-update UMKM.") };
+    return { success: false, error: typeof err === 'string' ? err : 'Gagal memperbarui UMKM.' };
   } catch (e: any) {
-    console.error("updateUmkm error:", e);
-    const err = e.response?.data?.error || e.response?.data?.message;
-    return { success: false, error: typeof err === 'string' ? err : (err?.message || "Gagal menghubungkan ke server.") };
+    console.error('updateUmkm error:', e);
+    return { success: false, error: extractError(e, 'Gagal menghubungkan ke server.') };
   }
 };
 
-export const deleteUmkm = async (id: number | string): Promise<{ success: boolean; error?: string }> => {
+export const deleteUmkm = async (
+  id: number | string
+): Promise<{ success: boolean; error?: string }> => {
   try {
     const res = await axiosInstance.delete(`/admin/umkm/${id}`);
-    if (res.data && (res.data.success || res.data.data)) {
+    if (res.data && res.data.success) {
       return { success: true };
     }
     const err = res.data?.error || res.data?.message;
-    return { success: false, error: typeof err === 'string' ? err : (err?.message || "Gagal menghapus UMKM.") };
+    return { success: false, error: typeof err === 'string' ? err : 'Gagal menghapus UMKM.' };
   } catch (e: any) {
-    console.error("deleteUmkm error:", e);
-    const err = e.response?.data?.error || e.response?.data?.message;
-    return { success: false, error: typeof err === 'string' ? err : (err?.message || "Gagal menghapus data dari server.") };
+    console.error('deleteUmkm error:', e);
+    return { success: false, error: extractError(e, 'Gagal menghapus data dari server.') };
   }
 };
 
-export const createProduct = async (productData: Partial<UMKMProduct>): Promise<{ success: boolean; data?: UMKMProduct; error?: string }> => {
+// ============================================================
+// ADMIN PRODUCT API — Requires JWT auth
+// ============================================================
+
+export const fetchAdminProducts = async (umkmId?: number | string): Promise<UMKMProduct[]> => {
+  try {
+    const params = umkmId ? { umkmId: String(umkmId) } : {};
+    const res = await axiosInstance.get('/admin/products', { params });
+    if (res.data && Array.isArray(res.data.data)) {
+      return res.data.data.map((p: any) => ({
+        id: p.id,
+        umkmId: p.umkmId,
+        name: p.name || '',
+        price: Number(p.price) || 0,
+        unit: p.unit || 'pcs',
+        description: p.description || '',
+        image: p.image || '',
+      }));
+    }
+  } catch (e) {
+    console.error('fetchAdminProducts error:', e);
+  }
+  return [];
+};
+
+export const createProduct = async (
+  productData: Partial<UMKMProduct>
+): Promise<{ success: boolean; data?: UMKMProduct; error?: string }> => {
   try {
     const res = await axiosInstance.post('/admin/products', productData);
     if (res.data && res.data.data) {
@@ -298,88 +268,143 @@ export const createProduct = async (productData: Partial<UMKMProduct>): Promise<
         data: {
           id: p.id,
           umkmId: p.umkmId,
-          name: p.name || p.title,
+          name: p.name || '',
           price: Number(p.price) || 0,
           unit: p.unit || 'pcs',
           description: p.description || '',
-          image: p.image || p.imageUrl || '',
-        }
+          image: p.image || '',
+        },
       };
     }
     const err = res.data?.error || res.data?.message;
-    return { success: false, error: typeof err === 'string' ? err : (err?.message || "Gagal menambahkan produk.") };
+    return { success: false, error: typeof err === 'string' ? err : 'Gagal menambahkan produk.' };
   } catch (e: any) {
-    console.error("createProduct error:", e);
-    const err = e.response?.data?.error || e.response?.data?.message;
-    return { success: false, error: typeof err === 'string' ? err : (err?.message || "Gagal menyimpan produk ke server.") };
+    console.error('createProduct error:', e);
+    return { success: false, error: extractError(e, 'Gagal menyimpan produk ke server.') };
   }
 };
 
-export const deleteProduct = async (productId: number | string): Promise<{ success: boolean; error?: string }> => {
+export const updateProduct = async (
+  productId: number | string,
+  productData: Partial<UMKMProduct>
+): Promise<{ success: boolean; data?: UMKMProduct; error?: string }> => {
+  try {
+    const res = await axiosInstance.put(`/admin/products/${productId}`, productData);
+    if (res.data && res.data.data) {
+      const p = res.data.data;
+      return {
+        success: true,
+        data: {
+          id: p.id,
+          umkmId: p.umkmId,
+          name: p.name || '',
+          price: Number(p.price) || 0,
+          unit: p.unit || 'pcs',
+          description: p.description || '',
+          image: p.image || '',
+        },
+      };
+    }
+    const err = res.data?.error || res.data?.message;
+    return { success: false, error: typeof err === 'string' ? err : 'Gagal memperbarui produk.' };
+  } catch (e: any) {
+    console.error('updateProduct error:', e);
+    return { success: false, error: extractError(e, 'Gagal memperbarui produk di server.') };
+  }
+};
+
+export const deleteProduct = async (
+  productId: number | string
+): Promise<{ success: boolean; error?: string }> => {
   try {
     const res = await axiosInstance.delete(`/admin/products/${productId}`);
+    if (res.data && res.data.success) {
+      return { success: true };
+    }
+    const err = res.data?.error || res.data?.message;
+    return { success: false, error: typeof err === 'string' ? err : 'Gagal menghapus produk.' };
+  } catch (e: any) {
+    console.error('deleteProduct error:', e);
+    return { success: false, error: extractError(e, 'Gagal menghapus produk dari server.') };
+  }
+};
+
+// ============================================================
+// SUPERADMIN API
+// ============================================================
+
+export const saveDynamicContent = async (
+  content: DynamicContent
+): Promise<{ success: boolean; error?: string }> => {
+  try {
+    const res = await axiosInstance.put('/superadmin/konten', content);
     if (res.data && (res.data.success || res.data.data)) {
       return { success: true };
     }
     const err = res.data?.error || res.data?.message;
-    return { success: false, error: typeof err === 'string' ? err : (err?.message || "Gagal menghapus produk.") };
+    return { success: false, error: typeof err === 'string' ? err : 'Gagal menyimpan konten.' };
   } catch (e: any) {
-    console.error("deleteProduct error:", e);
-    const err = e.response?.data?.error || e.response?.data?.message;
-    return { success: false, error: typeof err === 'string' ? err : (err?.message || "Gagal menghapus produk dari server.") };
+    console.error('saveDynamicContent error:', e);
+    return { success: false, error: extractError(e, 'Gagal menghubungkan ke server.') };
   }
 };
 
+// ============================================================
+// UPLOAD API — Requires JWT auth
+// ============================================================
+
 /**
  * Upload gambar ke backend (Cloudinary) dan kembalikan URL publik.
- * Mendukung dua sistem auth: token JWT di localStorage (custom login) dan NextAuth session.
+ * Uses the backend upload endpoint which requires JWT auth.
  */
-export const uploadImage = async (file: File): Promise<{ success: boolean; url?: string; error?: string }> => {
+export const uploadImage = async (
+  file: File
+): Promise<{ success: boolean; url?: string; error?: string }> => {
   try {
     const formData = new FormData();
     formData.append('image', file);
 
-    // Ambil token: coba dari localStorage dulu (custom JWT login)
-    let token = typeof window !== 'undefined' ? localStorage.getItem('umkm_token') : null;
+    // Get token from localStorage (set during login)
+    const token = typeof window !== 'undefined' ? localStorage.getItem('umkm_token') : null;
 
-    // Jika tidak ada di localStorage, coba ambil dari NextAuth session via API
     if (!token) {
-      try {
-        const sessionRes = await fetch('/api/auth/session');
-        if (sessionRes.ok) {
-          const session = await sessionRes.json();
-          token = session?.accessToken || null;
-        }
-      } catch (_) {}
+      return { success: false, error: 'Anda belum login. Silakan login terlebih dahulu.' };
     }
 
-    const headers: Record<string, string> = {};
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-
+    // Use fetch directly for multipart/form-data (avoid axios content-type issues)
     const res = await fetch('/api/admin/upload', {
       method: 'POST',
-      headers,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        // Do NOT set Content-Type — let browser set it with boundary for multipart
+      },
       body: formData,
     });
 
-    // Cek apakah respons JSON atau HTML error
+    // Check if response is JSON
     const contentType = res.headers.get('content-type') || '';
     if (!contentType.includes('application/json')) {
       const text = await res.text();
-      console.error('Upload non-JSON response:', text.slice(0, 200));
-      return { success: false, error: 'Server tidak merespons dengan benar. Pastikan Anda sudah login.' };
+      console.error('Upload non-JSON response:', text.slice(0, 500));
+      if (res.status === 401 || res.status === 403) {
+        return { success: false, error: 'Sesi login Anda telah berakhir. Silakan login ulang.' };
+      }
+      return { success: false, error: 'Server tidak merespons dengan benar saat upload.' };
     }
 
     const data = await res.json();
-    if (res.ok && (data.url || data.imageUrl)) {
+
+    if (!res.ok) {
+      return { success: false, error: data.message || `Upload gagal (HTTP ${res.status}).` };
+    }
+
+    if (data.url || data.imageUrl) {
       return { success: true, url: data.url || data.imageUrl };
     }
-    return { success: false, error: data.message || 'Gagal mengupload gambar.' };
+
+    return { success: false, error: data.message || 'Gagal mendapatkan URL gambar dari server.' };
   } catch (e: any) {
     console.error('uploadImage error:', e);
     return { success: false, error: e.message || 'Gagal menghubungkan ke server upload.' };
   }
 };
-

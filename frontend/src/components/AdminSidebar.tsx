@@ -35,9 +35,13 @@ export const AdminSidebar: React.FC = () => {
   }, []);
 
   const handleLogout = () => {
+    // Clear localStorage
     if (typeof window !== 'undefined') {
       localStorage.removeItem('umkm_token');
       localStorage.removeItem('umkm_user');
+      // Clear cookies so Next.js middleware also logs out
+      document.cookie = 'umkm_token=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;';
+      document.cookie = 'umkm_user=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;';
     }
     router.push('/login');
   };

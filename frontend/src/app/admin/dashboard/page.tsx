@@ -6,14 +6,14 @@ import { Store, Package, MessageSquare, Plus, ArrowRight, ShieldCheck, TrendingU
 import AdminSidebar from '@/components/AdminSidebar';
 import SoftCard from '@/components/SoftCard';
 import SoftButton from '@/components/SoftButton';
-import { fetchUmkms } from '@/lib/api';
+import { fetchAdminUmkms } from '@/lib/api';
 import { UMKM } from '@/lib/types';
 
 export default function AdminDashboardPage() {
   const [umkms, setUmkms] = useState<UMKM[]>([]);
 
   useEffect(() => {
-    fetchUmkms().then(setUmkms);
+    fetchAdminUmkms().then(setUmkms);
   }, []);
 
   const totalProducts = umkms.reduce((acc, u) => acc + (u.products?.length || 0), 0);
