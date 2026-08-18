@@ -1,12 +1,17 @@
 import axios from 'axios';
 
 // Base API URL:
-// - Client-side: use relative path so Next.js rewrites proxy to backend
-// - Server-side (SSR): use absolute backend URL
-const API_BASE_URL =
-  typeof window !== 'undefined'
-    ? '/api'
-    : (process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000') + '/api';
+// - If NEXT_PUBLIC_BACKEND_URL is set, use it directly (both client & SSR)
+// - Fallback to /api (for Next.js rewrites proxy in local dev)
+const getBaseUrl = () => {
+  const backend = process.env.NEXT_PUBLIC_BACKEND_URL;
+  if (backend && backend.trim()) {
+    return `${backend.replace(/\/$/, '')}/api`;
+  }
+  return '/api';
+};
+
+const API_BASE_URL = getBaseUrl();
 
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,

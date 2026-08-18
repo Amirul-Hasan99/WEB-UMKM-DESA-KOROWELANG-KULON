@@ -208,13 +208,36 @@ export const loginAdmin = async (email: string, password: string) => {
     if (e.code === 'ERR_NETWORK' || e.code === 'ECONNREFUSED' || e.message?.includes('Network')) {
       return {
         success: false,
-        message: 'Tidak dapat terhubung ke server backend. Pastikan backend berjalan.',
+        message: 'Tidak dapat terhubung ke server backend. Pastikan URL backend Vercel sudah benar dan online.',
       };
     }
-    const errMsg = e.response?.data?.message || e.response?.data?.error;
+    if (e.response) {
+      if (e.response.status === 401) {
+        return {
+          success: false,
+          message: e.response.data?.message || 'Email atau password salah.',
+        };
+      }
+      if (e.response.status === 404) {
+        return {
+          success: false,
+          message: 'Endpoint backend tidak ditemukan (404). Cek URL NEXT_PUBLIC_BACKEND_URL di Vercel.',
+        };
+      }
+      if (e.response.status >= 500) {
+        return {
+          success: false,
+          message: e.response.data?.message || 'Server backend mengalami error (500). Cek log backend di Vercel.',
+        };
+      }
+      const errMsg = e.response.data?.message || e.response.data?.error;
+      if (errMsg) {
+        return { success: false, message: String(errMsg) };
+      }
+    }
     return {
       success: false,
-      message: typeof errMsg === 'string' ? errMsg : 'Login gagal. Periksa email & password.',
+      message: e.message || 'Login gagal. Periksa email & password.',
     };
   }
 };
