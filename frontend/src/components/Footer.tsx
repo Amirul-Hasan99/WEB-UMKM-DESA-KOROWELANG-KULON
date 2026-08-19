@@ -78,7 +78,7 @@ export const Footer: React.FC = () => {
       <div className="max-w-7xl mx-auto mt-12 pt-6 border-t border-gray-300/60 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-medium text-gray-500">
         <p>{content?.footerText || '© 2026 Pemerintah Desa Korowelang Kulon.'}</p>
         <p className="flex items-center gap-1">
-          Diberdayakan oleh <span className="font-bold text-gray-700">Warga Korowelang Kulon</span>
+          Diberdayakan oleh <span className="font-bold text-gray-700">KKN 14 UNWAHAS </span>
           <Heart className="w-3.5 h-3.5 text-red-500 fill-red-500 inline ml-0.5" />
         </p>
       </div>
