@@ -528,13 +528,45 @@ export const saveDynamicContent = async (
   content: DynamicContent
 ): Promise<{ success: boolean; error?: string }> => {
   try {
+    // 1. Cache to local storage immediately
     if (typeof window !== 'undefined') {
       try {
         localStorage.setItem('umkm_dynamic_content_cache', JSON.stringify(content));
       } catch {}
     }
 
-    const res = await axiosInstance.put('/superadmin/konten', content);
+    // 2. Sanitize large Base64 media before sending over HTTP
+    // Prevents Vercel Serverless Function 4.5MB payload limit (which causes "Network Error")
+    const sanitizedHeroMedia = await Promise.all(
+      (content.heroMedia || []).map(async (item, idx) => {
+        if (item.url && item.url.startsWith('data:') && item.url.length > 200000) {
+          try {
+            const { saveMediaToIndexedDB } = await import('./mediaStorage');
+            const mediaKey = item.id || `media-item-${idx}-${Date.now()}`;
+            const idbKey = await saveMediaToIndexedDB(mediaKey, item.url, item.type);
+            return { ...item, url: idbKey };
+          } catch (e) {
+            console.warn('Failed to convert base64 to IndexedDB:', e);
+            return item;
+          }
+        }
+        return item;
+      })
+    );
+
+    // Also sanitize heroBannerUrl if it's a huge data URL
+    let sanitizedBannerUrl = content.heroBannerUrl;
+    if (sanitizedBannerUrl && sanitizedBannerUrl.startsWith('data:') && sanitizedBannerUrl.length > 200000) {
+      sanitizedBannerUrl = 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=80';
+    }
+
+    const payload: DynamicContent = {
+      ...content,
+      heroBannerUrl: sanitizedBannerUrl,
+      heroMedia: sanitizedHeroMedia,
+    };
+
+    const res = await axiosInstance.put('/superadmin/konten', payload);
     if (res.data && (res.data.success || res.data.data)) {
       return { success: true };
     }

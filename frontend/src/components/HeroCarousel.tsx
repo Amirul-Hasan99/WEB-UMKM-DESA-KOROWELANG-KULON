@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { HeroMediaItem } from '@/lib/types';
 import { ChevronLeft, ChevronRight, Play, Pause, Video, Image as ImageIcon } from '@/components/Icons';
+import { resolveMediaUrl } from '@/lib/mediaStorage';
 
 interface HeroCarouselProps {
   mediaList?: HeroMediaItem[];
@@ -35,7 +36,29 @@ export default function HeroCarousel({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
+  const [resolvedUrls, setResolvedUrls] = useState<Record<string, string>>({});
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+
+  // Asynchronously resolve all media URLs (IndexedDB, Blob, or HTTP)
+  useEffect(() => {
+    let isMounted = true;
+    const loadUrls = async () => {
+      const urlMap: Record<string, string> = {};
+      for (const item of items) {
+        if (item.url) {
+          const resolved = await resolveMediaUrl(item.url);
+          urlMap[item.url] = resolved || item.url;
+        }
+      }
+      if (isMounted) {
+        setResolvedUrls(urlMap);
+      }
+    };
+    loadUrls();
+    return () => {
+      isMounted = false;
+    };
+  }, [items]);
 
   // Keep index in bounds if mediaList changes
   useEffect(() => {
@@ -103,7 +126,7 @@ export default function HeroCarousel({
                     ref={(el) => {
                       videoRefs.current[idx] = el;
                     }}
-                    src={item.url}
+                    src={resolvedUrls[item.url] || item.url}
                     className="w-full h-full object-cover"
                     autoPlay
                     muted
@@ -113,7 +136,7 @@ export default function HeroCarousel({
                   />
                 ) : (
                   <img
-                    src={item.url}
+                    src={resolvedUrls[item.url] || item.url}
                     alt={item.title || 'Banner Slide UMKM'}
                     className="w-full h-full object-cover"
                   />

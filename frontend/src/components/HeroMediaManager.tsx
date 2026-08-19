@@ -17,6 +17,7 @@ import {
 import SoftCard from '@/components/SoftCard';
 import SoftButton from '@/components/SoftButton';
 import { uploadMedia } from '@/lib/api';
+import { resolveMediaUrl } from '@/lib/mediaStorage';
 
 interface HeroMediaManagerProps {
   mediaList: HeroMediaItem[];
@@ -31,6 +32,7 @@ export default function HeroMediaManager({
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
   const [uploadSuccess, setUploadSuccess] = useState('');
+  const [resolvedUrls, setResolvedUrls] = useState<Record<string, string>>({});
 
   // Form states for new item
   const [addMode, setAddMode] = useState<'upload' | 'url'>('upload');
@@ -38,6 +40,31 @@ export default function HeroMediaManager({
   const [newUrl, setNewUrl] = useState('');
   const [newTitle, setNewTitle] = useState('');
   const [newSubtitle, setNewSubtitle] = useState('');
+
+  // Resolve all URLs in mediaList asynchronously
+  React.useEffect(() => {
+    let isMounted = true;
+    const loadUrls = async () => {
+      const urlMap: Record<string, string> = {};
+      for (const item of mediaList) {
+        if (item.url) {
+          const res = await resolveMediaUrl(item.url);
+          urlMap[item.url] = res || item.url;
+        }
+      }
+      if (newUrl) {
+        const resNew = await resolveMediaUrl(newUrl);
+        urlMap[newUrl] = resNew || newUrl;
+      }
+      if (isMounted) {
+        setResolvedUrls(urlMap);
+      }
+    };
+    loadUrls();
+    return () => {
+      isMounted = false;
+    };
+  }, [mediaList, newUrl]);
 
   // Reordering helpers
   const handleMoveUp = (index: number) => {
@@ -218,7 +245,7 @@ export default function HeroMediaManager({
               <div className="relative w-28 h-20 rounded-xl overflow-hidden bg-gray-900 border border-gray-300 shrink-0 flex items-center justify-center">
                 {item.type === 'video' ? (
                   <video
-                    src={item.url}
+                    src={resolvedUrls[item.url] || item.url}
                     className="w-full h-full object-cover"
                     muted
                     playsInline
@@ -226,7 +253,7 @@ export default function HeroMediaManager({
                   />
                 ) : (
                   <img
-                    src={item.url}
+                    src={resolvedUrls[item.url] || item.url}
                     alt={item.title || 'Slide Hero'}
                     className="w-full h-full object-cover"
                   />
@@ -385,14 +412,14 @@ export default function HeroMediaManager({
             <div className="w-32 h-20 rounded-xl overflow-hidden bg-black shrink-0 flex items-center justify-center border border-gray-300">
               {newType === 'video' ? (
                 <video
-                  src={newUrl}
+                  src={resolvedUrls[newUrl] || newUrl}
                   className="w-full h-full object-cover"
                   controls
                   muted
                 />
               ) : (
                 <img
-                  src={newUrl}
+                  src={resolvedUrls[newUrl] || newUrl}
                   alt="Preview"
                   className="w-full h-full object-cover"
                 />
