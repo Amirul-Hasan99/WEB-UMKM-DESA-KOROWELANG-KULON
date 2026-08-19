@@ -71,6 +71,7 @@ const dynamicContent = pgTable('dynamic_content', {
   heroTitle: text('hero_title'),
   heroSubtitle: text('hero_subtitle'),
   heroBannerUrl: text('hero_banner_url'),
+  heroMedia: jsonb('hero_media').default([]),
   aboutTitle: text('about_title'),
   aboutText: text('about_text'),
   villageAddress: text('village_address'),

@@ -41,6 +41,15 @@ export interface Feedback {
   createdAt: string;
 }
 
+export interface HeroMediaItem {
+  id: string;
+  type: 'image' | 'video';
+  url: string;
+  title?: string;
+  subtitle?: string;
+  order: number;
+}
+
 export interface DynamicContent {
   siteName: string;
   headerTitle: string;
@@ -49,6 +58,7 @@ export interface DynamicContent {
   heroTitle: string;
   heroSubtitle: string;
   heroBannerUrl: string;
+  heroMedia?: HeroMediaItem[];
   aboutTitle: string;
   aboutText: string;
   villageAddress: string;

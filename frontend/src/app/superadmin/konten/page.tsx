@@ -7,8 +7,9 @@ import SoftCard from '@/components/SoftCard';
 import SoftInput from '@/components/SoftInput';
 import SoftButton from '@/components/SoftButton';
 import ImageUploadInput from '@/components/ImageUploadInput';
+import HeroMediaManager from '@/components/HeroMediaManager';
 import { fetchDynamicContent, saveDynamicContent } from '@/lib/api';
-import { DynamicContent } from '@/lib/types';
+import { DynamicContent, HeroMediaItem } from '@/lib/types';
 
 export default function SuperAdminKontenPage() {
   const [siteName, setSiteName] = useState('');
@@ -18,6 +19,7 @@ export default function SuperAdminKontenPage() {
   const [heroTitle, setHeroTitle] = useState('');
   const [heroSubtitle, setHeroSubtitle] = useState('');
   const [heroBannerUrl, setHeroBannerUrl] = useState('');
+  const [heroMedia, setHeroMedia] = useState<HeroMediaItem[]>([]);
   const [aboutTitle, setAboutTitle] = useState('');
   const [aboutText, setAboutText] = useState('');
   const [villageAddress, setVillageAddress] = useState('');
@@ -37,6 +39,22 @@ export default function SuperAdminKontenPage() {
         setHeroTitle(c.heroTitle || '');
         setHeroSubtitle(c.heroSubtitle || '');
         setHeroBannerUrl(c.heroBannerUrl || '');
+        setHeroMedia(
+          Array.isArray(c.heroMedia) && c.heroMedia.length > 0
+            ? c.heroMedia
+            : c.heroBannerUrl
+            ? [
+                {
+                  id: 'initial-hero-1',
+                  type: 'image',
+                  url: c.heroBannerUrl,
+                  title: 'Produk Olahan & Kerajinan Tangan',
+                  subtitle: 'Mendorong kemandirian ekonomi masyarakat Korowelang Kulon.',
+                  order: 1,
+                },
+              ]
+            : []
+        );
         setAboutTitle(c.aboutTitle || '');
         setAboutText(c.aboutText || '');
         setVillageAddress(c.villageAddress || '');
@@ -50,6 +68,10 @@ export default function SuperAdminKontenPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Fallback banner url from first image in heroMedia if available
+    const primaryBanner =
+      heroMedia.find((m) => m.type === 'image')?.url || heroBannerUrl || '';
+
     const updatedContent: DynamicContent = {
       siteName,
       headerTitle,
@@ -57,7 +79,8 @@ export default function SuperAdminKontenPage() {
       logoUrl,
       heroTitle,
       heroSubtitle,
-      heroBannerUrl,
+      heroBannerUrl: primaryBanner,
+      heroMedia,
       aboutTitle,
       aboutText,
       villageAddress,
@@ -113,10 +136,10 @@ export default function SuperAdminKontenPage() {
           </SoftCard>
 
           {/* SECTION 2: LANDING PAGE HERO */}
-          <SoftCard className="p-6 md:p-8 flex flex-col gap-5">
+          <SoftCard className="p-6 md:p-8 flex flex-col gap-6">
             <div className="flex items-center gap-2 border-b border-gray-200 pb-3">
               <Globe className="w-5 h-5 text-blue-600" />
-              <h2 className="text-lg font-bold text-gray-800">2. Konten Hero Section Landing Page</h2>
+              <h2 className="text-lg font-bold text-gray-800">2. Konten Hero Section & Slider Banner Landing Page</h2>
             </div>
 
             <SoftInput label="Judul Banner Utama (Hero Title)" value={heroTitle} onChange={e => setHeroTitle(e.target.value)} required />
@@ -131,7 +154,10 @@ export default function SuperAdminKontenPage() {
               />
             </div>
 
-            <ImageUploadInput label="Image Banner Hero Landing Page" value={heroBannerUrl} onChange={setHeroBannerUrl} />
+            {/* Slider Media Manager (Foto & Video Auto-Slide & Urutan) */}
+            <div className="pt-2 border-t border-gray-200">
+              <HeroMediaManager mediaList={heroMedia} onChange={setHeroMedia} />
+            </div>
           </SoftCard>
 
           {/* SECTION 3: ABOUT PAGE CONTENT */}

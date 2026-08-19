@@ -524,38 +524,32 @@ export const saveDynamicContent = async (
 };
 
 // ============================================================
-// UPLOAD API — Requires JWT auth
+// UPLOAD API — Requires JWT auth (Supports Image & Video)
 // ============================================================
 
 /**
- * Upload gambar ke backend (Cloudinary) dan kembalikan URL publik.
- * Uses the backend upload endpoint which requires JWT auth.
+ * Upload gambar atau video ke backend dan kembalikan URL publik & tipe media.
  */
-export const uploadImage = async (
+export const uploadMedia = async (
   file: File
-): Promise<{ success: boolean; url?: string; error?: string }> => {
+): Promise<{ success: boolean; url?: string; mediaType?: 'image' | 'video'; error?: string }> => {
   try {
     const formData = new FormData();
-    formData.append('image', file);
+    formData.append('media', file);
 
-    // Get token from localStorage (set during login)
     const token = typeof window !== 'undefined' ? localStorage.getItem('umkm_token') : null;
-
     if (!token) {
       return { success: false, error: 'Anda belum login. Silakan login terlebih dahulu.' };
     }
 
-    // Use fetch directly for multipart/form-data (avoid axios content-type issues)
     const res = await fetch('/api/admin/upload', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
-        // Do NOT set Content-Type — let browser set it with boundary for multipart
       },
       body: formData,
     });
 
-    // Check if response is JSON
     const contentType = res.headers.get('content-type') || '';
     if (!contentType.includes('application/json')) {
       const text = await res.text();
@@ -572,13 +566,103 @@ export const uploadImage = async (
       return { success: false, error: data.message || `Upload gagal (HTTP ${res.status}).` };
     }
 
-    if (data.url || data.imageUrl) {
-      return { success: true, url: data.url || data.imageUrl };
+    const mediaUrl = data.url || data.imageUrl || data.mediaUrl;
+    const isVideo = file.type.startsWith('video/') || data.mediaType === 'video';
+
+    if (mediaUrl) {
+      return {
+        success: true,
+        url: mediaUrl,
+        mediaType: isVideo ? 'video' : 'image',
+      };
     }
 
-    return { success: false, error: data.message || 'Gagal mendapatkan URL gambar dari server.' };
+    return { success: false, error: data.message || 'Gagal mendapatkan URL media dari server.' };
   } catch (e: any) {
-    console.error('uploadImage error:', e);
+    console.error('uploadMedia error:', e);
     return { success: false, error: e.message || 'Gagal menghubungkan ke server upload.' };
   }
 };
+
+/**
+ * Upload gambar ke backend (Cloudinary) dan kembalikan URL publik.
+ */
+export const uploadImage = async (
+  file: File
+): Promise<{ success: boolean; url?: string; error?: string }> => {
+  return uploadMedia(file);
+};
+
+// ============================================================
+// INITIAL FALLBACK DATA
+// ============================================================
+
+export const initialDynamicContent: DynamicContent = {
+  siteName: 'UMKM Korowelang Kulon',
+  headerTitle: 'Portal Resmi UMKM Korowelang Kulon',
+  headerSubtitle: 'Kecamatan Cepiring, Kabupaten Kendal, Jawa Tengah',
+  logoUrl: '/logo-kendal.png',
+  heroTitle: 'Jelajahi Produk Unggulan Karya Warga Korowelang Kulon',
+  heroSubtitle: 'Dari Kuliner hingga Olahan Khas Desa. Dapatkan produk berkualitas langsung dari UMKM desa kami.',
+  heroBannerUrl: 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=80',
+  heroMedia: [
+    {
+      id: 'default-1',
+      type: 'image',
+      url: 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=80',
+      title: 'Produk Olahan & Kerajinan Tangan',
+      subtitle: 'Mendorong kemandirian ekonomi masyarakat Korowelang Kulon.',
+      order: 1,
+    },
+    {
+      id: 'default-2',
+      type: 'image',
+      url: 'https://images.unsplash.com/photo-1509358271058-acd22cc93898?auto=format&fit=crop&w=800&q=80',
+      title: 'Kuliner & Jajanan Tradisional',
+      subtitle: 'Cita rasa khas nusantara buatan tangan warga desa.',
+      order: 2,
+    },
+  ],
+  aboutTitle: 'Tentang Program UMKM Desa Korowelang Kulon',
+  aboutText: 'Desa Korowelang Kulon merupakan desa yang kaya akan potensi produk olahan, industri makanan ringan, hasil tambak & pertanian, hingga kerajinan seni khas desa. Portal ini hadir sebagai wadah digitalisasi resmi yang dikelola oleh Pemerintah Desa Korowelang Kulon untuk memasarkan dan memperkenalkan potensi lokal secara luas ke seluruh Indonesia.',
+  villageAddress: 'Jl. Raya Korowelang Kulon, Kec. Cepiring, Kab. Kendal',
+  contactEmail: 'info@korowelangkulon.desa.id',
+  contactPhone: '+62 812-3456-7890',
+  footerText: '© 2026 Pemerintah Desa Korowelang Kulon.',
+};
+
+export const initialUmkms: UMKM[] = [
+  {
+    id: 1,
+    name: 'Bandeng Presto Bu Siti',
+    owner: 'Siti Rahmawati',
+    category: 'Kuliner',
+    address: 'RT 02 / RW 01, Dusun Krajan, Korowelang Kulon',
+    phone: '081234567890',
+    whatsapp: '6281234567890',
+    gmapsUrl: 'https://maps.google.com/?q=Korowelang+Kulon',
+    gmapsEmbed: '',
+    description: 'Olahan bandeng presto khas pesisir dengan duri lunak dan rempah istimewa.',
+    landingText: 'Bandeng presto duri lunak dengan bumbu rempah pilihan khas pesisir Korowelang.',
+    profileImage: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
+    bannerImage: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1200&q=80',
+    rating: 4.9,
+    reviewCount: 28,
+    isHalal: true,
+    halalNumber: 'ID33110001234560723',
+    certifications: ['Halal MUI', 'P-IRT'],
+    createdAt: '2026-01-15T08:00:00.000Z',
+    products: [
+      {
+        id: 101,
+        umkmId: 1,
+        name: 'Bandeng Presto Vacuum Pack 500gr',
+        price: 35000,
+        unit: 'pack',
+        description: 'Bandeng presto isi 2 ekor dikemas vacuum steril.',
+        image: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=400&q=80',
+        isHalal: true,
+      },
+    ],
+  },
+];

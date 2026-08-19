@@ -4,10 +4,10 @@ const multer = require('multer');
 const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith('image/')) {
+  if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/')) {
     cb(null, true);
   } else {
-    cb(new Error('Hanya file gambar (JPEG, PNG, WEBP, GIF) yang diperbolehkan!'), false);
+    cb(new Error('Hanya file gambar (JPEG, PNG, WEBP, GIF) dan video (MP4, WEBM, MOV) yang diperbolehkan!'), false);
   }
 };
 
@@ -15,7 +15,7 @@ const upload = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB limit
+    fileSize: 50 * 1024 * 1024, // 50MB limit for photos & videos
   },
 });
 

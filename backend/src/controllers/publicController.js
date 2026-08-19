@@ -146,10 +146,18 @@ const getDynamicContent = async (req, res) => {
 
     let content = null;
     const result = await db.select().from(schema.dynamicContent);
-    if (result.length > 0) content = result[0];
+    if (result.length > 0) content = { ...result[0] };
 
     if (!content) {
       return res.status(404).json({ success: false, message: 'Konten tidak ditemukan.' });
+    }
+
+    if (content.heroMedia && typeof content.heroMedia === 'string') {
+      try {
+        content.heroMedia = JSON.parse(content.heroMedia);
+      } catch {
+        content.heroMedia = [];
+      }
     }
 
     return res.status(200).json({

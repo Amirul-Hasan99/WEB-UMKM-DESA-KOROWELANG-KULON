@@ -47,6 +47,13 @@ import {
   Funnel,
   ChatCircle,
   ArrowsClockwise,
+  VideoCamera,
+  Play as PhPlay,
+  Pause as PhPause,
+  CaretLeft,
+  ArrowUp as PhArrowUp,
+  ArrowDown as PhArrowDown,
+  FilmStrip,
   IconProps
 } from '@phosphor-icons/react';
 
@@ -82,6 +89,11 @@ export const UserCheck = wrap(PhUserCheck);
 export const Globe = wrap(PhGlobe);
 export const User = wrap(PhUser);
 export const ChevronRight = wrap(CaretRight);
+export const ChevronLeft = wrap(CaretLeft);
+export const ChevronUp = wrap(PhArrowUp);
+export const ChevronDown = wrap(PhArrowDown);
+export const ArrowUp = wrap(PhArrowUp);
+export const ArrowDown = wrap(PhArrowDown);
 export const Plus = wrap(PhPlus);
 export const Edit2 = wrap(PencilSimple);
 export const Trash2 = wrap(PhTrash);
@@ -94,6 +106,10 @@ export const Camera = wrap(PhCamera);
 export const Upload = wrap(UploadSimple);
 export const ImageIcon = wrap(PhImage);
 export const Image = wrap(PhImage);
+export const Video = wrap(VideoCamera);
+export const Play = wrap(PhPlay);
+export const Pause = wrap(PhPause);
+export const Film = wrap(FilmStrip);
 export const Layout = wrap(PhLayout);
 export const Heart = wrap(PhHeart);
 export const Clock = wrap(PhClock);

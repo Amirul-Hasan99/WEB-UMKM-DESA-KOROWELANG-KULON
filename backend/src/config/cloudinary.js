@@ -11,12 +11,12 @@ cloudinary.config({
 /**
  * Upload buffer to Cloudinary and return secure URL.
  */
-const uploadToCloudinary = (fileBuffer, folder = 'umkm-korowelang') => {
+const uploadToCloudinary = (fileBuffer, folder = 'umkm-korowelang', mimetype = 'image/jpeg') => {
   return new Promise((resolve, reject) => {
     // If Cloudinary is not configured, fall back to base64 Data URL
     if (!process.env.CLOUDINARY_CLOUD_NAME || process.env.CLOUDINARY_CLOUD_NAME === 'your_cloud_name') {
       const base64Data = fileBuffer.toString('base64');
-      const dataUrl = `data:image/jpeg;base64,${base64Data}`;
+      const dataUrl = `data:${mimetype};base64,${base64Data}`;
       return resolve(dataUrl);
     }
 

@@ -104,7 +104,7 @@ function LoginForm() {
               <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0" />
               Masuk Akun Staff / Admin
             </h2>
-            <p className="text-[11px] text-gray-500">Masukkan kredensial login staff desa.</p>
+            <p className="text-[11px] text-gray-500">Masukkan email dan password untuk melanjutkan.</p>
           </div>
 
           {/* Session expired notice */}
@@ -127,7 +127,7 @@ function LoginForm() {
             <SoftInput
               label="Email Staff / Admin"
               type="email"
-              placeholder="admin@korowelangkulon.desa.id"
+              placeholder="Masukkan email..."
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               icon={<Mail className="w-4 h-4" />}
@@ -138,7 +138,7 @@ function LoginForm() {
             <SoftInput
               label="Password"
               type="password"
-              placeholder="••••••••"
+              placeholder="Masukkan password..."
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               icon={<Lock className="w-4 h-4" />}

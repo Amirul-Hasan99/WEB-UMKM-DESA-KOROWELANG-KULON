@@ -2,11 +2,12 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Store, ArrowRight, ShieldCheck, MapPin, Award, PhoneCall, Sparkles, ShoppingBag } from '@/components/Icons';
+import { Store, ArrowRight, ShieldCheck, MapPin, PhoneCall, Sparkles, ShoppingBag } from '@/components/Icons';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import SoftCard from '@/components/SoftCard';
 import SoftButton from '@/components/SoftButton';
+import HeroCarousel from '@/components/HeroCarousel';
 import { HalalCornerBadge } from '@/components/HalalBadge';
 import { fetchDynamicContent, fetchUmkms } from '@/lib/api';
 import { DynamicContent, UMKM } from '@/lib/types';
@@ -78,30 +79,14 @@ export default function LandingPage() {
 
               </div>
 
-              {/* Right Column: Hero Graphic Banner / Soft Card UI showcase */}
+              {/* Right Column: Hero Graphic Banner / Auto-slide Photo & Video Carousel */}
               <div className="lg:col-span-5 flex justify-center">
-                <div className="relative w-full max-w-md">
-                  <div className="soft-card p-4 rounded-3xl overflow-hidden shadow-2xl transition-transform hover:scale-[1.02] duration-300">
-                    <div className="relative h-72 w-full rounded-2xl overflow-hidden mb-4">
-                      <img
-                        src={content?.heroBannerUrl || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=80'}
-                        alt="Hero Banner UMKM"
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-4">
-                        <span className="text-white text-xs font-bold bg-blue-600/90 backdrop-blur-md px-3 py-1.5 rounded-xl flex items-center gap-1.5">
-                          <Award className="w-3.5 h-3.5" />
-                          Potensi Ekonomi Desa
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="p-2 flex flex-col gap-2">
-                      <h3 className="font-extrabold text-gray-800 text-base">Produk Olahan & Kerajinan Tangan</h3>
-                      <p className="text-xs text-gray-500 font-medium">Mendorong kemandirian ekonomi masyarakat Korowelang Kulon.</p>
-                    </div>
-                  </div>
-                </div>
+                <HeroCarousel
+                  mediaList={content?.heroMedia}
+                  fallbackImageUrl={content?.heroBannerUrl}
+                  defaultTitle="Produk Olahan & Kerajinan Tangan"
+                  defaultSubtitle="Mendorong kemandirian ekonomi masyarakat Korowelang Kulon."
+                />
               </div>
 
             </div>
