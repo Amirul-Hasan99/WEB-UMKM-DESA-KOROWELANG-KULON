@@ -121,26 +121,46 @@ const updateDynamicContent = async (req, res) => {
   try {
     if (!db) return res.status(500).json({ success: false, message: 'Database tidak terhubung.' });
 
-    const existing = await db.select().from(schema.dynamicContent);
-    if (existing.length > 0) {
-      const updated = await db.update(schema.dynamicContent)
-        .set({ ...req.body, updatedAt: new Date() })
-        .where(eq(schema.dynamicContent.id, existing[0].id))
-        .returning();
-      return res.status(200).json({
-        success: true,
-        message: 'Konten dinamis website berhasil diperbarui.',
-        data: updated[0]
-      });
-    } else {
-      const inserted = await db.insert(schema.dynamicContent).values(req.body).returning();
-      return res.status(200).json({
-        success: true,
-        message: 'Konten dinamis website berhasil diperbarui.',
-        data: inserted[0]
-      });
+    const payload = { ...req.body, updatedAt: new Date() };
+
+    // Function to perform upsert
+    const performSave = async () => {
+      const existing = await db.select().from(schema.dynamicContent);
+      if (existing.length > 0) {
+        return await db.update(schema.dynamicContent)
+          .set(payload)
+          .where(eq(schema.dynamicContent.id, existing[0].id))
+          .returning();
+      } else {
+        return await db.insert(schema.dynamicContent).values(payload).returning();
+      }
+    };
+
+    let result = [];
+    try {
+      result = await performSave();
+    } catch (saveErr) {
+      // If error is about missing hero_media column, auto-create column and retry
+      if (saveErr.message && (saveErr.message.includes('hero_media') || saveErr.message.includes('column'))) {
+        try {
+          const { sql } = require('drizzle-orm');
+          await db.execute(sql.raw(`ALTER TABLE "dynamic_content" ADD COLUMN IF NOT EXISTS "hero_media" jsonb DEFAULT '[]'::jsonb;`));
+          result = await performSave();
+        } catch (retryErr) {
+          throw saveErr;
+        }
+      } else {
+        throw saveErr;
+      }
     }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Konten dinamis website berhasil diperbarui.',
+      data: result[0] || payload
+    });
   } catch (error) {
+    console.error('updateDynamicContent error:', error);
     return res.status(500).json({ success: false, message: error.message });
   }
 };

@@ -30,6 +30,13 @@ async function syncAllSequences(db) {
       }
     }
   }
+
+  // Sync columns if needed
+  try {
+    await db.execute(sql.raw(`ALTER TABLE "dynamic_content" ADD COLUMN IF NOT EXISTS "hero_media" jsonb DEFAULT '[]'::jsonb;`));
+  } catch (colErr) {
+    // Ignore if table doesn't exist yet
+  }
 }
 
 module.exports = { syncAllSequences };

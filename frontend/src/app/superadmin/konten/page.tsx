@@ -40,7 +40,7 @@ export default function SuperAdminKontenPage() {
         setHeroSubtitle(c.heroSubtitle || '');
         setHeroBannerUrl(c.heroBannerUrl || '');
         setHeroMedia(
-          Array.isArray(c.heroMedia) && c.heroMedia.length > 0
+          Array.isArray(c.heroMedia)
             ? c.heroMedia
             : c.heroBannerUrl
             ? [

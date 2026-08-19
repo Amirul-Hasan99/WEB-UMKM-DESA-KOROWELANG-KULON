@@ -159,11 +159,28 @@ export const fetchUmkmById = async (id: number | string): Promise<UMKM | null> =
 export const fetchDynamicContent = async (): Promise<DynamicContent | null> => {
   try {
     const res = await axiosInstance.get('/public/konten');
-    if (res.data && res.data.data) return res.data.data;
+    if (res.data && res.data.data) {
+      const data = res.data.data;
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem('umkm_dynamic_content_cache', JSON.stringify(data));
+        } catch {}
+      }
+      return data;
+    }
   } catch (e) {
     console.warn('fetchDynamicContent error:', e);
   }
-  return null;
+
+  // Fallback to cache if available
+  if (typeof window !== 'undefined') {
+    try {
+      const cached = localStorage.getItem('umkm_dynamic_content_cache');
+      if (cached) return JSON.parse(cached);
+    } catch {}
+  }
+
+  return initialDynamicContent;
 };
 
 export const sendFeedback = async (name: string, email: string, message: string) => {
@@ -511,6 +528,12 @@ export const saveDynamicContent = async (
   content: DynamicContent
 ): Promise<{ success: boolean; error?: string }> => {
   try {
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('umkm_dynamic_content_cache', JSON.stringify(content));
+      } catch {}
+    }
+
     const res = await axiosInstance.put('/superadmin/konten', content);
     if (res.data && (res.data.success || res.data.data)) {
       return { success: true };

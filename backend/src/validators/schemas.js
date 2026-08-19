@@ -90,13 +90,14 @@ const dynamicContentSchema = z.object({
   heroTitle: z.string().optional(),
   heroSubtitle: z.string().optional(),
   heroBannerUrl: z.string().optional(),
+  heroMedia: z.any().optional(),
   aboutTitle: z.string().optional(),
   aboutText: z.string().optional(),
   villageAddress: z.string().optional(),
   contactEmail: z.string().optional(),
   contactPhone: z.string().optional(),
   footerText: z.string().optional(),
-});
+}).passthrough();
 
 // Public Review Schema
 const reviewSchema = z.object({

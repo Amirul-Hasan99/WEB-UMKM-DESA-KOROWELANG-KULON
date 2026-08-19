@@ -18,7 +18,7 @@ const axiosInstance = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 15000, // 15 seconds (Vercel cold starts can be slow)
+  timeout: 60000, // 60 seconds (allows large media sync)
 });
 
 // ============================================================
