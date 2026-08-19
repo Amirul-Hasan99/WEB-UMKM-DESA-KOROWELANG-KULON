@@ -85,21 +85,24 @@ export const ImageUploadInput: React.FC<ImageUploadInputProps> = ({
         </p>
       )}
 
-      {/* Preview jika berhasil upload */}
-      {value && uploadStatus === 'success' && (
+      {/* Preview jika foto ada (baik foto tersimpan maupun baru diupload) */}
+      {value && (
         <div className="mt-1 flex items-center justify-between p-2.5 rounded-2xl soft-card-sm bg-white/70">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-12 h-12 rounded-xl overflow-hidden bg-gray-200 shrink-0 border border-gray-300">
+            <div className="w-14 h-14 rounded-xl overflow-hidden bg-gray-200 shrink-0 border border-gray-300">
               <img src={value} alt="Preview Foto" className="w-full h-full object-cover" />
             </div>
-            <span className="text-xs font-bold text-emerald-700 flex items-center gap-1">
-              <Check className="w-3.5 h-3.5" /> Foto berhasil diupload
-            </span>
+            <div className="flex flex-col min-w-0">
+              <span className="text-xs font-bold text-gray-800 truncate">
+                {uploadStatus === 'success' ? 'Foto baru berhasil diupload' : 'Foto saat ini aktif'}
+              </span>
+              <span className="text-[11px] text-gray-500">Klik ikon silang untuk menghapus/mengganti</span>
+            </div>
           </div>
           <button
             type="button"
             onClick={handleClear}
-            className="p-1.5 rounded-xl text-red-500 hover:bg-red-50 transition-colors"
+            className="p-2 rounded-xl text-red-500 hover:bg-red-50 transition-colors shrink-0"
             title="Hapus Foto"
           >
             <X className="w-4 h-4" />

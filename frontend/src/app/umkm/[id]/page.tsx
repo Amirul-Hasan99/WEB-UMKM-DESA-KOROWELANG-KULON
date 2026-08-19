@@ -76,7 +76,7 @@ export default function UmkmDetailPage() {
         <SoftCard className="p-6 md:p-8 flex flex-col gap-8">
           <div className="relative h-64 md:h-80 rounded-2xl overflow-hidden bg-gray-200">
             <img
-              src={umkm.bannerImage || umkm.profileImage}
+              src={umkm.bannerImage || umkm.profileImage || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=80'}
               alt={umkm.name}
               className="w-full h-full object-cover"
             />
@@ -191,7 +191,7 @@ export default function UmkmDetailPage() {
             <div className="p-2 rounded-xl soft-card-sm text-blue-600">
               <Package className="w-5 h-5" />
             </div>
-            <h2 className="text-2xl font-extrabold text-gray-900">Daftar Produk Unggulan</h2>
+            <h2 className="text-2xl font-extrabold text-gray-900">Daftar Produk</h2>
           </div>
 
           {!umkm.products || umkm.products.length === 0 ? (

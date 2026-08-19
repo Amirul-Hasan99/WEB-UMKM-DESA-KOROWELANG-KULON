@@ -55,6 +55,7 @@ export default function AdminUmkmPage() {
   const [description, setDescription] = useState('');
   const [landingText, setLandingText] = useState('');
   const [profileImage, setProfileImage] = useState('');
+  const [bannerImage, setBannerImage] = useState('');
   const [isHalal, setIsHalal] = useState(false);
   const [halalNumber, setHalalNumber] = useState('');
   const [certifications, setCertifications] = useState<string[]>([]);
@@ -103,6 +104,7 @@ export default function AdminUmkmPage() {
     setDescription('');
     setLandingText('');
     setProfileImage('');
+    setBannerImage('');
     setIsHalal(false);
     setHalalNumber('');
     setCertifications([]);
@@ -121,7 +123,8 @@ export default function AdminUmkmPage() {
     setGmapsEmbed(umkm.gmapsEmbed || '');
     setDescription(umkm.description || '');
     setLandingText(umkm.landingText || '');
-    setProfileImage(umkm.profileImage || '');
+    setProfileImage(umkm.profileImage || umkm.bannerImage || '');
+    setBannerImage(umkm.bannerImage || umkm.profileImage || '');
     setIsHalal(Boolean(umkm.isHalal));
     setHalalNumber(umkm.halalNumber || '');
     setCertifications(umkm.certifications || []);
@@ -140,6 +143,9 @@ export default function AdminUmkmPage() {
 
     const cleanEmbed = parseGmapsEmbedUrl(gmapsEmbed, `${name} ${address} Korowelang Kulon Kendal`);
 
+    const finalProfile = profileImage || bannerImage;
+    const finalBanner = bannerImage || profileImage;
+
     const payload: Partial<UMKM> = {
       name,
       owner,
@@ -151,7 +157,8 @@ export default function AdminUmkmPage() {
       gmapsEmbed: cleanEmbed,
       description,
       landingText,
-      profileImage,
+      profileImage: finalProfile,
+      bannerImage: finalBanner,
       isHalal,
       halalNumber: isHalal ? halalNumber : '',
       certifications,
@@ -601,11 +608,18 @@ export default function AdminUmkmPage() {
                   </div>
                 </div>
 
-                <ImageUploadInput
-                  label="Foto Profil / Logo UMKM"
-                  value={profileImage}
-                  onChange={setProfileImage}
-                />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <ImageUploadInput
+                    label="Foto Sampul / Banner Header UMKM (Atas)"
+                    value={bannerImage}
+                    onChange={setBannerImage}
+                  />
+                  <ImageUploadInput
+                    label="Foto Profil / Logo UMKM (Katalog)"
+                    value={profileImage}
+                    onChange={setProfileImage}
+                  />
+                </div>
 
                 <div className="flex flex-col gap-1.5">
                   <label className="text-xs font-bold uppercase text-gray-500 ml-1">
