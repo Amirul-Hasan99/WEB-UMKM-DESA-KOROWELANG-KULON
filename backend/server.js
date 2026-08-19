@@ -93,9 +93,9 @@ app.use(
 // Handle preflight OPTIONS globally
 app.options("*", cors());
 
-// Body Parsing (10MB limit)
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+// Body Parsing (50MB limit for video & images)
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
 // Static files for uploads (local dev fallback)
 app.use("/uploads", express.static(path.join(__dirname, "public", "uploads")));

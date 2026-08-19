@@ -88,6 +88,7 @@ export default function HeroMediaManager({
     const file = e.target.files?.[0];
     if (!file) return;
 
+    const fileSizeMb = (file.size / (1024 * 1024)).toFixed(1);
     setUploading(true);
     setUploadError('');
     setUploadSuccess('');
@@ -95,17 +96,23 @@ export default function HeroMediaManager({
     try {
       const res = await uploadMedia(file);
       if (res.success && res.url) {
-        const isVideo = file.type.startsWith('video/') || res.mediaType === 'video';
+        const isVideo = file.type.startsWith('video/') || res.mediaType === 'video' || file.name.match(/\.(mp4|webm|mov)$/i) !== null;
         setNewUrl(res.url);
         setNewType(isVideo ? 'video' : 'image');
+        if (!newTitle) {
+          setNewTitle(isVideo ? 'Video Produk & Kegiatan UMKM' : 'Produk Olahan & Seni Desa');
+        }
+        if (!newSubtitle) {
+          setNewSubtitle('Dokumentasi resmi aktivitas usaha warga Korowelang Kulon.');
+        }
         setUploadSuccess(
-          `Berhasil mengunggah ${isVideo ? 'video' : 'foto'}! Silakan klik tombol 'Tambahkan Slide ke Banner'.`
+          `File ${isVideo ? 'video' : 'foto'} (${fileSizeMb} MB) siap ditambahkan! Klik tombol 'Tambahkan Slide ke Banner' di bawah.`
         );
       } else {
-        setUploadError(res.error || 'Gagal mengunggah file media.');
+        setUploadError(res.error || 'Gagal memproses file media.');
       }
     } catch (err: any) {
-      setUploadError(err.message || 'Terjadi kesalahan saat upload.');
+      setUploadError(err.message || 'Terjadi kesalahan saat memproses media.');
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
