@@ -132,9 +132,20 @@ export default function HeroMediaManager({
         if (!newSubtitle) {
           setNewSubtitle('Dokumentasi resmi aktivitas usaha warga Korowelang Kulon.');
         }
-        setUploadSuccess(
-          `File ${isVideo ? 'video' : 'foto'} (${fileSizeMb} MB) siap ditambahkan! Klik tombol 'Tambahkan Slide ke Banner' di bawah.`
-        );
+
+        // Check if upload actually went to server (Cloudinary) or fell back to local data URL
+        const isServerUrl = res.url.startsWith('http://') || res.url.startsWith('https://');
+        if (isServerUrl) {
+          setUploadSuccess(
+            `✅ File ${isVideo ? 'video' : 'foto'} (${fileSizeMb} MB) berhasil diunggah ke server! Klik 'Tambahkan Slide ke Banner' untuk menyimpan.`
+          );
+        } else {
+          // Local data URL fallback — warn the user
+          setUploadError(
+            `⚠️ File (${fileSizeMb} MB) hanya tersimpan sementara di perangkat Anda (server tidak merespons). Pastikan backend online lalu coba lagi agar gambar dapat dilihat semua pengunjung.`
+          );
+          setNewUrl(res.url);
+        }
       } else {
         setUploadError(res.error || 'Gagal memproses file media.');
       }

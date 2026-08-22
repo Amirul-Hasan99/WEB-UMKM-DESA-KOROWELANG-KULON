@@ -19,9 +19,13 @@ export default function HeroCarousel({
   defaultSubtitle = 'Mendorong kemandirian ekonomi masyarakat Korowelang Kulon.',
 }: HeroCarouselProps) {
   // Normalize items to ensure there is always at least 1 item
+  // Filter out indexeddb:// URLs since they are local-only and not accessible to other users
+  const validItems = (mediaList || []).filter(
+    (item) => item.url && !item.url.startsWith('indexeddb://')
+  );
   const items: HeroMediaItem[] =
-    mediaList && mediaList.length > 0
-      ? [...mediaList].sort((a, b) => (a.order || 0) - (b.order || 0))
+    validItems.length > 0
+      ? [...validItems].sort((a, b) => (a.order || 0) - (b.order || 0))
       : [
           {
             id: 'fallback-1',

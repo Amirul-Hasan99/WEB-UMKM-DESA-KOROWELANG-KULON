@@ -28,6 +28,9 @@ export default function SuperAdminKontenPage() {
   const [footerText, setFooterText] = useState('');
 
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [saveError, setSaveError] = useState('');
+  const [skippedWarning, setSkippedWarning] = useState(0);
 
   useEffect(() => {
     fetchDynamicContent().then((c) => {
@@ -67,6 +70,9 @@ export default function SuperAdminKontenPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitting(true);
+    setSaveError('');
+    setSkippedWarning(0);
 
     // Fallback banner url from first image in heroMedia if available
     const primaryBanner =
@@ -91,11 +97,16 @@ export default function SuperAdminKontenPage() {
 
     // Simpan ke database via API — bukan localStorage
     const res = await saveDynamicContent(updatedContent);
+    setSubmitting(false);
     if (res.success) {
       setSavedSuccess(true);
-      setTimeout(() => setSavedSuccess(false), 3000);
+      if (res.skippedItems && res.skippedItems > 0) {
+        setSkippedWarning(res.skippedItems);
+      }
+      setTimeout(() => { setSavedSuccess(false); setSkippedWarning(0); }, 6000);
     } else {
-      alert(res.error || 'Gagal menyimpan konten ke database.');
+      setSaveError(res.error || 'Gagal menyimpan konten ke database.');
+      setTimeout(() => setSaveError(''), 8000);
     }
   };
 
@@ -114,6 +125,22 @@ export default function SuperAdminKontenPage() {
           <div className="p-4 rounded-2xl bg-emerald-50 text-emerald-700 font-bold text-xs border border-emerald-200 flex items-center gap-2">
             <Check className="w-4 h-4" />
             <span>Konten website berhasil diperbarui secara langsung!</span>
+          </div>
+        )}
+
+        {skippedWarning > 0 && (
+          <div className="p-4 rounded-2xl bg-amber-50 text-amber-700 text-xs border border-amber-200 flex items-start gap-2">
+            <span className="text-base shrink-0">⚠️</span>
+            <span>
+              <strong>{skippedWarning} media</strong> tidak dapat disimpan ke server karena ukuran file terlalu besar atau koneksi terputus. Gunakan tombol <strong>Upload dari Device</strong> saat koneksi internet stabil agar gambar/video dapat diakses oleh semua pengunjung.
+            </span>
+          </div>
+        )}
+
+        {saveError && (
+          <div className="p-4 rounded-2xl bg-red-50 text-red-700 text-xs border border-red-200 flex items-center gap-2">
+            <span className="text-base shrink-0">❌</span>
+            <span>{saveError}</span>
           </div>
         )}
 
@@ -198,8 +225,8 @@ export default function SuperAdminKontenPage() {
           </SoftCard>
 
           {/* SUBMIT BUTTON */}
-          <SoftButton type="submit" variant="primary" size="lg" className="w-full shadow-lg" icon={<Check className="w-5 h-5" />}>
-            Simpan Perubahan Konten Website
+          <SoftButton type="submit" variant="primary" size="lg" className="w-full shadow-lg" icon={<Check className="w-5 h-5" />} disabled={submitting}>
+            {submitting ? 'Menyimpan & Mengupload Media...' : 'Simpan Perubahan Konten Website'}
           </SoftButton>
 
         </form>

@@ -97,14 +97,15 @@ const updateProfile = async (req, res) => {
   try {
     if (!db) return res.status(500).json({ success: false, message: 'Database tidak terhubung.' });
 
-    const { name, phone, bio, avatar, password } = req.body;
+    const { name, phone, bio, avatar } = req.body;
     const updatePayload = {};
 
     if (name !== undefined) updatePayload.name = name;
     if (phone !== undefined) updatePayload.phone = phone;
     if (bio !== undefined) updatePayload.bio = bio;
     if (avatar !== undefined) updatePayload.avatar = avatar;
-    if (password) updatePayload.password = await hashPassword(password);
+    // NOTE: password update is intentionally NOT allowed here.
+    // Only superadmin can change an admin's password via PUT /superadmin/admins/:id
 
     if (Object.keys(updatePayload).length === 0) {
       return res.status(400).json({ success: false, message: 'Tidak ada data yang diperbarui.' });

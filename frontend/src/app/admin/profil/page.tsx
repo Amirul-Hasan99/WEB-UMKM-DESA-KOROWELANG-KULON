@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { User, Mail, Phone, ShieldCheck, Check, Lock, AlertCircle } from '@/components/Icons';
+import { User, Phone, ShieldCheck, Check, AlertCircle, Info } from '@/components/Icons';
 import AdminSidebar from '@/components/AdminSidebar';
 import SoftCard from '@/components/SoftCard';
 import SoftInput from '@/components/SoftInput';
@@ -16,7 +16,6 @@ export default function AdminProfilePage() {
   const [phone, setPhone] = useState('');
   const [bio, setBio] = useState('');
   const [avatar, setAvatar] = useState('');
-  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
@@ -66,21 +65,13 @@ export default function AdminProfilePage() {
     setErrorMsg('');
     setSavedSuccess(false);
 
-    const payload: Partial<UserAdmin> & { password?: string } = {
+    // Password intentionally excluded — only superadmin can change passwords
+    const payload: Partial<UserAdmin> = {
       name,
       phone,
       bio,
       avatar,
     };
-
-    if (password.trim().length > 0) {
-      if (password.trim().length < 6) {
-        setErrorMsg('Password baru minimal 6 karakter.');
-        setSubmitting(false);
-        return;
-      }
-      payload.password = password.trim();
-    }
 
     const res = await updateUserProfile(payload);
     setSubmitting(false);
@@ -91,7 +82,6 @@ export default function AdminProfilePage() {
         localStorage.setItem('umkm_user', JSON.stringify(res.data));
         window.dispatchEvent(new Event('umkm_user_updated'));
       }
-      setPassword('');
       setSavedSuccess(true);
       setTimeout(() => setSavedSuccess(false), 4000);
     } else {
@@ -108,6 +98,16 @@ export default function AdminProfilePage() {
         <div className="flex flex-col gap-1">
           <h1 className="text-2xl font-extrabold text-gray-900">Kelola Akun Saya</h1>
           <p className="text-xs text-gray-500">Perbarui informasi profil, nomor kontak, foto profil, dan biodata admin di database.</p>
+        </div>
+
+        {/* Info banner: password only changed by superadmin */}
+        <div className="p-4 rounded-2xl bg-blue-50 text-blue-700 text-xs border border-blue-200 flex items-start gap-2.5">
+          <Info className="w-4 h-4 text-blue-500 mt-0.5 shrink-0" />
+          <span>
+            <strong>Informasi:</strong> Perubahan <strong>password login</strong> hanya dapat dilakukan oleh{' '}
+            <strong>Super Admin Desa</strong> melalui halaman &ldquo;Kelola Akun Admin&rdquo;.
+            Hubungi superadmin jika Anda perlu mengganti password.
+          </span>
         </div>
 
         <SoftCard className="p-6 md:p-8 max-w-2xl">
@@ -185,15 +185,6 @@ export default function AdminProfilePage() {
                 />
               </div>
 
-              <SoftInput
-                label="Ganti Password Baru (kosongkan jika tidak ingin mengubah)"
-                type="password"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                icon={<Lock className="w-4 h-4" />}
-                placeholder="Minimal 6 karakter..."
-              />
-
               <SoftButton
                 type="submit"
                 variant="primary"
@@ -212,3 +203,4 @@ export default function AdminProfilePage() {
     </div>
   );
 }
+

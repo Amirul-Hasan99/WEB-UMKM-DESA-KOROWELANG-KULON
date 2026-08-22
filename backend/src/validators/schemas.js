@@ -6,13 +6,12 @@ const loginSchema = z.object({
   password: z.string().min(6, { message: 'Password minimal 6 karakter.' }),
 });
 
-// Profile Update Schema
+// Profile Update Schema — password intentionally excluded (only superadmin can change passwords)
 const profileSchema = z.object({
   name: z.string().min(2, { message: 'Nama minimal 2 karakter.' }).optional(),
   phone: z.string().optional(),
   bio: z.string().optional(),
   avatar: z.string().optional(),
-  password: z.string().min(6, { message: 'Password baru minimal 6 karakter.' }).optional(),
 });
 
 // UMKM Schema

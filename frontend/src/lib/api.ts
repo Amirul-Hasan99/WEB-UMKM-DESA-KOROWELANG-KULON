@@ -526,55 +526,185 @@ export const deleteAdminFeedback = async (
 
 export const saveDynamicContent = async (
   content: DynamicContent
-): Promise<{ success: boolean; error?: string }> => {
+): Promise<{ success: boolean; error?: string; skippedItems?: number }> => {
   try {
-    // 1. Cache to local storage immediately
-    if (typeof window !== 'undefined') {
-      try {
-        localStorage.setItem('umkm_dynamic_content_cache', JSON.stringify(content));
-      } catch {}
-    }
-
-    // 2. Sanitize large Base64 media before sending over HTTP
-    // Prevents Vercel Serverless Function 4.5MB payload limit (which causes "Network Error")
+    // 1. Sanitize heroMedia: upload data: URLs to server (Cloudinary) so they are publicly accessible
+    // IndexedDB is local-only — never store indexeddb:// URLs to database as other users can't access them
+    let skippedItems = 0;
     const sanitizedHeroMedia = await Promise.all(
-      (content.heroMedia || []).map(async (item, idx) => {
-        if (item.url && item.url.startsWith('data:') && item.url.length > 200000) {
+      (content.heroMedia || []).map(async (item) => {
+        // Skip items already stored with indexeddb:// URLs — they are local-only and cannot be shared
+        if (item.url && item.url.startsWith('indexeddb://')) {
+          skippedItems++;
+          return null;
+        }
+
+        // If it's a data: URL, try to upload to Cloudinary via server API
+        if (item.url && item.url.startsWith('data:')) {
           try {
-            const { saveMediaToIndexedDB } = await import('./mediaStorage');
-            const mediaKey = item.id || `media-item-${idx}-${Date.now()}`;
-            const idbKey = await saveMediaToIndexedDB(mediaKey, item.url, item.type);
-            return { ...item, url: idbKey };
-          } catch (e) {
-            console.warn('Failed to convert base64 to IndexedDB:', e);
-            return item;
+            const token = typeof window !== 'undefined' ? localStorage.getItem('umkm_token') : null;
+            const backend = process.env.NEXT_PUBLIC_BACKEND_URL;
+            const uploadEndpoint = backend && backend.trim()
+              ? `${backend.replace(/\/$/, '')}/api/admin/upload`
+              : '/api/admin/upload';
+
+            // Convert data URL to Blob for upload
+            const dataUrlParts = item.url.split(',');
+            const mimeMatch = dataUrlParts[0].match(/:([^;]+)/);
+            const mime = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+            const binaryStr = atob(dataUrlParts[1] || '');
+            const bytes = new Uint8Array(binaryStr.length);
+            for (let i = 0; i < binaryStr.length; i++) {
+              bytes[i] = binaryStr.charCodeAt(i);
+            }
+            const blob = new Blob([bytes], { type: mime });
+            const ext = mime.split('/')[1] || 'jpg';
+            const file = new File([blob], `hero-media-${item.id || Date.now()}.${ext}`, { type: mime });
+
+            if (token) {
+              const formData = new FormData();
+              formData.append('media', file);
+              const res = await fetch(uploadEndpoint, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${token}` },
+                body: formData,
+              });
+              if (res.ok) {
+                const contentType = res.headers.get('content-type') || '';
+                if (contentType.includes('application/json')) {
+                  const data = await res.json();
+                  const uploadedUrl = data.url || data.imageUrl || data.mediaUrl;
+                  if (uploadedUrl) {
+                    return { ...item, url: uploadedUrl };
+                  }
+                }
+              }
+            }
+
+            // If upload fails and data URL is small enough (< 200KB), keep it
+            if (item.url.length < 200000) {
+              return item;
+            }
+
+            // Data URL too large and upload failed — skip this item
+            console.warn(`Skipping large media item (${item.id}): upload to server failed and data URL too large`);
+            skippedItems++;
+            return null;
+          } catch (uploadErr) {
+            console.warn('Failed to upload data: URL to server, checking size:', uploadErr);
+            if (item.url.length < 200000) return item;
+            skippedItems++;
+            return null;
           }
         }
+
         return item;
       })
     );
 
-    // Also sanitize heroBannerUrl if it's a huge data URL
+    // Filter out null (skipped) items and re-index order
+    const finalHeroMedia = sanitizedHeroMedia
+      .filter((item): item is NonNullable<typeof item> => item !== null)
+      .map((item, idx) => ({ ...item, order: idx + 1 }));
+
+    // Sanitize heroBannerUrl if it's a data URL
     let sanitizedBannerUrl = content.heroBannerUrl;
-    if (sanitizedBannerUrl && sanitizedBannerUrl.startsWith('data:') && sanitizedBannerUrl.length > 200000) {
-      sanitizedBannerUrl = 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=80';
+    if (sanitizedBannerUrl && (sanitizedBannerUrl.startsWith('data:') || sanitizedBannerUrl.startsWith('indexeddb://'))) {
+      // Use first image from finalHeroMedia as fallback
+      const firstImage = finalHeroMedia.find((m) => m.type === 'image');
+      sanitizedBannerUrl = firstImage?.url || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=80';
     }
 
     const payload: DynamicContent = {
       ...content,
       heroBannerUrl: sanitizedBannerUrl,
-      heroMedia: sanitizedHeroMedia,
+      heroMedia: finalHeroMedia,
     };
+
+    // 2. Cache to local storage
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('umkm_dynamic_content_cache', JSON.stringify(payload));
+      } catch {}
+    }
 
     const res = await axiosInstance.put('/superadmin/konten', payload);
     if (res.data && (res.data.success || res.data.data)) {
-      return { success: true };
+      // Clear cache so landing page fetches fresh data from server
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.removeItem('umkm_dynamic_content_cache');
+        } catch {}
+      }
+      return { success: true, skippedItems };
     }
     const err = res.data?.error || res.data?.message;
     return { success: false, error: typeof err === 'string' ? err : 'Gagal menyimpan konten.' };
   } catch (e: any) {
     console.error('saveDynamicContent error:', e);
     return { success: false, error: extractError(e, 'Gagal menghubungkan ke server.') };
+  }
+};
+
+// ============================================================
+// SUPERADMIN: ADMIN ACCOUNTS MANAGEMENT API
+// ============================================================
+
+export const fetchAdminAccounts = async (): Promise<{ success: boolean; data?: UserAdmin[]; error?: string }> => {
+  try {
+    const res = await axiosInstance.get('/superadmin/admins');
+    if (res.data && Array.isArray(res.data.data)) {
+      return { success: true, data: res.data.data as UserAdmin[] };
+    }
+    return { success: false, error: res.data?.message || 'Gagal memuat daftar akun.' };
+  } catch (e: any) {
+    return { success: false, error: extractError(e, 'Gagal menghubungkan ke server.') };
+  }
+};
+
+export const createAdminAccount = async (
+  data: { name: string; email: string; password: string; role: 'admin' | 'superadmin'; phone?: string; bio?: string }
+): Promise<{ success: boolean; data?: UserAdmin; error?: string }> => {
+  try {
+    const res = await axiosInstance.post('/superadmin/admins', data);
+    if (res.data && res.data.data) {
+      return { success: true, data: res.data.data as UserAdmin };
+    }
+    const err = res.data?.error || res.data?.message;
+    return { success: false, error: typeof err === 'string' ? err : 'Gagal membuat akun admin.' };
+  } catch (e: any) {
+    return { success: false, error: extractError(e, 'Gagal menyimpan akun ke server.') };
+  }
+};
+
+export const updateAdminAccount = async (
+  id: number,
+  data: { name?: string; email?: string; password?: string; role?: 'admin' | 'superadmin'; phone?: string; bio?: string }
+): Promise<{ success: boolean; data?: UserAdmin; error?: string }> => {
+  try {
+    const res = await axiosInstance.put(`/superadmin/admins/${id}`, data);
+    if (res.data && res.data.data) {
+      return { success: true, data: res.data.data as UserAdmin };
+    }
+    const err = res.data?.error || res.data?.message;
+    return { success: false, error: typeof err === 'string' ? err : 'Gagal memperbarui akun admin.' };
+  } catch (e: any) {
+    return { success: false, error: extractError(e, 'Gagal memperbarui akun di server.') };
+  }
+};
+
+export const deleteAdminAccount = async (
+  id: number
+): Promise<{ success: boolean; error?: string }> => {
+  try {
+    const res = await axiosInstance.delete(`/superadmin/admins/${id}`);
+    if (res.data && res.data.success) {
+      return { success: true };
+    }
+    const err = res.data?.error || res.data?.message;
+    return { success: false, error: typeof err === 'string' ? err : 'Gagal menghapus akun admin.' };
+  } catch (e: any) {
+    return { success: false, error: extractError(e, 'Gagal menghapus akun dari server.') };
   }
 };
 
