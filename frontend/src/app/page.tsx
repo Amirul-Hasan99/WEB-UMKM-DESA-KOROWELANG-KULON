@@ -80,12 +80,12 @@ export default function LandingPage() {
               </div>
 
               {/* Right Column: Hero Graphic Banner / Auto-slide Photo & Video Carousel */}
-              <div className="lg:col-span-5 flex justify-center">
+              <div className="lg:col-span-5 flex justify-center w-full">
                 <HeroCarousel
                   mediaList={content?.heroMedia}
                   fallbackImageUrl={content?.heroBannerUrl}
-                  defaultTitle="Produk Olahan & Kerajinan Tangan"
-                  defaultSubtitle="Mendorong kemandirian ekonomi masyarakat Korowelang Kulon."
+                  defaultTitle="Selamat Datang di Portal Desa Korowelang Kulon"
+                  defaultSubtitle="Menjelajahi keindahan desa, potensi lokal, dan kreativitas UMKM warga."
                 />
               </div>
 
