@@ -5,6 +5,25 @@ import { HeroMediaItem } from '@/lib/types';
 import { ChevronLeft, ChevronRight, Play, Pause, Video, Image as ImageIcon } from '@/components/Icons';
 import { resolveMediaUrl } from '@/lib/mediaStorage';
 
+export const DEFAULT_HERO_VIDEOS: HeroMediaItem[] = [
+  {
+    id: 'default-video-1',
+    type: 'video',
+    url: '/videos/footage-1.mp4',
+    title: 'Selamat Datang di Portal Desa Korowelang Kulon',
+    subtitle: 'Menjelajahi keindahan desa, potensi lokal, dan kreativitas UMKM warga.',
+    order: 1,
+  },
+  {
+    id: 'default-video-2',
+    type: 'video',
+    url: '/videos/footage-2.mp4',
+    title: 'Potensi & Kemandirian Ekonomi Warga Desa',
+    subtitle: 'Mendorong kemandirian dan kemajuan UMKM khas Desa Korowelang Kulon.',
+    order: 2,
+  },
+];
+
 interface HeroCarouselProps {
   mediaList?: HeroMediaItem[];
   fallbackImageUrl?: string;
@@ -15,27 +34,28 @@ interface HeroCarouselProps {
 export default function HeroCarousel({
   mediaList = [],
   fallbackImageUrl = 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=80',
-  defaultTitle = 'Produk Olahan & Kerajinan Tangan',
-  defaultSubtitle = 'Mendorong kemandirian ekonomi masyarakat Korowelang Kulon.',
+  defaultTitle = 'Selamat Datang di Portal Desa Korowelang Kulon',
+  defaultSubtitle = 'Menjelajahi keindahan desa, potensi lokal, dan kreativitas UMKM warga.',
 }: HeroCarouselProps) {
-  // Normalize items to ensure there is always at least 1 item
-  // Filter out indexeddb:// URLs since they are local-only and not accessible to other users
+  // Normalize items to ensure valid media list
   const validItems = (mediaList || []).filter(
     (item) => item.url && !item.url.startsWith('indexeddb://')
   );
-  const items: HeroMediaItem[] =
-    validItems.length > 0
-      ? [...validItems].sort((a, b) => (a.order || 0) - (b.order || 0))
-      : [
-          {
-            id: 'fallback-1',
-            type: 'image',
-            url: fallbackImageUrl,
-            title: defaultTitle,
-            subtitle: defaultSubtitle,
-            order: 1,
-          },
-        ];
+
+  // If mediaList is empty or contains only old default Unsplash placeholder images, use the 2 default videos
+  const isOldPlaceholder =
+    validItems.length === 0 ||
+    validItems.every(
+      (item) =>
+        item.url.includes('images.unsplash.com') ||
+        item.id === 'default-1' ||
+        item.id === 'default-2' ||
+        item.id === 'fallback-1'
+    );
+
+  const items: HeroMediaItem[] = !isOldPlaceholder
+    ? [...validItems].sort((a, b) => (a.order || 0) - (b.order || 0))
+    : DEFAULT_HERO_VIDEOS;
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
@@ -43,7 +63,7 @@ export default function HeroCarousel({
   const [resolvedUrls, setResolvedUrls] = useState<Record<string, string>>({});
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
 
-  // Asynchronously resolve all media URLs (IndexedDB, Blob, or HTTP)
+  // Asynchronously resolve all media URLs (IndexedDB, Blob, or HTTP/Static)
   useEffect(() => {
     let isMounted = true;
     const loadUrls = async () => {
@@ -64,44 +84,58 @@ export default function HeroCarousel({
     };
   }, [items]);
 
-  // Keep index in bounds if mediaList changes
+  // Keep index in bounds if items length changes
   useEffect(() => {
     if (currentIndex >= items.length) {
       setCurrentIndex(0);
     }
   }, [items.length, currentIndex]);
 
-  // Auto-slide effect
-  useEffect(() => {
-    if (!isPlaying || isHovered || items.length <= 1) return;
-
-    const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % items.length);
-    }, 5500);
-
-    return () => clearInterval(interval);
-  }, [isPlaying, isHovered, items.length, currentIndex]);
-
-  // When active slide is a video, trigger play
-  useEffect(() => {
-    const currentItem = items[currentIndex];
-    if (currentItem?.type === 'video') {
-      const vid = videoRefs.current[currentIndex];
-      if (vid) {
-        vid.currentTime = 0;
-        vid.play().catch(() => {});
-      }
-    }
-  }, [currentIndex, items]);
+  const handleNext = () => {
+    setCurrentIndex((prev) => (prev + 1) % items.length);
+  };
 
   const handlePrev = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     setCurrentIndex((prev) => (prev - 1 + items.length) % items.length);
   };
 
-  const handleNext = (e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-    setCurrentIndex((prev) => (prev + 1) % items.length);
+  // Auto-slide effect for non-video items or fallback
+  useEffect(() => {
+    const currentItem = items[currentIndex];
+    // If current slide is a video, transition is handled by onEnded event instead of timer
+    if (currentItem?.type === 'video') return;
+
+    if (!isPlaying || isHovered || items.length <= 1) return;
+
+    const interval = setInterval(() => {
+      handleNext();
+    }, 6000);
+
+    return () => clearInterval(interval);
+  }, [isPlaying, isHovered, items.length, currentIndex, items]);
+
+  // When active slide changes, handle video playback
+  useEffect(() => {
+    const currentItem = items[currentIndex];
+    videoRefs.current.forEach((vid, idx) => {
+      if (!vid) return;
+      if (idx === currentIndex && currentItem?.type === 'video') {
+        vid.currentTime = 0;
+        if (isPlaying) {
+          vid.play().catch(() => {});
+        }
+      } else {
+        vid.pause();
+      }
+    });
+  }, [currentIndex, items, isPlaying]);
+
+  // Handle video ended event: smoothly advance to the next slide (Footage 1 -> Footage 2 -> Footage 1)
+  const handleVideoEnded = (idx: number) => {
+    if (idx === currentIndex && isPlaying) {
+      handleNext();
+    }
   };
 
   const activeItem = items[currentIndex] || items[0];
@@ -115,7 +149,7 @@ export default function HeroCarousel({
       <div className="soft-card p-4 rounded-3xl overflow-hidden shadow-2xl transition-transform duration-300">
         
         {/* Main Media Showcase Container */}
-        <div className="relative h-72 w-full rounded-2xl overflow-hidden mb-4 bg-gray-900 shadow-inner group">
+        <div className="relative h-72 w-full rounded-2xl overflow-hidden mb-4 bg-gray-950 shadow-inner group">
           {items.map((item, idx) => {
             const isActive = idx === currentIndex;
             return (
@@ -134,9 +168,10 @@ export default function HeroCarousel({
                     className="w-full h-full object-cover"
                     autoPlay
                     muted
-                    loop
+                    loop={false}
                     playsInline
                     preload="auto"
+                    onEnded={() => handleVideoEnded(idx)}
                   />
                 ) : (
                   <img
@@ -147,15 +182,15 @@ export default function HeroCarousel({
                 )}
 
                 {/* Subtle Overlay gradient */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20 pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30 pointer-events-none" />
 
                 {/* Top Badge: Foto / Video Indicator */}
                 <div className="absolute top-3 left-3 z-20">
                   <span className="text-[11px] font-bold bg-black/60 backdrop-blur-md text-white px-2.5 py-1 rounded-xl flex items-center gap-1.5 shadow-sm">
                     {item.type === 'video' ? (
                       <>
-                        <Video className="w-3.5 h-3.5 text-red-400" />
-                        <span>Video Desa</span>
+                        <Video className="w-3.5 h-3.5 text-red-400 animate-pulse" />
+                        <span>Video Desa #{idx + 1}</span>
                       </>
                     ) : (
                       <>
@@ -182,7 +217,7 @@ export default function HeroCarousel({
               </button>
               <button
                 type="button"
-                onClick={handleNext}
+                onClick={() => handleNext()}
                 aria-label="Slide Selanjutnya"
                 className="absolute right-2.5 top-1/2 -translate-y-1/2 z-30 w-8 h-8 rounded-full bg-white/80 hover:bg-white text-gray-800 backdrop-blur-md flex items-center justify-center shadow-lg transition-all hover:scale-110 active:scale-95"
               >
@@ -225,10 +260,10 @@ export default function HeroCarousel({
 
         {/* Dynamic Caption Box */}
         <div className="p-2 flex flex-col gap-1">
-          <h3 className="font-extrabold text-gray-800 text-base line-clamp-1 transition-all">
+          <h3 className="font-extrabold text-gray-900 text-base line-clamp-1 transition-all">
             {activeItem.title || defaultTitle}
           </h3>
-          <p className="text-xs text-gray-500 font-medium line-clamp-2 leading-relaxed transition-all">
+          <p className="text-xs text-gray-600 font-medium line-clamp-2 leading-relaxed transition-all">
             {activeItem.subtitle || defaultSubtitle}
           </p>
         </div>
