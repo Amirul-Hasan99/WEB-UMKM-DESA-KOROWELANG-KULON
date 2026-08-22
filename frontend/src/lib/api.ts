@@ -542,12 +542,6 @@ export const saveDynamicContent = async (
         // If it's a data: URL, try to upload to Cloudinary via server API
         if (item.url && item.url.startsWith('data:')) {
           try {
-            const token = typeof window !== 'undefined' ? localStorage.getItem('umkm_token') : null;
-            const backend = process.env.NEXT_PUBLIC_BACKEND_URL;
-            const uploadEndpoint = backend && backend.trim()
-              ? `${backend.replace(/\/$/, '')}/api/admin/upload`
-              : '/api/admin/upload';
-
             // Convert data URL to Blob for upload
             const dataUrlParts = item.url.split(',');
             const mimeMatch = dataUrlParts[0].match(/:([^;]+)/);
@@ -561,23 +555,17 @@ export const saveDynamicContent = async (
             const ext = mime.split('/')[1] || 'jpg';
             const file = new File([blob], `hero-media-${item.id || Date.now()}.${ext}`, { type: mime });
 
-            if (token) {
-              const formData = new FormData();
-              formData.append('media', file);
-              const res = await fetch(uploadEndpoint, {
-                method: 'POST',
-                headers: { Authorization: `Bearer ${token}` },
-                body: formData,
-              });
-              if (res.ok) {
-                const contentType = res.headers.get('content-type') || '';
-                if (contentType.includes('application/json')) {
-                  const data = await res.json();
-                  const uploadedUrl = data.url || data.imageUrl || data.mediaUrl;
-                  if (uploadedUrl) {
-                    return { ...item, url: uploadedUrl };
-                  }
-                }
+            const formData = new FormData();
+            formData.append('media', file);
+
+            const uploadRes = await axiosInstance.post('/admin/upload', formData, {
+              headers: { 'Content-Type': 'multipart/form-data' },
+            });
+
+            if (uploadRes.data) {
+              const uploadedUrl = uploadRes.data.url || uploadRes.data.imageUrl || uploadRes.data.mediaUrl;
+              if (uploadedUrl && (uploadedUrl.startsWith('http://') || uploadedUrl.startsWith('https://'))) {
+                return { ...item, url: uploadedUrl };
               }
             }
 
@@ -591,7 +579,7 @@ export const saveDynamicContent = async (
             skippedItems++;
             return null;
           } catch (uploadErr) {
-            console.warn('Failed to upload data: URL to server, checking size:', uploadErr);
+            console.warn('Failed to upload data: URL to server:', uploadErr);
             if (item.url.length < 200000) return item;
             skippedItems++;
             return null;
@@ -738,43 +726,24 @@ export const uploadMedia = async (
     const formData = new FormData();
     formData.append('media', file);
 
-    const token = typeof window !== 'undefined' ? localStorage.getItem('umkm_token') : null;
+    const res = await axiosInstance.post('/admin/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
 
-    // Resolve API endpoint URL properly
-    const backend = process.env.NEXT_PUBLIC_BACKEND_URL;
-    const uploadEndpoint =
-      backend && backend.trim()
-        ? `${backend.replace(/\/$/, '')}/api/admin/upload`
-        : '/api/admin/upload';
-
-    if (token) {
-      try {
-        const res = await fetch(uploadEndpoint, {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          body: formData,
-        });
-
-        const contentType = res.headers.get('content-type') || '';
-        if (contentType.includes('application/json')) {
-          const data = await res.json();
-          const mediaUrl = data.url || data.imageUrl || data.mediaUrl;
-          if (res.ok && mediaUrl) {
-            return {
-              success: true,
-              url: mediaUrl,
-              mediaType: data.mediaType || mediaType,
-            };
-          }
-        }
-      } catch (fetchErr) {
-        console.warn('Backend upload failed, falling back to local media processor:', fetchErr);
+    if (res.data) {
+      const mediaUrl = res.data.url || res.data.imageUrl || res.data.mediaUrl;
+      if (mediaUrl && (mediaUrl.startsWith('http://') || mediaUrl.startsWith('https://'))) {
+        return {
+          success: true,
+          url: mediaUrl,
+          mediaType: res.data.mediaType || mediaType,
+        };
       }
     }
 
-    // Fallback: Read file directly using browser FileReader
+    // Fallback: Read file directly using browser FileReader if no server URL returned
     const localDataUrl = await readFileAsDataUrl(file);
     return {
       success: true,
@@ -782,8 +751,7 @@ export const uploadMedia = async (
       mediaType,
     };
   } catch (e: any) {
-    console.error('uploadMedia error:', e);
-    // As final safeguard, attempt local DataURL
+    console.warn('axios uploadMedia error, attempting local DataURL fallback:', e?.message);
     try {
       const fallbackUrl = await readFileAsDataUrl(file);
       return {
@@ -792,7 +760,7 @@ export const uploadMedia = async (
         mediaType,
       };
     } catch {
-      return { success: false, error: e.message || 'Gagal memproses file media.' };
+      return { success: false, error: e?.message || 'Gagal memproses file media.' };
     }
   }
 };
